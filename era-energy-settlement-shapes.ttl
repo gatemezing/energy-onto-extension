@@ -1,0 +1,533 @@
+@prefix ex:    <http://example.org/era-energy#> .
+@prefix era:   <http://data.europa.eu/949/> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix exc:   <http://example.org/era-energy/concepts/> .
+
+ex:ConsumptionPointShape a sh:NodeShape ;
+    sh:targetClass ex:ConsumptionPoint ;
+    sh:property [
+        sh:path ex:consumptionPointId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:consumptionPointOf ;
+        sh:class era:Vehicle ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "Consumption-point ID must normalize to the linked vehicle's 12-digit EVN." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this ex:consumptionPointId ?id ;
+                      ex:consumptionPointOf/era:vehicleNumber ?evn .
+                BIND(REPLACE(STR(?id), "[ -]", "") AS ?normalizedId)
+                BIND(REPLACE(STR(?evn), "[ -]", "") AS ?normalizedEvn)
+                FILTER(!REGEX(?normalizedId, "^[0-9]{12}$") ||
+                       !REGEX(?normalizedEvn, "^[0-9]{12}$") ||
+                       ?normalizedId != ?normalizedEvn)
+            }
+        """ ;
+    ] .
+
+ex:TractionUnitVehicleShape a sh:NodeShape ;
+    sh:targetClass era:TrainCompositionJourneySection ;
+    sh:sparql [
+        sh:message "A locomotive EVN must normalize to exactly one registered vehicle." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this era:locoNumber ?loco .
+                BIND(REPLACE(STR(?loco), "[ -]", "") AS ?normalizedLoco)
+                FILTER(!REGEX(?normalizedLoco, "^[0-9]{12}$"))
+            }
+        """ ;
+    ] ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        sh:construct """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            CONSTRUCT { $this ex:tractionUnitVehicle ?vehicle }
+            WHERE {
+                $this era:locoNumber ?loco .
+                ?vehicle era:vehicleNumber ?evn .
+                BIND(REPLACE(STR(?loco), "[ -]", "") AS ?normalizedLoco)
+                BIND(REPLACE(STR(?evn), "[ -]", "") AS ?normalizedEvn)
+                FILTER(REGEX(?normalizedLoco, "^[0-9]{12}$") &&
+                       ?normalizedLoco = ?normalizedEvn)
+            }
+        """ ;
+    ] .
+
+ex:EnergyReadingShape a sh:NodeShape ;
+    sh:targetSubjectsOf ex:readingPeriod ;
+    sh:property [
+        sh:path ex:readingOfConsumptionPoint ;
+        sh:class ex:ConsumptionPoint ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:readingPeriod ;
+        sh:class <http://www.w3.org/2006/time#Interval> ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:activeEnergyConsumed ;
+        sh:datatype xsd:decimal ;
+        sh:minCount 1 ;
+        sh:minInclusive 0 ;
+    ] ;
+    sh:property [
+        sh:path ex:activeEnergyRegenerated ;
+        sh:datatype xsd:decimal ;
+        sh:minCount 1 ;
+        sh:minInclusive 0 ;
+    ] ;
+    sh:property [
+        sh:path ex:measurementQuality ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "Reading period must have a beginning strictly before its end." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX time: <http://www.w3.org/2006/time#>
+            SELECT $this
+            WHERE {
+                $this ex:readingPeriod ?interval .
+                ?interval time:hasBeginning/time:inXSDDateTimeStamp ?start ;
+                          time:hasEnd/time:inXSDDateTimeStamp ?end .
+                FILTER(?start >= ?end)
+            }
+        """ ;
+    ] .
+
+ex:EnergyAllocationShape a sh:NodeShape ;
+    sh:targetClass ex:EnergyAllocation ;
+    sh:property [
+        sh:path ex:hasAllocationComponent ;
+        sh:class ex:AllocationComponent ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocatedTo ;
+        sh:class ex:EnergyConsumerRole ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocatedInZone ;
+        sh:class ex:SettlementZone ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocationStatus ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocatedActiveEnergyConsumed ;
+        sh:datatype xsd:decimal ;
+        sh:minCount 1 ;
+        sh:minInclusive 0 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocatedActiveEnergyRegenerated ;
+        sh:datatype xsd:decimal ;
+        sh:minCount 1 ;
+        sh:minInclusive 0 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocatedNetActiveEnergy ;
+        sh:datatype xsd:decimal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocationMethod ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocationRule ;
+        sh:class prov:Entity ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:allocationVersion ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "Net active energy must equal allocated consumption minus allocated regeneration." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                $this ex:allocatedActiveEnergyConsumed ?consumed ;
+                      ex:allocatedActiveEnergyRegenerated ?regenerated ;
+                      ex:allocatedNetActiveEnergy ?net .
+                FILTER(ABS(?net - (?consumed - ?regenerated)) > 0.000001)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "A metered allocation must cite source readings, run, composition, and running information." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX exc: <http://example.org/era-energy/concepts/>
+            SELECT $this
+            WHERE {
+                {
+                    $this ex:allocationStatus exc:meteredValid .
+                    FILTER NOT EXISTS { $this ex:allocatesReading ?reading }
+                }
+                UNION
+                {
+                    $this ex:allocationStatus exc:meteredValid .
+                    FILTER NOT EXISTS { $this ex:matchedTrainRun ?run }
+                }
+                UNION
+                {
+                    $this ex:allocationStatus exc:meteredValid .
+                    FILTER NOT EXISTS { $this ex:matchedComposition ?message }
+                }
+                UNION
+                {
+                    $this ex:allocationStatus exc:meteredValid .
+                    FILTER NOT EXISTS { $this ex:matchedRunningInformation ?message }
+                }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "Allocation component source readings must exactly match the allocation's cited readings." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX exc: <http://example.org/era-energy/concepts/>
+            SELECT $this
+            WHERE {
+                {
+                    $this ex:allocationStatus exc:meteredValid ;
+                          ex:allocatesReading ?reading .
+                    FILTER NOT EXISTS {
+                        $this ex:hasAllocationComponent/ex:componentReading ?reading
+                    }
+                }
+                UNION
+                {
+                    $this ex:allocationStatus exc:meteredValid ;
+                          ex:hasAllocationComponent/ex:componentReading ?reading .
+                    FILTER NOT EXISTS { $this ex:allocatesReading ?reading }
+                }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "The allocation consumer must match the consumer assigned to its train run." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                $this ex:matchedTrainRun ?run ;
+                      ex:allocatedTo ?consumer .
+                FILTER NOT EXISTS { ?run ex:consumerRole ?consumer }
+            }
+        """ ;
+    ] .
+
+ex:AllocationComponentShape a sh:NodeShape ;
+    sh:targetClass ex:AllocationComponent ;
+    sh:property [
+        sh:path ex:componentActiveEnergyConsumed ;
+        sh:datatype xsd:decimal ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:minInclusive 0 ;
+    ] ;
+    sh:property [
+        sh:path ex:componentActiveEnergyRegenerated ;
+        sh:datatype xsd:decimal ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:minInclusive 0 ;
+    ] ;
+    sh:property [
+        sh:path ex:componentNetActiveEnergy ;
+        sh:datatype xsd:decimal ; sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "Component net active energy must equal consumed minus regenerated." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                $this ex:componentActiveEnergyConsumed ?consumed ;
+                      ex:componentActiveEnergyRegenerated ?regenerated ;
+                      ex:componentNetActiveEnergy ?net .
+                FILTER(ABS(?net - (?consumed - ?regenerated)) > 0.000001)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "The sum of components attributed to a source reading must not exceed its measured consumed energy." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                $this ex:componentReading ?reading .
+                ?reading ex:activeEnergyConsumed ?source .
+                $this ex:componentActiveEnergyConsumed ?allocated .
+                FILTER(?allocated > ?source)
+            }
+        """ ;
+    ] .
+
+ex:TrainRunShape a sh:NodeShape ;
+    sh:targetClass ex:TrainRun ;
+    sh:property [
+        sh:path ex:trainRunId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:operationalTrainNumber ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:runStart ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:runEnd ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:consumerRole ;
+        sh:class ex:EnergyConsumerRole ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:actualDepartureEvidence ;
+        sh:class prov:Entity ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "Train-run identifiers must be unique in the graph." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                $this ex:trainRunId ?id .
+                ?other ex:trainRunId ?id .
+                FILTER(?other != $this)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "Train-run start must precede its end, and actual departure must fall within the run interval." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                {
+                    $this ex:runStart ?start ; ex:runEnd ?end .
+                    FILTER(?start >= ?end)
+                }
+                UNION
+                {
+                    $this ex:runStart ?start ; ex:runEnd ?end ;
+                          ex:actualDepartureTime ?departure .
+                    FILTER(?departure < ?start || ?departure > ?end)
+                }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "Actual departure time and its evidence reference must be supplied together." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                {
+                    $this ex:actualDepartureTime ?time .
+                    FILTER NOT EXISTS { $this ex:actualDepartureEvidence ?evidence }
+                }
+                UNION
+                {
+                    $this ex:actualDepartureEvidence ?evidence .
+                    FILTER NOT EXISTS { $this ex:actualDepartureTime ?time }
+                }
+            }
+        """ ;
+    ] .
+
+ex:TrainMessageShape a sh:NodeShape ;
+    sh:targetClass era:TrainCompositionMessage, era:TrainRunningInformationMessage ;
+    sh:property [
+        sh:path ex:aboutTrainRun ;
+        sh:class ex:TrainRun ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "The linked run's operational train number must match the message number." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this era:operationalTrainNumberIdentifier/era:operationalTrainNumber ?messageNumber ;
+                      ex:aboutTrainRun/ex:operationalTrainNumber ?runNumber .
+                FILTER(?messageNumber != ?runNumber)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "A composition message created after actual departure needs a timeliness assessment and supporting evidence." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this a era:TrainCompositionMessage ;
+                      era:messageHeader/era:messageDateTimeCreated ?created ;
+                      ex:aboutTrainRun/ex:actualDepartureTime ?departure .
+                FILTER(?created > ?departure)
+                FILTER NOT EXISTS {
+                    $this ex:timelinessAssessment ?assessment ;
+                          ex:timelinessEvidence ?evidence ;
+                          ex:timelinessAuthority ?authority
+                }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "Running-report timestamps must fall within the linked train run's validity interval." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this a era:TrainRunningInformationMessage ;
+                      ex:aboutTrainRun/ex:runStart ?start ;
+                      ex:aboutTrainRun/ex:runEnd ?end ;
+                      era:trainLocationReport/era:locationDateTime ?reported .
+                FILTER(?reported < ?start || ?reported > ?end)
+            }
+        """ ;
+    ] .
+
+ex:RunningMessageShape a sh:NodeShape ;
+    sh:targetClass era:TrainRunningInformationMessage ;
+    sh:property [
+        sh:path ex:responsibleRUOrganisation ;
+        sh:class era:Body ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "The resolved RU organization must match the source responsibleRU company code." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this era:responsibleRU ?sourceCode ;
+                      ex:responsibleRUOrganisation ?organization .
+                FILTER NOT EXISTS { ?organization ex:railwayCompanyCode ?sourceCode }
+            }
+        """ ;
+    ] .
+
+ex:DataExchangeActivityShape a sh:NodeShape ;
+    sh:targetClass ex:DataExchangeActivity ;
+    sh:property [
+        sh:path ex:exchangedMessage ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:exchangeSender ;
+        sh:class era:Body ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:exchangeRecipient ;
+        sh:class ex:SettlementSystem ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:exchangeTime ;
+        sh:datatype xsd:dateTime ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:messageVersion ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:minLength 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:exchangeOutcome ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:exchangePurpose ;
+        sh:class skos:Concept ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:exchangeAuthority ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ex:retentionPolicy ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:sparql [
+        sh:message "The exchange recipient's receipt record must point back to this exchange activity." ;
+        sh:select """
+            PREFIX ex: <http://example.org/era-energy#>
+            SELECT $this
+            WHERE {
+                $this ex:exchangeRecipient ?recipient .
+                FILTER NOT EXISTS { ?recipient ex:exchangeContains $this }
+            }
+        """ ;
+    ] .
