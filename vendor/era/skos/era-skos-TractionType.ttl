@@ -1,0 +1,147 @@
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://data.europa.eu/949/concepts/traction-type/00> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "00" ;
+    skos:prefLabel "00"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/01> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "01" ;
+    skos:prefLabel "01"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/02> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "02" ;
+    skos:prefLabel "02"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/03> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "03" ;
+    skos:prefLabel "03"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/04> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "04" ;
+    skos:prefLabel "04"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/10> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "10" ;
+    skos:prefLabel "10"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/11> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "11" ;
+    skos:prefLabel "11"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/12> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "12" ;
+    skos:prefLabel "12"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/13> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "13" ;
+    skos:prefLabel "13"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/14> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "14" ;
+    skos:prefLabel "14"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/20> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "20" ;
+    skos:prefLabel "20"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/21> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "21" ;
+    skos:prefLabel "21"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/22> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "22" ;
+    skos:prefLabel "22"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/23> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "23" ;
+    skos:prefLabel "23"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/24> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "24" ;
+    skos:prefLabel "24"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/30> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "30" ;
+    skos:prefLabel "30"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/31> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "31" ;
+    skos:prefLabel "31"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/32> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "32" ;
+    skos:prefLabel "32"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/33> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "33" ;
+    skos:prefLabel "33"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/34> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/traction-type/TractionType> ;
+    skos:notation "34" ;
+    skos:prefLabel "34"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/traction-type/TractionType> .
+
+<http://data.europa.eu/949/concepts/traction-type/TractionType> a skos:ConceptScheme ;
+    rdfs:label "Concept Scheme for Type of traction"@en ;
+    cc:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
+    dct:identifier "TractionType"^^xsd:string ;
+    dct:issued "2026-03-11"^^xsd:date ;
+    dct:modified "2026-03-11"^^xsd:date ;
+    skos:prefLabel "Concept Scheme for Type of traction"@en ;
+    dct:title "Concept Scheme for Type of traction"@en ;
+    skos:definition """Identifies the type of a locomotive: 
+First digit:
+“0” = not specified
+“1” = external electric power supply for traction (catenary and pantograph, third rail or other such as maglev)
+“2” = on-board traction power supply for traction without external electrical or other power supply available
+“3” = hybrid traction (both on-board or electric traction available)
+Second digit (definitions in chapter 2.2.2 of the LOC and PAS TSI 1302/2014):
+“0” = not specified
+“1” = locomotive or power unit
+“2” = trainset or multiple unit or railcar
+“3” = shunter
+“4” = on track machine or infrastructure inspection vehicle"""@en .
+

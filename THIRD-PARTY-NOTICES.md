@@ -25,3 +25,12 @@ Copyright 2017–2019 W3C/OGC. They are distributed under the [W3C Software and 
 ## HermiT reasoner
 
 `dl_check.py` runs HermiT, the OWL 2 DL reasoner of the University of Oxford, from the jar bundled with the `owlready2` Python package (installed from `requirements.txt`, not vendored here). HermiT is licensed under the GNU Lesser General Public License v3 or later.
+
+## ERA telematics shapes and concept schemes
+
+`vendor/era/telematics-shacl.ttl` and the concept schemes in `vendor/era/skos/` (MessageStatus, RunningStatus, TrainType, TractionType) are unmodified copies from the ERA ontology repository at the `v4.0.0-rc.3` ref:
+
+- <https://gitlab.com/era-europa-eu/public/interoperable-data-programme/era-ontology/era-ontology/-/raw/v4.0.0-rc.3/domains/telematics/artefacts/dist/telematics/shacl.ttl>
+- <https://gitlab.com/era-europa-eu/public/interoperable-data-programme/era-ontology/era-ontology/-/tree/v4.0.0-rc.3/era-skos/telem>
+
+They are licensed under the European Union Public Licence, version 1.2 (EUPL-1.2), like the ERA ontology. They are used by `era_shapes_check.py` to validate the example data.

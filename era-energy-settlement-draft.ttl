@@ -39,6 +39,10 @@
 #     The data handling system used sosa:System, which W3C SOSA/SSN does
 #     not define (R26). No prov:Agent superclass is stated: agency stays
 #     an inference from ens:compiledBy and ens:producedBy.
+#   - ens:RunningTrain is no longer a subclass of era:Train (R19): ERA's TAP
+#     shape for era:Train requires era:trainNb. A running train is
+#     identified by ens:runningTrainNumberIdentifier (the shared
+#     era:OperationalTrainNumberIdentifier) and ens:departureDate.
 #   - Part 3 declares every reused class (ERA, SOSA/SSN, PROV-O, OWL-Time,
 #     GeoSPARQL, QUDT, SAREF, SKOS) as owl:Class with its source label.
 #
@@ -630,10 +634,28 @@ ens:producedBy a owl:ObjectProperty ;
 ens:RunningTrain a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf era:Train ;
     rdfs:label "Running train"@en ;
     skos:definition "A train running a specific service movement on the network, identified independently of its reusable operational train number."@en ;
-    rdfs:comment "Specialises the telematics era:Train (itself an era:OperationalTrainNumberIdentifier), so era:operationalTrainNumber, era:trainDepartureDate and era:trainOperatingRU apply directly. Named after era:RunningTrack. The operational number is not a key: two running trains may share it on different days. Not a prov:Activity: it denotes the train, not the movement event."@en .
+    rdfs:comment "Identified by its operational train number identifier (ens:runningTrainNumberIdentifier) together with its departure date (ens:departureDate); the number alone is not a key, since it is reused on other days. Not a subclass of era:Train since 0.9: ERA's TAP shape for era:Train requires era:trainNb, a train service number that running trains do not carry (R19). Named after era:RunningTrack."@en .
+
+ens:runningTrainNumberIdentifier a owl:ObjectProperty ;
+    era:shaclShapeValidationRule enssh:RunningTrainShape ;
+    rdfs:label "running train number identifier"@en ;
+    skos:definition "Operational train number identifier under which this train runs."@en ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:domain ens:RunningTrain ; rdfs:range era:OperationalTrainNumberIdentifier ;
+    rdfs:comment "Points to the same era:OperationalTrainNumberIdentifier node that the TEL TSI messages reference through era:operationalTrainNumberIdentifier, so that messages and running trains share the number; the node carries era:operationalTrainNumber."@en .
+
+ens:departureDate a owl:DatatypeProperty ;
+    era:shaclShapeValidationRule enssh:RunningTrainShape ;
+    rdfs:label "departure date"@en ;
+    skos:definition "Date on which the train left its origin under its operational train number."@en ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:domain ens:RunningTrain ; rdfs:range xsd:date ;
+    rdfs:seeAlso era:trainDepartureDate ;
+    rdfs:comment "Same meaning as era:trainDepartureDate, which is not used here because its domain is era:Train: on a running train it would type the running train as an era:Train again."@en .
 
 ens:runningTrainIdent a owl:ObjectProperty ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
@@ -641,7 +663,7 @@ ens:runningTrainIdent a owl:ObjectProperty ;
     rdfs:domain ens:RunningTrain ; rdfs:range era:TrainIdent ;
     rdfs:label "running train identification"@en ;
     skos:definition "TAF/TAP TSI unique identification of the contracted train (era:TrainIdent) under which this train runs."@en ;
-    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged. Otherwise the key is era:operationalTrainNumber together with era:trainDepartureDate, as in the TAF/TAP train identification."@en .
+    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged. Otherwise the key is the operational train number (ens:runningTrainNumberIdentifier) together with ens:departureDate."@en .
 
 ens:operatingRailwayUndertaking a owl:ObjectProperty ;
     era:shaclShapeValidationRule enssh:RunningTrainShape ;
@@ -650,7 +672,7 @@ ens:operatingRailwayUndertaking a owl:ObjectProperty ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
     rdfs:domain ens:RunningTrain ; rdfs:range era:OrganisationRole ;
-    rdfs:comment "Object counterpart of era:trainOperatingRU, which in rc.3 is a datatype property holding the company code. Keep the source code in era:trainOperatingRU and link the resolved role here: the role has era:hasOrganisationRole RU (or a narrower RU-n concept of the ERA organisation-roles scheme) and era:roleOf the body whose era:organisationCode equals the source code. The operating RU is not necessarily the energy consumer (see ens:consumerRole)."@en .
+    rdfs:comment "The role has era:hasOrganisationRole RU (or a narrower RU-n concept of the ERA organisation-roles scheme) and era:roleOf the body that operates the train. The operating RU is not necessarily the energy consumer (see ens:consumerRole). The source company code era:trainOperatingRU is not used on running trains since 0.9: its domain is era:Train."@en .
 
 ens:runStart a owl:DatatypeProperty ;
     rdfs:label "run start"@en ;
@@ -931,7 +953,7 @@ era:LocoIdent a owl:Class ; rdfs:label "Loco ident"@en .
 era:OrganisationRole a owl:Class ; rdfs:label "Organisation Role"@en .
 era:ReferenceBorderPoint a owl:Class ; rdfs:label "Reference border point"@en .
 era:RunningTrack a owl:Class ; rdfs:label "Running track"@en .
-era:Train a owl:Class ; rdfs:label "Train"@en .
+era:OperationalTrainNumberIdentifier a owl:Class ; rdfs:label "Operational train number identifier"@en .
 era:TrainCompositionJourneySection a owl:Class ; rdfs:label "Train composition journey section"@en .
 era:TrainCompositionMessage a owl:Class ; rdfs:label "Train composition message"@en .
 era:TrainIdent a owl:Class ; rdfs:label "Train ident"@en .
@@ -962,7 +984,6 @@ skos:Concept a owl:Class ; rdfs:label "Concept"@en .
 
 era:operationalTrainNumber a owl:DatatypeProperty .
 era:trainDepartureDate a owl:DatatypeProperty .
-era:trainOperatingRU a owl:DatatypeProperty .
 era:organisationCode a owl:DatatypeProperty .
 era:roleOf a owl:ObjectProperty .
 era:hasOrganisationRole a owl:ObjectProperty .

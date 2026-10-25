@@ -20,7 +20,13 @@ outside OWL 2 DL. Each adjustment is reported:
     restriction. The extension does not use sosa:usedProcedure;
   - facet values of xsd:double/xsd:float datatype restrictions that carry
     another datatype are cast to the restricted datatype (rc.3 restricts
-    era:dNvroll with xsd:decimal values).
+    era:dNvroll with xsd:decimal values);
+  - owl:FunctionalProperty is removed from ERA super-properties that stand
+    for an XSD simple type shared by several sub-properties (era:freeText,
+    era:companyCode, ...). A message reference that ERA's shapes require to
+    have both era:messageType and era:messageIdentifier, both
+    era:freeText, would otherwise be inconsistent. The sub-properties keep
+    their own owl:FunctionalProperty.
 HermiT runs with --ignoreUnsupportedDatatypes, because xsd:date (used by
 ERA and the examples) is not in the OWL 2 datatype map.
 """
@@ -31,7 +37,7 @@ import tempfile
 from dataclasses import dataclass, field
 
 import rdflib
-from rdflib.namespace import OWL, RDFS, XSD
+from rdflib.namespace import OWL, RDF, RDFS, XSD
 
 DEFAULT_ERA_ONTOLOGY = "era-ontology-v4.0.0-rc.3.ttl"
 DRAFT = "era-energy-settlement-draft.ttl"
@@ -90,6 +96,15 @@ def to_dl_graph(graph):
                     owners = ", ".join(sorted(str(s) for s in g.subjects(None, restriction)))
                     adjustments.append(f"cast {facet.n3(g.namespace_manager)} {value} to "
                                        f"{base.n3(g.namespace_manager)} (restriction of {owners})")
+    era = "http://data.europa.eu/949/"
+    shared = sorted(p for p in g.subjects(RDF.type, OWL.FunctionalProperty)
+                    if str(p).startswith(era)
+                    and len(set(g.subjects(RDFS.subPropertyOf, p))) >= 2)
+    for prop in shared:
+        g.remove((prop, RDF.type, OWL.FunctionalProperty))
+    if shared:
+        adjustments.append("removed owl:FunctionalProperty from ERA super-properties shared by several "
+                           "sub-properties: " + ", ".join(p.n3(g.namespace_manager) for p in shared))
     return g, adjustments
 
 
