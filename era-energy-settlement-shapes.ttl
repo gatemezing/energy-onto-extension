@@ -208,7 +208,7 @@ enssh:EnergyAllocationShape a sh:NodeShape ;
                 UNION
                 {
                     $this ens:allocationStatus ensc:meteredValid .
-                    FILTER NOT EXISTS { $this ens:matchedTrainRun ?run }
+                    FILTER NOT EXISTS { $this ens:matchedRunningTrain ?run }
                 }
                 UNION
                 {
@@ -247,12 +247,12 @@ enssh:EnergyAllocationShape a sh:NodeShape ;
         """ ;
     ] ;
     sh:sparql [
-        sh:message "The allocation consumer must match the consumer assigned to its train run." ;
+        sh:message "The allocation consumer must match the consumer assigned to its running train." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/>
             SELECT $this
             WHERE {
-                $this ens:matchedTrainRun ?run ;
+                $this ens:matchedRunningTrain ?run ;
                       ens:allocatedTo ?consumer .
                 FILTER NOT EXISTS { ?run ens:consumerRole ?consumer }
             }
@@ -303,15 +303,15 @@ enssh:AllocationComponentShape a sh:NodeShape ;
     ] .
 
 enssh:TrainRunShape a sh:NodeShape ;
-    sh:targetClass ens:TrainRun ;
+    sh:targetClass ens:RunningTrain ;
     sh:property [
-        sh:path ens:trainRunId ;
+        sh:path ens:runningTrainId ;
         sh:datatype xsd:string ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;
     sh:property [
-        sh:path ens:operationalTrainNumber ;
+        sh:path era:operationalTrainNumber ;
         sh:datatype xsd:string ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
@@ -340,19 +340,19 @@ enssh:TrainRunShape a sh:NodeShape ;
         sh:maxCount 1 ;
     ] ;
     sh:sparql [
-        sh:message "Train-run identifiers must be unique in the graph." ;
+        sh:message "Running-train identifiers must be unique in the graph." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/>
             SELECT $this
             WHERE {
-                $this ens:trainRunId ?id .
-                ?other ens:trainRunId ?id .
+                $this ens:runningTrainId ?id .
+                ?other ens:runningTrainId ?id .
                 FILTER(?other != $this)
             }
         """ ;
     ] ;
     sh:sparql [
-        sh:message "Train-run start must precede its end, and actual departure must fall within the run interval." ;
+        sh:message "Running-train start must precede its end, and actual departure must fall within the run interval." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/>
             SELECT $this
@@ -392,8 +392,8 @@ enssh:TrainRunShape a sh:NodeShape ;
 enssh:TrainMessageShape a sh:NodeShape ;
     sh:targetClass era:TrainCompositionMessage, era:TrainRunningInformationMessage ;
     sh:property [
-        sh:path ens:aboutTrainRun ;
-        sh:class ens:TrainRun ;
+        sh:path ens:aboutRunningTrain ;
+        sh:class ens:RunningTrain ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;
@@ -405,7 +405,7 @@ enssh:TrainMessageShape a sh:NodeShape ;
             SELECT $this
             WHERE {
                 $this era:operationalTrainNumberIdentifier/era:operationalTrainNumber ?messageNumber ;
-                      ens:aboutTrainRun/ens:operationalTrainNumber ?runNumber .
+                      ens:aboutRunningTrain/era:operationalTrainNumber ?runNumber .
                 FILTER(?messageNumber != ?runNumber)
             }
         """ ;
@@ -419,7 +419,7 @@ enssh:TrainMessageShape a sh:NodeShape ;
             WHERE {
                 $this a era:TrainCompositionMessage ;
                       era:messageHeader/era:messageDateTimeCreated ?created ;
-                      ens:aboutTrainRun/ens:actualDepartureTime ?departure .
+                      ens:aboutRunningTrain/ens:actualDepartureTime ?departure .
                 FILTER(?created > ?departure)
                 FILTER NOT EXISTS {
                     $this ens:timelinessAssessment ?assessment ;
@@ -430,15 +430,15 @@ enssh:TrainMessageShape a sh:NodeShape ;
         """ ;
     ] ;
     sh:sparql [
-        sh:message "Running-report timestamps must fall within the linked train run's validity interval." ;
+        sh:message "Running-report timestamps must fall within the linked running train's validity interval." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
                 $this a era:TrainRunningInformationMessage ;
-                      ens:aboutTrainRun/ens:runStart ?start ;
-                      ens:aboutTrainRun/ens:runEnd ?end ;
+                      ens:aboutRunningTrain/ens:runStart ?start ;
+                      ens:aboutRunningTrain/ens:runEnd ?end ;
                       era:trainLocationReport/era:locationDateTime ?reported .
                 FILTER(?reported < ?start || ?reported > ?end)
             }

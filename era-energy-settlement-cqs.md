@@ -583,7 +583,7 @@ SELECT ?vehicle WHERE {
 ```sparql
 SELECT ?msg WHERE {
   ?msg era:messageHeader/era:messageDateTimeCreated ?sent ;
-       ens:aboutTrainRun/ens:actualDepartureTime ?departure .
+       ens:aboutRunningTrain/ens:actualDepartureTime ?departure .
   FILTER (?sent > ?departure)
 }
 ```
@@ -622,7 +622,7 @@ SELECT ?place (SUBSTR(STR(?when), 12, 5) AS ?hhmm) ?ru WHERE {
              SELECT DISTINCT ?settlement WHERE {
                ?msg a era:TrainRunningInformationMessage ;
                     era:operationalTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
-                    ens:aboutTrainRun d:run1 .
+                    ens:aboutRunningTrain d:run1 .
                ?exchange a ens:DataExchangeActivity ;
                          ens:exchangedMessage ?msg ;
                          ens:exchangeRecipient ?settlement ;

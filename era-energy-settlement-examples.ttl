@@ -223,7 +223,7 @@ d:tcm1 a era:TrainCompositionMessage ;
     era:messageHeader [ era:messageDateTimeCreated "2026-10-15T05:50:00Z"^^xsd:dateTime ] ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:trainCompositionJourneySection d:js1 ;
-    ens:aboutTrainRun d:run1 .
+    ens:aboutRunningTrain d:run1 .
 d:js1 a era:TrainCompositionJourneySection ;
     era:locoNumber "91 80 6189 001-3" ;
     era:regenerativeBrake [ era:regenerativeBrakeFitted true ] ;
@@ -234,7 +234,7 @@ d:tcm2 a era:TrainCompositionMessage ;            # timing evidence is illustrat
     era:messageHeader [ era:messageDateTimeCreated "2026-10-15T17:00:00Z"^^xsd:dateTime ] ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41888" ] ;
     era:trainCompositionJourneySection d:js2 ;
-    ens:aboutTrainRun d:run2 .
+    ens:aboutRunningTrain d:run2 .
 d:js2 a era:TrainCompositionJourneySection ;
     era:locoNumber "917421940025" ;
     era:journeySection [ era:journeySectionOrigin [ era:bookedLocationDateTime "2026-10-15T07:00:00Z"^^xsd:dateTime ] ] ;
@@ -244,24 +244,24 @@ d:tri1 a era:TrainRunningInformationMessage ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:responsibleRU "3801" ;
     ens:responsibleRUOrganisation d:nordCargo ;
-    ens:aboutTrainRun d:run1 ;
+    ens:aboutRunningTrain d:run1 ;
     era:trainLocationReport
         [ era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ] ,
         [ era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ] ,
         [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
 
-d:run1 a ens:TrainRun ;
-    ens:trainRunId "NO-SE-20261015-41234-01" ;
-    ens:operationalTrainNumber "41234" ;
+d:run1 a ens:RunningTrain ;
+    ens:runningTrainId "NO-SE-20261015-41234-01" ;
+    era:operationalTrainNumber "41234" ;
     ens:runStart "2026-10-15T06:00:00Z"^^xsd:dateTime ;
     ens:runEnd "2026-10-15T08:38:00Z"^^xsd:dateTime ;
     ens:consumerRole d:ruRole ;
     ens:actualDepartureTime "2026-10-15T06:02:00Z"^^xsd:dateTime ;
     ens:actualDepartureEvidence d:departureEvent .
 
-d:run2 a ens:TrainRun ;
-    ens:trainRunId "NO-20261015-41888-01" ;
-    ens:operationalTrainNumber "41888" ;
+d:run2 a ens:RunningTrain ;
+    ens:runningTrainId "NO-20261015-41888-01" ;
+    era:operationalTrainNumber "41888" ;
     ens:runStart "2026-10-15T07:00:00Z"^^xsd:dateTime ;
     ens:runEnd "2026-10-15T12:00:00Z"^^xsd:dateTime ;
     ens:consumerRole d:ruRole ;
@@ -308,7 +308,7 @@ d:alloc1 a ens:EnergyAllocation ;
     ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneNO ;
     ens:allocationStatus ensc:meteredValid ; ens:producedBy d:settleNO ;
     ens:matchedComposition d:tcm1 ; ens:matchedRunningInformation d:tri1 ;
-    ens:matchedTrainRun d:run1 ;
+    ens:matchedRunningTrain d:run1 ;
     ens:allocatedActiveEnergyConsumed 790.5 ;
     ens:allocatedActiveEnergyRegenerated 20.5 ;
     ens:allocatedNetActiveEnergy 770.0 ;
@@ -321,7 +321,7 @@ d:alloc2 a ens:EnergyAllocation ;
     ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneSE ;
     ens:allocationStatus ensc:meteredValid ; ens:producedBy d:settleSE ;
     ens:matchedComposition d:tcm1 ; ens:matchedRunningInformation d:tri1 ;
-    ens:matchedTrainRun d:run1 ;
+    ens:matchedRunningTrain d:run1 ;
     ens:allocatedActiveEnergyConsumed 95.2 ;
     ens:allocatedActiveEnergyRegenerated 3.1 ;
     ens:allocatedNetActiveEnergy 92.1 ;
@@ -332,7 +332,7 @@ d:alloc3 a ens:EnergyAllocation ;                  # estimated, no reading used
     ens:hasAllocationComponent d:alloc3estimate ;
     ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneNO ;
     ens:allocationStatus ensc:estimated ; ens:producedBy d:settleNO ;
-    ens:matchedComposition d:tcm2 ; ens:matchedTrainRun d:run2 ;
+    ens:matchedComposition d:tcm2 ; ens:matchedRunningTrain d:run2 ;
     ens:allocatedActiveEnergyConsumed 250.0 ;
     ens:allocatedActiveEnergyRegenerated 0.0 ;
     ens:allocatedNetActiveEnergy 250.0 ;

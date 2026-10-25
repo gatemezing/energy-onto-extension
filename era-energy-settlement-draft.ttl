@@ -37,9 +37,14 @@
 #   - Ontology metadata: title, description, versionIRI, preferred prefix,
 #     term status. Every ens: term has rdfs:label, rdfs:isDefinedBy and
 #     vs:term_status "unstable".
-#   - ens:TrainRun is a prov:Activity (a train movement happens in time);
-#     it can carry the TAF/TAP unique train identification (era:TrainIdent)
-#     through ens:trainRunIdent.
+#   - ens:TrainRun renamed ens:RunningTrain (cf. era:RunningTrack) and made
+#     a subclass of era:Train; era:operationalTrainNumber replaces
+#     ens:operationalTrainNumber. It can carry the TAF/TAP unique train
+#     identification (era:TrainIdent) through ens:runningTrainIdent.
+#     Related properties renamed: ens:runningTrainId, ens:aboutRunningTrain,
+#     ens:matchedRunningTrain.
+#   - No SKOS mapping properties on classes or properties: skos:closeMatch
+#     to saref:Measurement replaced by rdfs:seeAlso.
 #   - ens:allocatesReading is entailed from allocation components by an
 #     OWL 2 property chain.
 #   - ens:forwardsTo and ens:exchangeProtocol received domains and ranges.
@@ -120,10 +125,10 @@ ens:EnergyReading a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
     rdfs:subClassOf sosa:Observation , geo:Feature ;
-    skos:closeMatch saref:Measurement ;
+    rdfs:seeAlso saref:Measurement ;
     rdfs:label "Energy reading"@en ;
     skos:definition "Energy values for one measurement period, time-stamped and geolocated."@en ;
-    rdfs:comment "Deviation from strict SOSA: one reading carries several results (consumed, regenerated, reactive) as datatype properties, mirroring the CEBD record. Hence skos:closeMatch, not subclass, to saref:Measurement. Not an era:Feature: readings are measurement data, not network features with validity."@en .
+    rdfs:comment "Deviation from strict SOSA: one reading carries several results (consumed, regenerated, reactive) as datatype properties, mirroring the CEBD record. Hence saref:Measurement is only referenced (rdfs:seeAlso), not a superclass; no SKOS mapping property is used, because skos:closeMatch would type both classes as skos:Concept. Not an era:Feature: readings are measurement data, not network features with validity."@en .
 
 ens:ReadingBlock a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
@@ -534,56 +539,48 @@ ens:producedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:wasAttributedTo ;
     rdfs:domain ens:EnergyAllocation ; rdfs:range ens:SettlementSystem .
 
-ens:TrainRun a owl:Class ;
+ens:RunningTrain a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf prov:Activity ;
-    rdfs:label "Train run"@en ;
-    skos:definition "A specific operational train movement identified independently of its reusable operational train number."@en ;
-    rdfs:comment "Modelled as an activity: a run takes place over a time interval, consumes energy and is described by telematics messages. The rc.3 classes era:Train, era:TrainIdent and era:OperationalTrainNumberIdentifier are message elements identifying a train, not the movement itself; link them with ens:trainRunIdent."@en .
+    rdfs:subClassOf era:Train ;
+    rdfs:label "Running train"@en ;
+    skos:definition "A train running a specific service movement on the network, identified independently of its reusable operational train number."@en ;
+    rdfs:comment "Specialises the telematics era:Train (itself an era:OperationalTrainNumberIdentifier), so era:operationalTrainNumber, era:trainDepartureDate and era:trainOperatingRU apply directly. Named after era:RunningTrack. The operational number is not a key: two running trains may share it on different days. Not a prov:Activity: it denotes the train, not the movement event."@en .
 
-ens:trainRunIdent a owl:ObjectProperty ;
+ens:runningTrainIdent a owl:ObjectProperty ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range era:TrainIdent ;
-    rdfs:label "train run identification"@en ;
-    skos:definition "TAF/TAP TSI unique identification of the contracted train (era:TrainIdent) under which this run operates."@en ;
-    rdfs:comment "Preferred production key for a run where the TAF/TAP identifiers are exchanged; ens:trainRunId remains for local or legacy keys."@en .
+    rdfs:domain ens:RunningTrain ; rdfs:range era:TrainIdent ;
+    rdfs:label "running train identification"@en ;
+    skos:definition "TAF/TAP TSI unique identification of the contracted train (era:TrainIdent) under which this train runs."@en ;
+    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged; ens:runningTrainId remains for local or legacy keys."@en .
 
-ens:trainRunId a owl:DatatypeProperty ;
-    rdfs:label "train run identifier"@en ;
-    skos:definition "Stable identifier of the train run, independent of the reusable operational train number."@en ;
+ens:runningTrainId a owl:DatatypeProperty ;
+    rdfs:label "running train identifier"@en ;
+    skos:definition "Stable identifier of the running train, independent of the reusable operational train number."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range xsd:string .
-
-ens:operationalTrainNumber a owl:DatatypeProperty ;
-    rdfs:label "operational train number"@en ;
-    rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
-    vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range xsd:string ;
-    skos:closeMatch era:operationalTrainNumber ;
-    rdfs:comment "Operational number in context of this specific run; not a globally unique run identifier."@en .
+    rdfs:domain ens:RunningTrain ; rdfs:range xsd:string .
 
 ens:runStart a owl:DatatypeProperty ;
     rdfs:label "run start"@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range xsd:dateTime ;
+    rdfs:domain ens:RunningTrain ; rdfs:range xsd:dateTime ;
     rdfs:comment "Start of the interval within which messages and readings may be attributed to the run; not the actual departure (see ens:actualDepartureTime)."@en .
 
 ens:runEnd a owl:DatatypeProperty ;
     rdfs:label "run end"@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range xsd:dateTime ;
+    rdfs:domain ens:RunningTrain ; rdfs:range xsd:dateTime ;
     rdfs:comment "End of the interval within which messages and readings may be attributed to the run."@en .
 
 ens:consumerRole a owl:ObjectProperty ;
     rdfs:label "consumer role"@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range ens:EnergyConsumerRole ;
+    rdfs:domain ens:RunningTrain ; rdfs:range ens:EnergyConsumerRole ;
     rdfs:comment "Consumer party applicable to this run under the relevant agreement and allocation rules."@en .
 
 ens:responsibleRUOrganisation a owl:ObjectProperty ;
@@ -601,26 +598,26 @@ ens:railwayCompanyCode a owl:DatatypeProperty ;
     rdfs:domain era:Body ; rdfs:range xsd:string ;
     rdfs:comment "Organization identifier corresponding to a telematics company code; populate only from an authoritative code mapping."@en .
 
-ens:aboutTrainRun a owl:ObjectProperty ;
-    rdfs:label "about train run"@en ;
-    skos:definition "Train run described by a telematics composition or running information message."@en ;
+ens:aboutRunningTrain a owl:ObjectProperty ;
+    rdfs:label "about running train"@en ;
+    skos:definition "Running train described by a telematics composition or running information message."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
     rdfs:domain [ a owl:Class ; owl:unionOf ( era:TrainCompositionMessage era:TrainRunningInformationMessage ) ] ;
-    rdfs:range ens:TrainRun .
+    rdfs:range ens:RunningTrain .
 
-ens:matchedTrainRun a owl:ObjectProperty ;
-    rdfs:label "matched train run"@en ;
-    skos:definition "Train run to which the allocated energy is attributed."@en ;
+ens:matchedRunningTrain a owl:ObjectProperty ;
+    rdfs:label "matched running train"@en ;
+    skos:definition "Running train to which the allocated energy is attributed."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:EnergyAllocation ; rdfs:range ens:TrainRun .
+    rdfs:domain ens:EnergyAllocation ; rdfs:range ens:RunningTrain .
 
 ens:actualDepartureTime a owl:DatatypeProperty ;
     rdfs:label "actual departure time"@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range xsd:dateTime ;
+    rdfs:domain ens:RunningTrain ; rdfs:range xsd:dateTime ;
     rdfs:comment "Actual departure time only when supported by an authoritative operational event; do not substitute the booked time."@en .
 
 ens:actualDepartureEvidence a owl:ObjectProperty ;
@@ -628,7 +625,7 @@ ens:actualDepartureEvidence a owl:ObjectProperty ;
     skos:definition "Evidence record (e.g. operational event or message) supporting the actual departure time of the run."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:TrainRun ; rdfs:range prov:Entity .
+    rdfs:domain ens:RunningTrain ; rdfs:range prov:Entity .
 
 ens:timelinessAssessment a owl:ObjectProperty ;
     rdfs:label "timeliness assessment"@en ;
@@ -821,8 +818,8 @@ era:ReferenceBorderPoint a owl:Class .
 era:RunningTrack a owl:Class .
 era:LocoIdent a owl:Class .
 era:TrainIdent a owl:Class .
+era:Train a owl:Class .
 era:operationalTrainNumber a owl:DatatypeProperty .
-skos:closeMatch a owl:AnnotationProperty .
 skos:definition a owl:AnnotationProperty .
 vs:term_status a owl:AnnotationProperty .
 era:TrainCompositionMessage a owl:Class .

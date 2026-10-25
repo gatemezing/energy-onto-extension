@@ -325,7 +325,7 @@ SETS = [
              "Temporal comparison", "ABox",
              """SELECT ?msg WHERE {
   ?msg era:messageHeader/era:messageDateTimeCreated ?sent ;
-       ens:aboutTrainRun/ens:actualDepartureTime ?departure .
+       ens:aboutRunningTrain/ens:actualDepartureTime ?departure .
   FILTER (?sent > ?departure)
 }""", [("tcm2",)]),
         ],
@@ -349,7 +349,7 @@ SETS = [
              """             SELECT DISTINCT ?settlement WHERE {
                ?msg a era:TrainRunningInformationMessage ;
                     era:operationalTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
-                    ens:aboutTrainRun d:run1 .
+                    ens:aboutRunningTrain d:run1 .
                ?exchange a ens:DataExchangeActivity ;
                          ens:exchangedMessage ?msg ;
                          ens:exchangeRecipient ?settlement ;

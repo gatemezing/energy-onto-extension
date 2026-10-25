@@ -21,8 +21,8 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R2 | `era:shaclShapeValidationRule` pointed to four `exsh:` shapes that did not exist; shapes were declared in the vocabulary namespace | High | **Fixed in v0.6**: shapes in `enssh:`, links resolve |
 | R3 | 70+ terms without `rdfs:label`, ~35 without any definition; no `rdfs:isDefinedBy` or term status | Medium | **Fixed in v0.6** |
 | R4 | No ontology metadata (title, description, versionIRI, preferred prefix) | Medium | **Fixed in v0.6** (licence still open, see P4) |
-| R5 | `ens:TrainRun` typed as `prov:Entity`, although a run is a movement in time | Medium | **Fixed in v0.6**: `prov:Activity` |
-| R6 | Run identity not aligned with TAF/TAP: rc.3 has `era:TrainIdent` (unique contracted train ID) and `era:operationalTrainNumber` | Medium | **Partly fixed in v0.6**: `ens:trainRunIdent`, `skos:closeMatch`; test data still missing |
+| R5 | `ens:TrainRun` typed as `prov:Entity` and disconnected from the telematics train concepts | Medium | **Fixed in v0.6**: renamed `ens:RunningTrain` (cf. `era:RunningTrack`), `⊑ era:Train` |
+| R6 | Run identity not aligned with TAF/TAP: rc.3 has `era:TrainIdent` (unique contracted train ID) and `era:operationalTrainNumber` | Medium | **Partly fixed in v0.6**: `era:operationalTrainNumber` reused directly, `ens:runningTrainIdent → era:TrainIdent`; test data still missing |
 | R7 | `ens:allocatesReading` duplicates the component path without a stated relation | Medium | **Fixed in v0.6**: OWL 2 property chain |
 | R8 | `ens:forwardsTo` / `ens:exchangeProtocol` without domain/range; no check of admissible flow | Low | **Fixed in v0.6** + `enssh:ForwardsToShape` |
 | R9 | Header comments contradicted the model (TrainRun "removed") and the CQ count | Low | **Fixed in v0.6** |
@@ -33,6 +33,8 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R14 | Concept schemes are defined only in the example data; `AllocationStatuses` mixes status and method (`estimated`, `fallback-to-keeper`) | Medium | Open → P2 |
 | R15 | Corrections expressed as `ens:allocationVersion` string; no supersession or reversal | Medium | Open → P2 |
 | R16 | Time modelled two ways: `time:Interval` for readings, `xsd:dateTime` pair for runs; timezone not enforced | Low | Open → P2 |
+| R18 | `skos:closeMatch` between OWL classes/properties (`ens:EnergyReading`–`saref:Measurement`): with the SKOS schema, an RDFS or OWL RL reasoner types both as `skos:Concept` (domain/range of `skos:semanticRelation`), and declaring it an annotation property clashes with SKOS's object-property declaration in OWL 2 DL | Medium | **Fixed in v0.6**: `rdfs:seeAlso`; no SKOS mapping properties on ontology terms (verified with owlrl) |
+| R19 | `era:Train` is a TAF/TAP message element (its other subclasses are `era:TrainStopType` and `era:WagonStatusMessage`) and carries ERA shape links; if ERA shapes target `era:Train`, running trains will be validated against them | Low | Open → P1: run the ERA shapes on the examples |
 | R17 | `ens:exchangeContains` (settlement system → activity) is the undeclared inverse of `ens:exchangeRecipient`; name does not say "received" | Low | Open → P2 |
 
 ## 2. Changes made on this branch (v0.6)
@@ -40,10 +42,11 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 1. Namespace `http://data.europa.eu/dy6/`; prefixes `ens:` (vocabulary), `ensc:` (concepts), `enssh:` (shapes). Synthetic instances stay in `http://example.org/data/`.
 2. Ontology header: `dct:title`, `dct:description`, `owl:versionIRI <http://data.europa.eu/dy6/0.6.0>`, `owl:versionInfo "0.6.0"`, `dct:modified`, `vann:preferredNamespacePrefix/Uri`, `vs:term_status` (ERA convention).
 3. Every `ens:` term: `rdfs:label`, `rdfs:isDefinedBy`, `vs:term_status "unstable"`, and a `skos:definition` or comment.
-4. `ens:TrainRun ⊑ prov:Activity`; new `ens:trainRunIdent → era:TrainIdent`; `ens:operationalTrainNumber skos:closeMatch era:operationalTrainNumber`; `runStart`/`runEnd` documented as an attribution window, not actual departure.
-5. `ens:allocatesReading owl:propertyChainAxiom (ens:hasAllocationComponent ens:componentReading)`.
-6. Domains/ranges for `ens:forwardsTo` and `ens:exchangeProtocol`.
-7. Shapes moved to `enssh:`; new `enssh:EnergyMeasurementSystemShape` and `enssh:ForwardsToShape`; dangling validation-rule links fixed. Two new negative tests (DCS → settlement system; EMS without vehicle).
+4. `ens:TrainRun` renamed `ens:RunningTrain ⊑ era:Train` (hence `⊑ era:OperationalTrainNumberIdentifier`), so `era:operationalTrainNumber` replaces `ens:operationalTrainNumber` and `era:trainDepartureDate`/`era:trainOperatingRU` become available; renamed properties `ens:runningTrainId`, `ens:aboutRunningTrain`, `ens:matchedRunningTrain`; new `ens:runningTrainIdent → era:TrainIdent`; `runStart`/`runEnd` documented as an attribution window, not actual departure.
+5. `skos:closeMatch` removed from ontology terms (replaced by `rdfs:seeAlso`), see R18.
+6. `ens:allocatesReading owl:propertyChainAxiom (ens:hasAllocationComponent ens:componentReading)`.
+7. Domains/ranges for `ens:forwardsTo` and `ens:exchangeProtocol`.
+8. Shapes moved to `enssh:`; new `enssh:EnergyMeasurementSystemShape` and `enssh:ForwardsToShape`; dangling validation-rule links fixed. Two new negative tests (DCS → settlement system; EMS without vehicle).
 
 Result: 48/48 CQs, SHACL conforms, accounting and all negative tests pass.
 
