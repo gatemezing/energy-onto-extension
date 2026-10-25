@@ -25,7 +25,7 @@ The CQs were produced and validated with current practice in ontology requiremen
 | Purpose | Represent traction energy measurement, exchange and settlement data, linked to ERA registers and TEL TSI messages |
 | Scope | EMS to CEBD to DCS to exchange function to settlement system to allocation; matching with composition and running information; borders and grid context |
 | Out of scope (this iteration) | Energy market and supply contracts, prices, network losses (see section 4) |
-| Implementation | OWL 2 (RDFS-level axioms) and SHACL, `ex:` extension of `era:` v4.0.0-rc.3, reusing SOSA/SSN, SAREF, QUDT, PROV-O, OWL-Time, GeoSPARQL |
+| Implementation | OWL 2 (RDFS-level axioms) and SHACL, `ens:` extension of `era:` v4.0.0-rc.3, reusing SOSA/SSN, SAREF, QUDT, PROV-O, OWL-Time, GeoSPARQL |
 | Intended users | Eress partner IMs, settlement operators, RUs, ERA, regulatory bodies |
 | Intended uses | Cross-border allocation support, evidence-oriented ENE TSI review, settlement reconciliation, EMS cross-acceptance analysis |
 
@@ -67,7 +67,7 @@ The CQs were produced and validated with current practice in ontology requiremen
 ```sparql
 SELECT ?ems WHERE {
   ?vehicle era:vehicleNumber "918061890013" .
-  ?ems ex:installedOn ?vehicle .
+  ?ems ens:installedOn ?vehicle .
 }
 ```
 
@@ -94,7 +94,7 @@ SELECT ?component WHERE {
 
 ```sparql
 ASK {
-  ex:EnergyMeasurementSystem rdfs:subClassOf saref:Meter , sosa:Platform .
+  ens:EnergyMeasurementSystem rdfs:subClassOf saref:Meter , sosa:Platform .
 }
 ```
 
@@ -113,8 +113,8 @@ ASK {
 
 ```sparql
 SELECT ?cp ?id WHERE {
-  d:ems1 ex:measuresConsumptionPoint ?cp .
-  ?cp ex:consumptionPointId ?id .
+  d:ems1 ens:measuresConsumptionPoint ?cp .
+  ?cp ens:consumptionPointId ?id .
 }
 ```
 
@@ -127,8 +127,8 @@ SELECT ?cp ?id WHERE {
 
 ```sparql
 SELECT ?vehicle WHERE {
-  ?cp ex:consumptionPointOf ?vehicle .
-  ?cp ex:consumptionPointId ?id .
+  ?cp ens:consumptionPointOf ?vehicle .
+  ?cp ens:consumptionPointId ?id .
   ?vehicle era:vehicleNumber ?evn .
   FILTER (REPLACE(STR(?id), "[ -]", "") = REPLACE("91 80 6189 001-3", "[ -]", ""))
   FILTER (REPLACE(STR(?evn), "[ -]", "") = REPLACE(STR(?id), "[ -]", ""))
@@ -144,7 +144,7 @@ SELECT ?vehicle WHERE {
 
 ```sparql
 SELECT (COUNT(?cp) AS ?n) WHERE {
-  ?cp ex:consumptionPointId ?id ; ex:consumptionPointOf/era:vehicleNumber ?evn .
+  ?cp ens:consumptionPointId ?id ; ens:consumptionPointOf/era:vehicleNumber ?evn .
   FILTER (REPLACE(STR(?id), "[ -]", "") != REPLACE(STR(?evn), "[ -]", ""))
 }
 ```
@@ -164,8 +164,8 @@ SELECT (COUNT(?cp) AS ?n) WHERE {
 
 ```sparql
 SELECT ?reading (SUBSTR(STR(?start), 12, 5) AS ?hhmm) WHERE {
-  d:cebd1 ex:hasReading ?reading .
-  ?reading ex:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
+  d:cebd1 ens:hasReading ?reading .
+  ?reading ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
 }
 ```
 
@@ -178,10 +178,10 @@ SELECT ?reading (SUBSTR(STR(?start), 12, 5) AS ?hhmm) WHERE {
 
 ```sparql
 SELECT (SUM(?kwh) AS ?total) WHERE {
-  ?reading ex:readingOfConsumptionPoint d:cp1 ;
-           ex:activeEnergyConsumed ?kwh ;
-           ex:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start ;
-           ex:readingPeriod/time:hasEnd/time:inXSDDateTimeStamp ?end .
+  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+           ens:activeEnergyConsumed ?kwh ;
+           ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start ;
+           ens:readingPeriod/time:hasEnd/time:inXSDDateTimeStamp ?end .
   FILTER (STR(?start) >= "2026-10-15T00:00:00Z" &&
           STR(?start) < "2026-10-16T00:00:00Z")
 }
@@ -195,7 +195,7 @@ SELECT (SUM(?kwh) AS ?total) WHERE {
 - Result: r3 → **PASS**
 
 ```sparql
-SELECT ?reading WHERE { ?reading a ex:ReadingBlock . }
+SELECT ?reading WHERE { ?reading a ens:ReadingBlock . }
 ```
 
 ### S4. Regenerative braking
@@ -213,9 +213,9 @@ SELECT ?reading WHERE { ?reading a ex:ReadingBlock . }
 
 ```sparql
 SELECT (SUM(?kwh) AS ?total) WHERE {
-  ?reading ex:readingOfConsumptionPoint d:cp1 ;
-           ex:activeEnergyRegenerated ?kwh ;
-           ex:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
+  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+           ens:activeEnergyRegenerated ?kwh ;
+           ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
   FILTER (STR(?start) >= "2026-10-15T00:00:00Z" &&
           STR(?start) < "2026-10-16T00:00:00Z")
 }
@@ -230,8 +230,8 @@ SELECT (SUM(?kwh) AS ?total) WHERE {
 
 ```sparql
 SELECT ?reading ((?in - ?out) AS ?net) WHERE {
-  ?reading ex:readingOfConsumptionPoint d:cp1 ;
-           ex:activeEnergyConsumed ?in ; ex:activeEnergyRegenerated ?out .
+  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+           ens:activeEnergyConsumed ?in ; ens:activeEnergyRegenerated ?out .
 }
 ```
 
@@ -264,7 +264,7 @@ SELECT ?fitted WHERE {
 
 ```sparql
 SELECT ?track ?country WHERE {
-  d:r1 ex:readingOnTrack ?track .
+  d:r1 ens:readingOnTrack ?track .
   ?track era:inCountry ?country .
 }
 ```
@@ -278,7 +278,7 @@ SELECT ?track ?country WHERE {
 
 ```sparql
 SELECT ?supply ?maxCurrent WHERE {
-  d:r3 ex:readingOnTrack/era:contactLineSystem ?cls .
+  d:r3 ens:readingOnTrack/era:contactLineSystem ?cls .
   ?cls era:energySupplySystem ?supply ; era:maxTrainCurrent ?maxCurrent .
 }
 ```
@@ -292,7 +292,7 @@ SELECT ?supply ?maxCurrent WHERE {
 
 ```sparql
 SELECT (COUNT(?reading) AS ?n) WHERE {
-  ?reading a/rdfs:subClassOf* ex:EnergyReading .
+  ?reading a/rdfs:subClassOf* ens:EnergyReading .
   FILTER NOT EXISTS { ?reading geo:hasGeometry ?g . }
 }
 ```
@@ -311,7 +311,7 @@ SELECT (COUNT(?reading) AS ?n) WHERE {
 - Result: eressDCS → **PASS**
 
 ```sparql
-SELECT ?dcs WHERE { ?dcs a ex:DataCollectingSystem ; ex:receivesFrom d:ems1 . }
+SELECT ?dcs WHERE { ?dcs a ens:DataCollectingSystem ; ens:receivesFrom d:ems1 . }
 ```
 
 #### CQ6.2 – To which exchange function does that DCS forward data?
@@ -323,8 +323,8 @@ SELECT ?dcs WHERE { ?dcs a ex:DataCollectingSystem ; ex:receivesFrom d:ems1 . }
 
 ```sparql
 SELECT ?exchange WHERE {
-  ?dcs ex:receivesFrom d:ems1 ; ex:forwardsTo ?exchange .
-  ?exchange a ex:ExchangeFunction .
+  ?dcs ens:receivesFrom d:ems1 ; ens:forwardsTo ?exchange .
+  ?exchange a ens:ExchangeFunction .
 }
 ```
 
@@ -337,8 +337,8 @@ SELECT ?exchange WHERE {
 
 ```sparql
 SELECT ?org WHERE {
-  ?dcs ex:receivesFrom d:ems1 ; ex:operatedBy ?role .
-  ?role a ex:DCSAdministratorRole ; era:roleOf ?org .
+  ?dcs ens:receivesFrom d:ems1 ; ens:operatedBy ?role .
+  ?role a ens:DCSAdministratorRole ; era:roleOf ?org .
 }
 ```
 
@@ -351,12 +351,12 @@ SELECT ?org WHERE {
 
 ```sparql
 SELECT ?recipient ?outcome WHERE {
-  ?exchange a ex:DataExchangeActivity ;
-            ex:exchangedMessage d:tcm1 ;
-            ex:exchangeRecipient ?recipient ;
-            ex:exchangeOutcome ?outcome ;
-            ex:exchangeAuthority ?authority ;
-            ex:retentionPolicy ?retention .
+  ?exchange a ens:DataExchangeActivity ;
+            ens:exchangedMessage d:tcm1 ;
+            ens:exchangeRecipient ?recipient ;
+            ens:exchangeOutcome ?outcome ;
+            ens:exchangeAuthority ?authority ;
+            ens:retentionPolicy ?retention .
 }
 ```
 
@@ -375,7 +375,7 @@ SELECT ?recipient ?outcome WHERE {
 
 ```sparql
 SELECT ?settlement WHERE {
-  d:erex ex:forwardsTo ?settlement . ?settlement a ex:SettlementSystem .
+  d:erex ens:forwardsTo ?settlement . ?settlement a ens:SettlementSystem .
 }
 ```
 
@@ -388,8 +388,8 @@ SELECT ?settlement WHERE {
 
 ```sparql
 SELECT ?other ?protocol WHERE {
-  d:erex ex:exchangesWith|^ex:exchangesWith ?other .
-  ?other ex:exchangeProtocol ?protocol .
+  d:erex ens:exchangesWith|^ens:exchangesWith ?other .
+  ?other ens:exchangeProtocol ?protocol .
 }
 ```
 
@@ -401,7 +401,7 @@ SELECT ?other ?protocol WHERE {
 - Result: legacyExchange → **PASS**
 
 ```sparql
-SELECT ?exchange WHERE { ?exchange ex:exchangeProtocol exc:UTILTS . }
+SELECT ?exchange WHERE { ?exchange ens:exchangeProtocol ensc:UTILTS . }
 ```
 
 ### S8. Settlement systems and zones
@@ -419,7 +419,7 @@ SELECT ?exchange WHERE { ?exchange ex:exchangeProtocol exc:UTILTS . }
 
 ```sparql
 SELECT ?settlement ?zone ?country WHERE {
-  ?settlement ex:servesZone ?zone . ?zone ex:zoneCountry ?country .
+  ?settlement ens:servesZone ?zone . ?zone ens:zoneCountry ?country .
 }
 ```
 
@@ -432,7 +432,7 @@ SELECT ?settlement ?zone ?country WHERE {
 
 ```sparql
 SELECT ?settlement WHERE {
-  ?settlement ex:servesZone/ex:zoneCountry country:SWE .
+  ?settlement ens:servesZone/ens:zoneCountry country:SWE .
 }
 ```
 
@@ -445,7 +445,7 @@ SELECT ?settlement WHERE {
 
 ```sparql
 SELECT ?org WHERE {
-  ?settlement ex:servesZone/ex:zoneCountry country:NOR ; ex:operatedBy/era:roleOf ?org .
+  ?settlement ens:servesZone/ens:zoneCountry country:NOR ; ens:operatedBy/era:roleOf ?org .
 }
 ```
 
@@ -463,7 +463,7 @@ SELECT ?org WHERE {
 - Result: rbpMagnor, NO-SE-MAG → **PASS**
 
 ```sparql
-SELECT ?rbp ?id WHERE { d:zoneNO ex:delimitedBy ?rbp . ?rbp era:borderPointId ?id . }
+SELECT ?rbp ?id WHERE { d:zoneNO ens:delimitedBy ?rbp . ?rbp era:borderPointId ?id . }
 ```
 
 #### CQ9.2 – Which operational points refer to border point NO-SE-MAG?
@@ -488,7 +488,7 @@ SELECT ?op WHERE {
 
 ```sparql
 SELECT ?zone1 ?zone2 WHERE {
-  ?zone1 ex:delimitedBy ?rbp . ?zone2 ex:delimitedBy ?rbp .
+  ?zone1 ens:delimitedBy ?rbp . ?zone2 ens:delimitedBy ?rbp .
   FILTER (STR(?zone1) < STR(?zone2))
 }
 ```
@@ -522,7 +522,7 @@ SELECT ?org WHERE {
 ```sparql
 SELECT ?role WHERE {
   ?role rdfs:subClassOf era:OrganisationRole .
-  FILTER STRSTARTS(STR(?role), "http://example.org/era-energy#")
+  FILTER STRSTARTS(STR(?role), "http://data.europa.eu/dy6/")
 }
 ```
 
@@ -534,7 +534,7 @@ SELECT ?role WHERE {
 - Result: railLease → **PASS**
 
 ```sparql
-SELECT ?org WHERE { d:ems1 ex:emsResponsible/era:roleOf ?org . }
+SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }
 ```
 
 ### S11. Train composition (TEL TSI 2.5.1(16))
@@ -569,7 +569,7 @@ SELECT ?loco ?mass WHERE {
 ```sparql
 SELECT ?vehicle WHERE {
   ?msg era:operationalTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
-       era:trainCompositionJourneySection/ex:tractionUnitVehicle ?vehicle .
+       era:trainCompositionJourneySection/ens:tractionUnitVehicle ?vehicle .
 }
 ```
 
@@ -583,7 +583,7 @@ SELECT ?vehicle WHERE {
 ```sparql
 SELECT ?msg WHERE {
   ?msg era:messageHeader/era:messageDateTimeCreated ?sent ;
-       ex:aboutTrainRun/ex:actualDepartureTime ?departure .
+       ens:aboutTrainRun/ens:actualDepartureTime ?departure .
   FILTER (?sent > ?departure)
 }
 ```
@@ -622,11 +622,11 @@ SELECT ?place (SUBSTR(STR(?when), 12, 5) AS ?hhmm) ?ru WHERE {
              SELECT DISTINCT ?settlement WHERE {
                ?msg a era:TrainRunningInformationMessage ;
                     era:operationalTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
-                    ex:aboutTrainRun d:run1 .
-               ?exchange a ex:DataExchangeActivity ;
-                         ex:exchangedMessage ?msg ;
-                         ex:exchangeRecipient ?settlement ;
-                         ex:exchangePurpose exc:energySettlement .
+                    ens:aboutTrainRun d:run1 .
+               ?exchange a ens:DataExchangeActivity ;
+                         ens:exchangedMessage ?msg ;
+                         ens:exchangeRecipient ?settlement ;
+                         ens:exchangePurpose ensc:energySettlement .
              }
 ```
 
@@ -654,7 +654,7 @@ SELECT ?op (SUBSTR(STR(?when), 12, 5) AS ?hhmm) WHERE {
 - Result: nordCargo → **PASS**
 
 ```sparql
-SELECT ?org WHERE { d:tri1 ex:responsibleRUOrganisation ?org . }
+SELECT ?org WHERE { d:tri1 ens:responsibleRUOrganisation ?org . }
 ```
 
 ### S13. Allocation and matching
@@ -672,8 +672,8 @@ SELECT ?org WHERE { d:tri1 ex:responsibleRUOrganisation ?org . }
 
 ```sparql
 SELECT ?org ?zone WHERE {
-  ?allocation ex:allocatesReading d:r1 ;
-              ex:allocatedTo/era:roleOf ?org ; ex:allocatedInZone ?zone .
+  ?allocation ens:allocatesReading d:r1 ;
+              ens:allocatedTo/era:roleOf ?org ; ens:allocatedInZone ?zone .
 }
 ```
 
@@ -686,10 +686,10 @@ SELECT ?org ?zone WHERE {
 
 ```sparql
 SELECT ?zone (SUM(?kwh) AS ?total) WHERE {
-  ?allocation ex:allocatedTo/era:roleOf d:nordCargo ;
-              ex:allocationStatus exc:meteredValid ;
-              ex:allocatedInZone ?zone ;
-                           ex:allocatedActiveEnergyConsumed ?kwh .
+  ?allocation ens:allocatedTo/era:roleOf d:nordCargo ;
+              ens:allocationStatus ensc:meteredValid ;
+              ens:allocatedInZone ?zone ;
+                           ens:allocatedActiveEnergyConsumed ?kwh .
 } GROUP BY ?zone
 ```
 
@@ -702,7 +702,7 @@ SELECT ?zone (SUM(?kwh) AS ?total) WHERE {
 
 ```sparql
 SELECT ?composition ?running WHERE {
-  d:alloc1 ex:matchedComposition ?composition ; ex:matchedRunningInformation ?running .
+  d:alloc1 ens:matchedComposition ?composition ; ens:matchedRunningInformation ?running .
 }
 ```
 
@@ -715,10 +715,10 @@ SELECT ?composition ?running WHERE {
 
 ```sparql
 SELECT ?zone ?consumed ?regenerated ?net WHERE {
-  ?allocation ex:allocatedInZone ?zone ;
-              ex:allocatedActiveEnergyConsumed ?consumed ;
-              ex:allocatedActiveEnergyRegenerated ?regenerated ;
-              ex:allocatedNetActiveEnergy ?net .
+  ?allocation ens:allocatedInZone ?zone ;
+              ens:allocatedActiveEnergyConsumed ?consumed ;
+              ens:allocatedActiveEnergyRegenerated ?regenerated ;
+              ens:allocatedNetActiveEnergy ?net .
 }
 ```
 
@@ -736,7 +736,7 @@ SELECT ?zone ?consumed ?regenerated ?net WHERE {
 - Result: alloc3 → **PASS**
 
 ```sparql
-SELECT ?allocation WHERE { ?allocation ex:allocationStatus exc:estimated . }
+SELECT ?allocation WHERE { ?allocation ens:allocationStatus ensc:estimated . }
 ```
 
 #### CQ14.2 – Which readings have not been allocated to any consumer?
@@ -748,8 +748,8 @@ SELECT ?allocation WHERE { ?allocation ex:allocationStatus exc:estimated . }
 
 ```sparql
 SELECT ?reading WHERE {
-  ?reading a/rdfs:subClassOf* ex:EnergyReading .
-  FILTER NOT EXISTS { ?allocation ex:allocatesReading ?reading . }
+  ?reading a/rdfs:subClassOf* ens:EnergyReading .
+  FILTER NOT EXISTS { ?allocation ens:allocatesReading ?reading . }
 }
 ```
 
@@ -762,8 +762,8 @@ SELECT ?reading WHERE {
 
 ```sparql
 SELECT DISTINCT ?ems WHERE {
-  d:alloc2 ex:allocatesReading ?reading .
-  ?cebd ex:hasReading ?reading ; ex:compiledBy ?ems .
+  d:alloc2 ens:allocatesReading ?reading .
+  ?cebd ens:hasReading ?reading ; ens:compiledBy ?ems .
 }
 ```
 
@@ -782,7 +782,7 @@ SELECT DISTINCT ?ems WHERE {
 
 ```sparql
 SELECT ?ems ?edition WHERE {
-  ?ems ex:emsStandardVersion/skos:prefLabel ?edition .
+  ?ems ens:emsStandardVersion/skos:prefLabel ?edition .
 }
 ```
 
@@ -795,7 +795,7 @@ SELECT ?ems ?edition WHERE {
 
 ```sparql
 SELECT ?vehicle WHERE {
-  ?ems ex:installedOn ?vehicle . ?vehicle era:vehicleType ?type .
+  ?ems ens:installedOn ?vehicle . ?vehicle era:vehicleType ?type .
   FILTER NOT EXISTS { ?type era:configDependentParameter/era:hasOnboardEnergyMeasurement true . }
 }
 ```
@@ -809,8 +809,8 @@ SELECT ?vehicle WHERE {
 
 ```sparql
 SELECT (COUNT(?ems) AS ?n) WHERE {
-  ?ems a ex:EnergyMeasurementSystem .
-  FILTER NOT EXISTS { ?ems ex:emsStandardVersion ?v . }
+  ?ems a ens:EnergyMeasurementSystem .
+  FILTER NOT EXISTS { ?ems ens:emsStandardVersion ?v . }
 }
 ```
 
@@ -821,9 +821,9 @@ These questions have not been settled by this proposal. Some now have model fiel
 | ID | Competency question | Why it fails | Proposed action |
 |---|---|---|---|
 | G1 | Was a composition message sent after departure justified by an anomaly? | The draft records a timing assessment, evidence reference, and authority reference, but the cited rule, allowed window, and meaning of a qualifying anomaly have not been verified against the official instrument. | Verify the operative TEL TSI text and message schema with ERA/legal experts; use a controlled outcome vocabulary and evidence mapping without treating a populated link as proof of compliance. |
-| G2 | What was the train's actual departure time? | ex:actualDepartureTime now distinguishes actual from booked time and requires an evidence reference; no authoritative departure event or interface mapping is validated by the synthetic example. | Map an authoritative operating event and its provenance for each deployment; do not infer departure from the first location report without an approved operational rule. |
+| G2 | What was the train's actual departure time? | ens:actualDepartureTime now distinguishes actual from booked time and requires an evidence reference; no authoritative departure event or interface mapping is validated by the synthetic example. | Map an authoritative operating event and its provenance for each deployment; do not infer departure from the first location report without an approved operational rule. |
 | G3 | Which energy supplier delivered the allocated energy, and at what price? | Supplier, contract, and price data are outside this iteration and must not be inferred from settlement party or infrastructure operator. | Add a separate market/contract module after verifying the operative legal interface obligations and responsible actors. |
-| G4 | How were network losses allocated between consumers? | Loss coefficients and their allocation (AS-03 §5.6.2(g), Infrabel 96 % rule) are not modelled. | Add a loss allocation method concept and coefficient to ex:EnergyAllocation. |
+| G4 | How were network losses allocated between consumers? | Loss coefficients and their allocation (AS-03 §5.6.2(g), Infrabel 96 % rule) are not modelled. | Add a loss allocation method concept and coefficient to ens:EnergyAllocation. |
 | G5 | In which unit is the train weight of a composition message expressed? | era:trainWeight (xsd:int) has no era:unitOfMeasure in rc.3. | Raise with ERA (TAF practice: tonnes). |
 | G6 | Which legal, privacy, security, and retention controls govern each exchange? | The exchange record now links a purpose, authority reference, recipient, outcome, and retention-policy reference, but example references are explicit placeholders and access controls are external to RDF. | Have the controller/processor roles, legal basis, purpose limitation, recipient authorization, retention/deletion schedule, security controls, and audit needs approved for each deployment. |
 
@@ -831,7 +831,7 @@ This list distinguishes data-model coverage from evidence quality: a populated e
 
 ## 5. Notes on the tests
 
-- **No OWL reasoner is used.** Subclass and subproperty entailments are written as property paths (`rdf:type/rdfs:subClassOf*`, `rdfs:subPropertyOf*`). CQ7.2 uses `ex:exchangesWith|^ex:exchangesWith` because the symmetry of the property is only entailed by a reasoner.
+- **No OWL reasoner is used.** Subclass and subproperty entailments are written as property paths (`rdf:type/rdfs:subClassOf*`, `rdfs:subPropertyOf*`). CQ7.2 uses `ens:exchangesWith|^ens:exchangesWith` because the symmetry of the property is only entailed by a reasoner.
 - **CQ11.2 depends on a SHACL rule.** The link from the composition journey section's normalized `era:locoNumber` to a registered vehicle is derived only when it matches a valid 12-digit vehicle number.
 - **Allocation arithmetic checks** verify component totals and cap aggregate component values at each source reading. The energy quantities are not prices and do not define market, contract, tax, or network-loss treatment.
 - **Legal and privacy caveat:** exchange authority and retention references in examples are placeholders. The shapes validate reference presence, not legal validity, a GDPR basis, controller/processor allocation, access control, or retention compliance.
