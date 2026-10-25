@@ -15,8 +15,8 @@ The runner uses the committed `era-ontology-v4.0.0-rc.3.ttl` snapshot by default
 
 ## Files
 
-- `era-energy-settlement-draft.ttl` — extension vocabulary and mappings.
-- `era-energy-settlement-shapes.ttl` — SHACL constraints and the normalized EVN-to-vehicle rule.
+- `era-energy-settlement-draft.ttl` — extension vocabulary and mappings. Energy readings follow SOSA/SSN and SSN-Ext: a reading is a `sosa:ObservationCollection` of `sosa:Observation`s with QUDT results.
+- `era-energy-settlement-shapes.ttl` — SHACL constraints, the normalized EVN-to-vehicle rule and the rule deriving reading shortcuts from SOSA observations.
 - `era-energy-settlement-examples.ttl` — synthetic sample data.
 - `cq_suite.py` — executable competency questions and arithmetic/negative checks.
 - `era-energy-settlement-cqs.md` — generated test report and open requirements.
@@ -25,3 +25,7 @@ The runner uses the committed `era-ontology-v4.0.0-rc.3.ttl` snapshot by default
 - `era-ontology-v4.0.0-rc.3.ttl` — upstream ERA ontology snapshot used for repeatable local validation.
 
 See `THIRD-PARTY-NOTICES.md` for attribution and the ERA ontology license.
+
+## Licence
+
+The extension (vocabulary, shapes, examples and test suite) is licensed under the [European Union Public Licence v1.2](LICENSE) (EUPL-1.2, Commission Implementing Decision (EU) 2017/863), the licence of the ERA ontology. The vendored ERA ontology snapshot keeps its own terms; see `THIRD-PARTY-NOTICES.md`.

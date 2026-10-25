@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: EUPL-1.2
 @prefix ens:   <http://data.europa.eu/dy6/def/energy/> .
 @prefix era:   <http://data.europa.eu/949/> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
@@ -12,15 +13,16 @@
 @prefix saref: <https://saref.etsi.org/core/> .
 @prefix unit:  <http://qudt.org/vocab/unit/> .
 @prefix qudt:  <http://qudt.org/schema/qudt/> .
+@prefix ssn:   <http://www.w3.org/ns/ssn/> .
 @prefix enssh: <http://data.europa.eu/dy6/def/energy/shapes/> .
 @prefix vann:  <http://purl.org/vocab/vann/> .
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 
 # =====================================================================
-# DRAFT v0.6 – ERA ontology extension for traction energy settlement
+# DRAFT v0.7 – ERA ontology extension for traction energy settlement
 #   (proposal for ERA governance; namespace http://data.europa.eu/dy6/def/energy/)
 # LOT activity: Ontology implementation (conceptualisation + reuse),
-#   validated against the 49 competency questions executed by cq_suite.py
+#   validated against the 51 competency questions executed by cq_suite.py
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following
@@ -31,7 +33,25 @@
 #   and 2.5.2(8); ENE TSI Art. 9(4); EN 50463:2017 and prEN revision;
 #   UIC IRS 90930; Eress guidelines.
 #
-# Changes from v0.5:
+# Changes from v0.6:
+#   - Licence: EUPL v1.2 (Commission Implementing Decision (EU) 2017/863),
+#     the licence of the ERA ontology.
+#   - Maximal SOSA/SSN reuse. An energy reading is a sosa:ObservationCollection
+#     (SSN-Ext) whose members are sosa:Observation instances, one per
+#     observable property (ens:ConsumedActiveEnergy,
+#     ens:RegeneratedActiveEnergy, ens:MeasuredReactiveEnergy), each with a
+#     sosa:hasResult qudt:QuantityValue. A CEBD is a collection of readings.
+#     Shared values sit on the collection (sosa:hasFeatureOfInterest,
+#     sosa:phenomenonTime); sosa:madeBySensor is on each member observation.
+#   - SOSA properties used directly; their ens: aliases are deprecated
+#     (ens:readingOfConsumptionPoint, ens:measuredBy, ens:readingPeriod,
+#     ens:hasReading, ens:installedOn, ens:hasMeasurementFunction,
+#     ens:hasDataHandlingSystem).
+#   - ens:activeEnergyConsumed, ens:activeEnergyRegenerated and
+#     ens:reactiveEnergy are shortcuts derived from the member
+#     observations by a SHACL rule; they are not asserted in source data.
+#
+# Changes from v0.5 (v0.6):
 #   - Namespace moved from example.org to http://data.europa.eu/dy6/def/energy/
 #     (prefixes ens: vocabulary, ensc: concepts, enssh: shapes).
 #   - Ontology metadata: title, description, versionIRI, preferred prefix,
@@ -74,8 +94,10 @@
     rdfs:label "ERA energy settlement extension (draft)"@en ;
     dct:title "ERA energy settlement extension"@en ;
     dct:description "Proposed extension of the ERA ontology for on-board traction energy measurement, energy data exchange and settlement allocation, linked to ERA telematics (TEL TSI) and RINF concepts."@en ;
-    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.6.0> ;
-    owl:versionInfo "0.6.0" ;
+    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.7.0> ;
+    owl:versionInfo "0.7.0" ;
+    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.6.0> ;
+    dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
     dct:created "2026-10-15"^^xsd:date ;
     dct:modified "2026-10-25"^^xsd:date ;
     vann:preferredNamespacePrefix "ens" ;
@@ -121,18 +143,19 @@ ens:ConsumptionPoint a owl:Class ;
 ens:CompiledEnergyBillingData a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf prov:Entity ;
+    rdfs:subClassOf prov:Entity , sosa:ObservationCollection ;
     rdfs:label "Compiled energy billing data (CEBD)"@en ;
-    skos:definition "Data set compiled by the DHS, suitable for energy billing (EN 50463)."@en .
+    skos:definition "Data set compiled by the DHS, suitable for energy billing (EN 50463)."@en ;
+    rdfs:comment "A collection (SSN-Ext) whose sosa:hasMember values are the energy readings it contains."@en .
 
 ens:EnergyReading a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf sosa:Observation , geo:Feature ;
+    rdfs:subClassOf sosa:ObservationCollection , geo:Feature ;
     rdfs:seeAlso saref:Measurement ;
     rdfs:label "Energy reading"@en ;
-    skos:definition "Energy values for one measurement period, time-stamped and geolocated."@en ;
-    rdfs:comment "Deviation from strict SOSA: one reading carries several results (consumed, regenerated, reactive) as datatype properties, mirroring the CEBD record. Hence saref:Measurement is only referenced (rdfs:seeAlso), not a superclass; no SKOS mapping property is used, because skos:closeMatch would type both classes as skos:Concept. Not an era:Feature: readings are measurement data, not network features with validity."@en .
+    skos:definition "Energy values of one consumption point for one measurement period, time-stamped and geolocated, as compiled in a CEBD record."@en ;
+    rdfs:comment "An SSN-Ext observation collection. Its members are sosa:Observation instances, one per observable property (ens:ConsumedActiveEnergy, ens:RegeneratedActiveEnergy, ens:MeasuredReactiveEnergy), each with a sosa:hasResult qudt:QuantityValue. Values shared by all members are stated once on the collection: sosa:hasFeatureOfInterest (the consumption point) and sosa:phenomenonTime (the measurement period). sosa:madeBySensor (the EMF) is stated on each member: under the SSN axioms every sosa:Sensor only makes sosa:Observation, so a collection linked to its sensor would be inferred to be an observation. The GPS fix is the collection's geo:hasGeometry. saref:Measurement is only referenced: it describes a single value. Not an era:Feature: readings are measurement data, not network features with validity."@en .
 
 ens:ReadingBlock a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
@@ -144,8 +167,10 @@ ens:ReadingBlock a owl:Class ;
 ens:installedOn a owl:ObjectProperty ;
     rdfs:label "installed on"@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
-    era:shaclShapeValidationRule enssh:EnergyMeasurementSystemShape ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:isHostedBy ;
+    rdfs:comment "Deprecated in v0.7: use sosa:isHostedBy directly; the domain and range are enforced in SHACL."@en ;
     rdfs:subPropertyOf sosa:isHostedBy ;
     rdfs:domain ens:EnergyMeasurementSystem ;
     rdfs:range era:Vehicle ;
@@ -155,7 +180,10 @@ ens:hasMeasurementFunction a owl:ObjectProperty ;
     rdfs:label "has measurement function"@en ;
     skos:definition "Energy measurement function hosted by the energy measurement system."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:hosts ;
+    rdfs:comment "Deprecated in v0.7: use sosa:hosts directly; the domain and range are enforced in SHACL."@en ;
     rdfs:subPropertyOf sosa:hosts ;
     rdfs:domain ens:EnergyMeasurementSystem ;
     rdfs:range ens:EnergyMeasurementFunction .
@@ -164,7 +192,10 @@ ens:hasDataHandlingSystem a owl:ObjectProperty ;
     rdfs:label "has data handling system"@en ;
     skos:definition "Data handling system hosted by the energy measurement system."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:hosts ;
+    rdfs:comment "Deprecated in v0.7: use sosa:hosts directly; the domain and range are enforced in SHACL."@en ;
     rdfs:subPropertyOf sosa:hosts ;
     rdfs:domain ens:EnergyMeasurementSystem ;
     rdfs:range ens:DataHandlingSystem .
@@ -217,7 +248,10 @@ ens:hasReading a owl:ObjectProperty ;
     rdfs:label "has reading"@en ;
     skos:definition "Energy reading contained in the CEBD."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:hasMember ;
+    rdfs:comment "Deprecated in v0.7: use sosa:hasMember directly; the domain and range are enforced in SHACL."@en ;
     rdfs:domain ens:CompiledEnergyBillingData ;
     rdfs:range ens:EnergyReading .
 
@@ -225,7 +259,10 @@ ens:readingOfConsumptionPoint a owl:ObjectProperty ;
     rdfs:label "reading of consumption point"@en ;
     skos:definition "Consumption point to which the reading refers."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:hasFeatureOfInterest ;
+    rdfs:comment "Deprecated in v0.7: use sosa:hasFeatureOfInterest directly; the domain and range are enforced in SHACL."@en ;
     rdfs:subPropertyOf sosa:hasFeatureOfInterest ;
     rdfs:domain ens:EnergyReading ;
     rdfs:range ens:ConsumptionPoint .
@@ -234,7 +271,10 @@ ens:measuredBy a owl:ObjectProperty ;
     rdfs:label "measured by"@en ;
     skos:definition "Energy measurement function that produced the reading."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:madeBySensor ;
+    rdfs:comment "Deprecated in v0.7: use sosa:madeBySensor directly, on each member observation of a reading; the domain and range are enforced in SHACL."@en ;
     rdfs:subPropertyOf sosa:madeBySensor ;
     rdfs:domain ens:EnergyReading ;
     rdfs:range ens:EnergyMeasurementFunction .
@@ -243,7 +283,10 @@ ens:readingPeriod a owl:ObjectProperty ;
     rdfs:label "reading period"@en ;
     skos:definition "Measurement period of the reading."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy sosa:phenomenonTime ;
+    rdfs:comment "Deprecated in v0.7: use sosa:phenomenonTime directly; the domain and range are enforced in SHACL."@en ;
     rdfs:subPropertyOf sosa:phenomenonTime ;
     rdfs:domain ens:EnergyReading ;
     rdfs:range time:Interval .
@@ -255,7 +298,7 @@ ens:activeEnergyConsumed a owl:DatatypeProperty ;
     vs:term_status "unstable" ;
     rdfs:domain ens:EnergyReading ; rdfs:range xsd:decimal ;
     era:unitOfMeasure unit:KiloW-HR ;
-    rdfs:comment "Active energy taken from the contact line in the period."@en .
+    rdfs:comment "Active energy taken from the contact line in the period. Shortcut derived from the member observation of ens:ConsumedActiveEnergy (enssh:EnergyReadingShape rule); do not assert it in source data."@en .
 
 ens:activeEnergyRegenerated a owl:DatatypeProperty ;
     rdfs:label "active energy regenerated"@en ;
@@ -263,7 +306,7 @@ ens:activeEnergyRegenerated a owl:DatatypeProperty ;
     vs:term_status "unstable" ;
     rdfs:domain ens:EnergyReading ; rdfs:range xsd:decimal ;
     era:unitOfMeasure unit:KiloW-HR ;
-    rdfs:comment "Active energy returned to the contact line (regenerative braking)."@en .
+    rdfs:comment "Active energy returned to the contact line (regenerative braking). Shortcut derived from the member observation of ens:RegeneratedActiveEnergy (enssh:EnergyReadingShape rule); do not assert it in source data."@en .
 
 ens:reactiveEnergy a owl:DatatypeProperty ;
     rdfs:label "reactive energy"@en ;
@@ -271,7 +314,7 @@ ens:reactiveEnergy a owl:DatatypeProperty ;
     vs:term_status "unstable" ;
     rdfs:domain ens:EnergyReading ; rdfs:range xsd:decimal ;
     era:unitOfMeasure unit:KiloVAR-HR ;
-    rdfs:comment "Reactive energy in kilovar-hours (kvarh)."@en .
+    rdfs:comment "Reactive energy in kilovar-hours (kvarh). Shortcut derived from the member observation of ens:MeasuredReactiveEnergy (enssh:EnergyReadingShape rule); do not assert it in source data."@en .
 
 ens:measurementQuality a owl:ObjectProperty ;
     rdfs:label "measurement quality"@en ;
@@ -288,6 +331,24 @@ ens:measurementEvidence a owl:ObjectProperty ;
     rdfs:domain ens:EnergyMeasurementSystem ;
     rdfs:range prov:Entity ;
     rdfs:comment "Evidence reference for the applicable meter approval, calibration, or conformity assessment."@en .
+
+ens:ConsumedActiveEnergy a sosa:ObservableProperty , owl:NamedIndividual ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:label "Consumed active energy"@en ;
+    skos:definition "Active energy taken from the contact line by the traction unit (EN 50463), observed in kWh."@en .
+
+ens:RegeneratedActiveEnergy a sosa:ObservableProperty , owl:NamedIndividual ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:label "Regenerated active energy"@en ;
+    skos:definition "Active energy returned to the contact line by regenerative braking (EN 50463), observed in kWh."@en .
+
+ens:MeasuredReactiveEnergy a sosa:ObservableProperty , owl:NamedIndividual ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:label "Reactive energy"@en ;
+    skos:definition "Reactive energy exchanged with the contact line (EN 50463), observed in kvarh."@en .
 
 ## 1.2 Ground systems (ENE TSI 4.2.17, Art. 9(4); IRS 90930)
 

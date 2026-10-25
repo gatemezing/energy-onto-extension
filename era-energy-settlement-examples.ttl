@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: EUPL-1.2
 @prefix ens:    <http://data.europa.eu/dy6/def/energy/> .
 @prefix ensc:   <http://data.europa.eu/dy6/def/energy/concepts/> .
 @prefix era:   <http://data.europa.eu/949/> .
@@ -9,10 +10,13 @@
 @prefix time:  <http://www.w3.org/2006/time#> .
 @prefix geo:   <http://www.opengis.net/ont/geosparql#> .
 @prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix qudt:  <http://qudt.org/schema/qudt/> .
+@prefix unit:  <http://qudt.org/vocab/unit/> .
 @prefix country: <http://publications.europa.eu/resource/authority/country/> .
 
 # =====================================================================
-# Example data for validating the energy settlement extension (v0.6)
+# Example data for validating the energy settlement extension (v0.7)
 # against the competency questions in era-energy-settlement-cqs.md.
 #
 # Scenario: freight train 41234, operated by a fictitious RU, runs from
@@ -102,22 +106,23 @@ d:loco2 a era:Vehicle ;
 # --- On-board measurement --------------------------------------------
 
 d:ems1 a ens:EnergyMeasurementSystem ;
-    ens:installedOn d:loco1 ;
-    ens:hasMeasurementFunction d:emf1 ;
-    ens:hasDataHandlingSystem d:dhs1 ;
+    sosa:isHostedBy d:loco1 ;
+    sosa:hosts d:emf1 , d:dhs1 ;
     ens:measuresConsumptionPoint d:cp1 ;
     ens:emsStandardVersion ensc:EN50463-2017 ;
     ens:emsResponsible d:emsRespRole .
-d:emf1 a ens:EnergyMeasurementFunction .
+d:emf1 a ens:EnergyMeasurementFunction ;
+    sosa:observes ens:ConsumedActiveEnergy , ens:RegeneratedActiveEnergy , ens:MeasuredReactiveEnergy .
 d:dhs1 a ens:DataHandlingSystem .
 
 d:ems2 a ens:EnergyMeasurementSystem ;             # R4 warning: typeB has no meter
-    ens:installedOn d:loco2 ;
-    ens:hasMeasurementFunction d:emf2 ;
+    sosa:isHostedBy d:loco2 ;
+    sosa:hosts d:emf2 ;
     ens:measuresConsumptionPoint d:cp2 ;
     ens:emsStandardVersion ensc:EN50463-2012 ;
     ens:emsResponsible d:emsRespRole .
-d:emf2 a ens:EnergyMeasurementFunction .
+d:emf2 a ens:EnergyMeasurementFunction ;
+    sosa:observes ens:ConsumedActiveEnergy , ens:RegeneratedActiveEnergy , ens:MeasuredReactiveEnergy .
 
 d:cp1 a ens:ConsumptionPoint ; ens:consumptionPointId "918061890013" ; ens:consumptionPointOf d:loco1 .
 d:cp2 a ens:ConsumptionPoint ; ens:consumptionPointId "917421940025" ; ens:consumptionPointOf d:loco2 .
@@ -126,51 +131,99 @@ d:cp2 a ens:ConsumptionPoint ; ens:consumptionPointId "917421940025" ; ens:consu
 
 d:cebd1 a ens:CompiledEnergyBillingData ;
     ens:compiledBy d:ems1 ;
-    ens:hasReading d:r1 , d:r2 , d:r3 .
+    sosa:hasMember d:r1 , d:r2 , d:r3 .
 
 d:cebd2 a ens:CompiledEnergyBillingData ;
     ens:compiledBy d:ems2 ;
-    ens:hasReading d:r4 .
+    sosa:hasMember d:r4 .
 
 d:r1 a ens:EnergyReading ;
-    ens:readingOfConsumptionPoint d:cp1 ; ens:measuredBy d:emf1 ;
+    sosa:hasFeatureOfInterest d:cp1 ;
     ens:measurementQuality ensc:qualityAccepted ;
-    ens:readingPeriod [ a time:Interval ;
+    sosa:phenomenonTime [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T06:00:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T06:05:00Z"^^xsd:dateTimeStamp ] ] ;
-    ens:activeEnergyConsumed 410.5 ; ens:activeEnergyRegenerated 12.0 ; ens:reactiveEnergy 30.2 ;
+    sosa:hasMember d:r1-consumed , d:r1-regenerated , d:r1-reactive ;
     geo:hasGeometry [ geo:asWKT "POINT(12.003 60.190)"^^geo:wktLiteral ] ;
     ens:readingOnTrack d:trackNO .
 
+d:r1-consumed a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:ConsumedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 410.5 ; qudt:unit unit:KiloW-HR ] .
+d:r1-regenerated a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:RegeneratedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 12.0 ; qudt:unit unit:KiloW-HR ] .
+d:r1-reactive a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:MeasuredReactiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 30.2 ; qudt:unit unit:KiloVAR-HR ] .
+
 d:r2 a ens:EnergyReading ;
-    ens:readingOfConsumptionPoint d:cp1 ; ens:measuredBy d:emf1 ;
+    sosa:hasFeatureOfInterest d:cp1 ;
     ens:measurementQuality ensc:qualityAccepted ;
-    ens:readingPeriod [ a time:Interval ;
+    sosa:phenomenonTime [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T06:05:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T06:10:00Z"^^xsd:dateTimeStamp ] ] ;
-    ens:activeEnergyConsumed 380.0 ; ens:activeEnergyRegenerated 8.5 ; ens:reactiveEnergy 28.0 ;
+    sosa:hasMember d:r2-consumed , d:r2-regenerated , d:r2-reactive ;
     geo:hasGeometry [ geo:asWKT "POINT(12.010 60.150)"^^geo:wktLiteral ] ;
     ens:readingOnTrack d:trackNO .
 
+d:r2-consumed a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:ConsumedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 380.0 ; qudt:unit unit:KiloW-HR ] .
+d:r2-regenerated a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:RegeneratedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 8.5 ; qudt:unit unit:KiloW-HR ] .
+d:r2-reactive a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:MeasuredReactiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 28.0 ; qudt:unit unit:KiloVAR-HR ] .
+
 d:r3 a ens:ReadingBlock ;                          # one-minute block, in Sweden
-    ens:readingOfConsumptionPoint d:cp1 ; ens:measuredBy d:emf1 ;
+    sosa:hasFeatureOfInterest d:cp1 ;
     ens:measurementQuality ensc:qualityAccepted ;
-    ens:readingPeriod [ a time:Interval ;
+    sosa:phenomenonTime [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T08:40:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T08:41:00Z"^^xsd:dateTimeStamp ] ] ;
-    ens:activeEnergyConsumed 95.2 ; ens:activeEnergyRegenerated 3.1 ; ens:reactiveEnergy 6.4 ;
+    sosa:hasMember d:r3-consumed , d:r3-regenerated , d:r3-reactive ;
     geo:hasGeometry [ geo:asWKT "POINT(12.290 59.880)"^^geo:wktLiteral ] ;
     ens:readingOnTrack d:trackSE .
 
+d:r3-consumed a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:ConsumedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 95.2 ; qudt:unit unit:KiloW-HR ] .
+d:r3-regenerated a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:RegeneratedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 3.1 ; qudt:unit unit:KiloW-HR ] .
+d:r3-reactive a sosa:Observation ;
+    sosa:madeBySensor d:emf1 ;
+    sosa:observedProperty ens:MeasuredReactiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 6.4 ; qudt:unit unit:KiloVAR-HR ] .
+
 d:r4 a ens:EnergyReading ;                         # never allocated
-    ens:readingOfConsumptionPoint d:cp2 ; ens:measuredBy d:emf2 ;
+    sosa:hasFeatureOfInterest d:cp2 ;
     ens:measurementQuality ensc:qualityAccepted ;
-    ens:readingPeriod [ a time:Interval ;
+    sosa:phenomenonTime [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T07:00:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T07:05:00Z"^^xsd:dateTimeStamp ] ] ;
-    ens:activeEnergyConsumed 250.0 ; ens:activeEnergyRegenerated 0.0 ;
+    sosa:hasMember d:r4-consumed , d:r4-regenerated ;
     geo:hasGeometry [ geo:asWKT "POINT(11.950 60.200)"^^geo:wktLiteral ] ;
     ens:readingOnTrack d:trackNO .
+
+d:r4-consumed a sosa:Observation ;
+    sosa:madeBySensor d:emf2 ;
+    sosa:observedProperty ens:ConsumedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 250.0 ; qudt:unit unit:KiloW-HR ] .
+d:r4-regenerated a sosa:Observation ;
+    sosa:madeBySensor d:emf2 ;
+    sosa:observedProperty ens:RegeneratedActiveEnergy ;
+    sosa:hasResult [ a qudt:QuantityValue ; qudt:numericValue 0.0 ; qudt:unit unit:KiloW-HR ] .
 
 # --- Infrastructure (RINF terms) -------------------------------------
 
