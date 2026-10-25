@@ -38,6 +38,9 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R19 | `era:Train` is a TAF/TAP message element (its other subclasses are `era:TrainStopType` and `era:WagonStatusMessage`) and carries ERA shape links; if ERA shapes target `era:Train`, running trains will be validated against them | Low | Open → P1: run the ERA shapes on the examples |
 | R21 | With the full SSN axioms (`sosa:Sensor ⊑ ∀ sosa:madeObservation.sosa:Observation`, inverse of `sosa:madeBySensor`), stating the sensor on an observation collection, as SSN-Ext allows, makes the collection an observation | Medium | **Fixed in v0.7**: `sosa:madeBySensor` on each member observation, forbidden on readings by SHACL (verified with owlrl and SOSA/SSN/SSN-Ext loaded) |
 | R22 | `ens:` aliases of SOSA properties (`readingOfConsumptionPoint`, `measuredBy`, `readingPeriod`, `hasReading`, `installedOn`, `hasMeasurementFunction`, `hasDataHandlingSystem`) only restated SOSA with a narrower domain/range | Low | **Fixed in v0.7**: SOSA properties used directly; aliases deprecated with `dct:isReplacedBy`; domain/range checks moved to SHACL |
+| R23 | Example message `d:tri1` carried three `era:trainLocationReport`s, but rc.3 declares `era:trainLocationReport` and `era:locationDateTime` functional; HermiT found the ABox inconsistent (SHACL and the CQs did not) | High | **Fixed in v0.7**: one location report per running-information message (`tri1`–`tri3`); a DL negative test keeps it detected |
+| R24 | ERA rc.3 restricts `era:dNvroll` to `xsd:double` with `xsd:decimal` facet values (`0.0`, `327670.0`), which is not valid OWL 2 DL | Low (upstream) | Worked around in `dl_check.py` (facets cast, reported); upstream change request in P4 |
+| R25 | SSN (property chains defining `sosa:usedProcedure`) combined with SSN-Ext (`ObservationCollection ⊑ ≤1 sosa:usedProcedure`) is outside OWL 2 DL | Low (W3C) | `dl_check.py` drops that one SSN-Ext axiom (unused here) and reports it |
 | R17 | `ens:exchangeContains` (settlement system → activity) is the undeclared inverse of `ens:exchangeRecipient`; name does not say "received" | Low | Open → P2 |
 
 ## 2. Changes in v0.7
@@ -50,6 +53,7 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
    - `ens:activeEnergyConsumed`, `ens:activeEnergyRegenerated`, `ens:reactiveEnergy` are shortcuts derived by a SHACL rule, not source data.
 3. Shapes: reading and observation shapes (required observed properties, no duplicates, decimal non-negative results, kWh/kvarh units), CEBD shape, EMS hosting. SPARQL constraints avoid `VALUES` (not allowed in SHACL SPARQL constraints).
 4. Tests: CQ1.4 (properties observed by the EMF) and CQ3.4 (observed property, value and unit of each observation); negative tests for a kvarh unit on active energy and a reading without a consumed-energy observation. 51/51 CQs pass.
+5. OWL 2 DL reasoning: `dl_check.py` runs HermiT (via owlready2, needs Java) on ERA rc.3 + extension + examples + vendored SOSA/SSN/SSN-Ext, by default inside `cq_suite.py`; negative fixtures prove it detects an inconsistent ABox and an unsatisfiable class. It found R23. A GitHub Actions workflow (`.github/workflows/checks.yml`) runs the whole suite on every push and pull request.
 
 ## 2a. Changes in v0.6
 
@@ -93,8 +97,8 @@ Result: 49/49 CQs, SHACL conforms, accounting and all negative tests pass.
 
 - Confirm with the Publications Office / ERA that `dy6/def/energy` is the allocated path and set up dereferencing and content negotiation for terms, `0.6.0` version IRIs and shapes.
 - Licence: done in v0.7 (EUPL v1.2). Contributors still to be added to the header.
-- Quality gates in CI: `cq_suite.py`, OWL 2 DL profile check (ROBOT `validate-profile`), OOPS! pitfall scan, HTML documentation (pyLODE or Widoco).
-- Upstream change requests to the ERA ontology: object link from `era:LocoIdent`/`era:locoNumber` to `era:Vehicle`; unit of `era:trainWeight` (G5); clarify whether the run key should be `era:TrainIdent`; make `era:trainOperatingRU` (and `era:responsibleRU`) object properties to `era:OrganisationRole`, or add object counterparts, so `ens:operatingRailwayUndertaking` can be retired.
+- Quality gates in CI: `cq_suite.py` with the HermiT DL check runs on every push (v0.7). Still to add: OWL 2 DL profile report (ROBOT `validate-profile`), OOPS! pitfall scan, HTML documentation (pyLODE or Widoco).
+- Upstream change requests to the ERA ontology: object link from `era:LocoIdent`/`era:locoNumber` to `era:Vehicle`; unit of `era:trainWeight` (G5); clarify whether the run key should be `era:TrainIdent`; use `xsd:double` facet values on `era:dNvroll` (R24); confirm against the TAF XSD that `era:trainLocationReport` is single-valued (R23); make `era:trainOperatingRU` (and `era:responsibleRU`) object properties to `era:OrganisationRole`, or add object counterparts, so `ens:operatingRailwayUndertaking` can be retired.
 
 ## 4. Decisions needed
 

@@ -266,8 +266,8 @@ d:legacyExchange a ens:ExchangeFunction ;
 
 d:settleNO a ens:SettlementSystem ; ens:servesZone d:zoneNO ; ens:operatedBy d:settleOpNO .
 d:settleSE a ens:SettlementSystem ; ens:servesZone d:zoneSE ; ens:operatedBy d:settleOpSE .
-d:settleNO ens:exchangeContains d:exchangeTcm1NO, d:exchangeTri1NO, d:exchangeTcm2NO .
-d:settleSE ens:exchangeContains d:exchangeTcm1SE, d:exchangeTri1SE .
+d:settleNO ens:exchangeContains d:exchangeTcm1NO, d:exchangeTri1NO, d:exchangeTri2NO, d:exchangeTcm2NO .
+d:settleSE ens:exchangeContains d:exchangeTcm1SE, d:exchangeTri3SE .
 
 d:zoneNO a ens:SettlementZone ; ens:zoneCountry country:NOR ; ens:delimitedBy d:rbpMagnor .
 d:zoneSE a ens:SettlementZone ; ens:zoneCountry country:SWE ; ens:delimitedBy d:rbpMagnor .
@@ -295,15 +295,28 @@ d:js2 a era:TrainCompositionJourneySection ;
     era:journeySection [ era:journeySectionOrigin [ era:bookedLocationDateTime "2026-10-15T07:00:00Z"^^xsd:dateTime ] ] ;
     era:trainRunningData [ era:trainRunningTechData [ era:trainWeight 980 ] ] .
 
+# One location report per message: era:trainLocationReport and
+# era:locationDateTime are functional in ERA rc.3.
 d:tri1 a era:TrainRunningInformationMessage ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:responsibleRU "3801" ;
     ens:responsibleRUOrganisation d:nordCargo ;
     ens:aboutRunningTrain d:run1 ;
-    era:trainLocationReport
-        [ era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ] ,
-        [ era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ] ,
-        [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
+    era:trainLocationReport [ era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ] .
+
+d:tri2 a era:TrainRunningInformationMessage ;
+    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
+    era:responsibleRU "3801" ;
+    ens:responsibleRUOrganisation d:nordCargo ;
+    ens:aboutRunningTrain d:run1 ;
+    era:trainLocationReport [ era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ] .
+
+d:tri3 a era:TrainRunningInformationMessage ;
+    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
+    era:responsibleRU "3801" ;
+    ens:responsibleRUOrganisation d:nordCargo ;
+    ens:aboutRunningTrain d:run1 ;
+    era:trainLocationReport [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
 
 d:run1 a ens:RunningTrain ;
     era:operationalTrainNumber "41234" ;
@@ -345,11 +358,16 @@ d:exchangeTcm1SE a ens:DataExchangeActivity ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 d:exchangeTri1NO a ens:DataExchangeActivity ;
     ens:exchangedMessage d:tri1 ; ens:exchangeSender d:baneNor ;
-    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T08:39:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T07:11:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
-d:exchangeTri1SE a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tri1 ; ens:exchangeSender d:trafikverket ;
+d:exchangeTri2NO a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tri2 ; ens:exchangeSender d:baneNor ;
+    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T08:31:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
+    ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
+d:exchangeTri3SE a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tri3 ; ens:exchangeSender d:trafikverket ;
     ens:exchangeRecipient d:settleSE ; ens:exchangeTime "2026-10-15T08:40:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
@@ -379,7 +397,7 @@ d:alloc2 a ens:EnergyAllocation ;
     ens:hasAllocationComponent d:alloc2r3 ;
     ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneSE ;
     ens:allocationStatus ensc:meteredValid ; ens:producedBy d:settleSE ;
-    ens:matchedComposition d:tcm1 ; ens:matchedRunningInformation d:tri1 ;
+    ens:matchedComposition d:tcm1 ; ens:matchedRunningInformation d:tri3 ;
     ens:matchedRunningTrain d:run1 ;
     ens:allocatedActiveEnergyConsumed 95.2 ;
     ens:allocatedActiveEnergyRegenerated 3.1 ;
