@@ -1,6 +1,7 @@
-@prefix ex:    <http://example.org/era-energy#> .
-@prefix exc:   <http://example.org/era-energy/concepts/> .
+@prefix ens:    <http://data.europa.eu/dy6/def/energy/> .
+@prefix ensc:   <http://data.europa.eu/dy6/def/energy/concepts/> .
 @prefix era:   <http://data.europa.eu/949/> .
+@prefix eraor: <http://data.europa.eu/949/concepts/organisation-roles/> .
 @prefix d:     <http://example.org/data/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
@@ -11,7 +12,7 @@
 @prefix country: <http://publications.europa.eu/resource/authority/country/> .
 
 # =====================================================================
-# Example data for validating the energy settlement extension (v0.5)
+# Example data for validating the energy settlement extension (v0.6)
 # against the competency questions in era-energy-settlement-cqs.md.
 #
 # Scenario: freight train 41234, operated by a fictitious RU, runs from
@@ -26,33 +27,33 @@
 
 # --- Proposed SKOS concept schemes (part of the proposal) ------------
 
-exc:EmsStandardVersions a skos:ConceptScheme ; skos:prefLabel "EMS standard versions"@en .
-exc:EN50463-2012 a skos:Concept ; skos:inScheme exc:EmsStandardVersions ; skos:prefLabel "EN 50463:2012"@en .
-exc:EN50463-2017 a skos:Concept ; skos:inScheme exc:EmsStandardVersions ; skos:prefLabel "EN 50463:2017"@en .
+ensc:EmsStandardVersions a skos:ConceptScheme ; skos:prefLabel "EMS standard versions"@en .
+ensc:EN50463-2012 a skos:Concept ; skos:inScheme ensc:EmsStandardVersions ; skos:prefLabel "EN 50463:2012"@en .
+ensc:EN50463-2017 a skos:Concept ; skos:inScheme ensc:EmsStandardVersions ; skos:prefLabel "EN 50463:2017"@en .
 
-exc:ExchangeProtocols a skos:ConceptScheme ; skos:prefLabel "Energy data exchange protocols"@en .
-exc:IRS90930 a skos:Concept ; skos:inScheme exc:ExchangeProtocols ; skos:prefLabel "UIC IRS 90930"@en .
-exc:UTILTS a skos:Concept ; skos:inScheme exc:ExchangeProtocols ; skos:prefLabel "UTILTS (legacy)"@en .
+ensc:ExchangeProtocols a skos:ConceptScheme ; skos:prefLabel "Energy data exchange protocols"@en .
+ensc:IRS90930 a skos:Concept ; skos:inScheme ensc:ExchangeProtocols ; skos:prefLabel "UIC IRS 90930"@en .
+ensc:UTILTS a skos:Concept ; skos:inScheme ensc:ExchangeProtocols ; skos:prefLabel "UTILTS (legacy)"@en .
 
-exc:AllocationStatuses a skos:ConceptScheme ; skos:prefLabel "Allocation statuses"@en .
-exc:meteredValid a skos:Concept ; skos:inScheme exc:AllocationStatuses ; skos:prefLabel "metered, valid"@en .
-exc:estimated a skos:Concept ; skos:inScheme exc:AllocationStatuses ; skos:prefLabel "estimated"@en .
+ensc:AllocationStatuses a skos:ConceptScheme ; skos:prefLabel "Allocation statuses"@en .
+ensc:meteredValid a skos:Concept ; skos:inScheme ensc:AllocationStatuses ; skos:prefLabel "metered, valid"@en .
+ensc:estimated a skos:Concept ; skos:inScheme ensc:AllocationStatuses ; skos:prefLabel "estimated"@en .
 
-exc:MeasurementQuality a skos:ConceptScheme ; skos:prefLabel "Measurement quality"@en .
-exc:qualityAccepted a skos:Concept ; skos:inScheme exc:MeasurementQuality ; skos:prefLabel "accepted for settlement (illustrative)"@en .
+ensc:MeasurementQuality a skos:ConceptScheme ; skos:prefLabel "Measurement quality"@en .
+ensc:qualityAccepted a skos:Concept ; skos:inScheme ensc:MeasurementQuality ; skos:prefLabel "accepted for settlement (illustrative)"@en .
 
-exc:AllocationMethods a skos:ConceptScheme ; skos:prefLabel "Allocation methods"@en .
-exc:meteredByConsumptionPoint a skos:Concept ; skos:inScheme exc:AllocationMethods ; skos:prefLabel "metered by consumption point"@en .
-exc:estimatedFromOperationalData a skos:Concept ; skos:inScheme exc:AllocationMethods ; skos:prefLabel "estimated from operational data (illustrative)"@en .
+ensc:AllocationMethods a skos:ConceptScheme ; skos:prefLabel "Allocation methods"@en .
+ensc:meteredByConsumptionPoint a skos:Concept ; skos:inScheme ensc:AllocationMethods ; skos:prefLabel "metered by consumption point"@en .
+ensc:estimatedFromOperationalData a skos:Concept ; skos:inScheme ensc:AllocationMethods ; skos:prefLabel "estimated from operational data (illustrative)"@en .
 
-exc:ExchangeOutcomes a skos:ConceptScheme ; skos:prefLabel "Exchange outcomes"@en .
-exc:received a skos:Concept ; skos:inScheme exc:ExchangeOutcomes ; skos:prefLabel "received (illustrative)"@en .
+ensc:ExchangeOutcomes a skos:ConceptScheme ; skos:prefLabel "Exchange outcomes"@en .
+ensc:received a skos:Concept ; skos:inScheme ensc:ExchangeOutcomes ; skos:prefLabel "received (illustrative)"@en .
 
-exc:ExchangePurposes a skos:ConceptScheme ; skos:prefLabel "Exchange purposes"@en .
-exc:energySettlement a skos:Concept ; skos:inScheme exc:ExchangePurposes ; skos:prefLabel "energy settlement (illustrative)"@en .
+ensc:ExchangePurposes a skos:ConceptScheme ; skos:prefLabel "Exchange purposes"@en .
+ensc:energySettlement a skos:Concept ; skos:inScheme ensc:ExchangePurposes ; skos:prefLabel "energy settlement (illustrative)"@en .
 
-exc:TimelinessAssessments a skos:ConceptScheme ; skos:prefLabel "Composition message timeliness assessments"@en .
-exc:exceptionEvidenceRecorded a skos:Concept ; skos:inScheme exc:TimelinessAssessments ; skos:prefLabel "exception evidence recorded (illustrative only)"@en .
+ensc:TimelinessAssessments a skos:ConceptScheme ; skos:prefLabel "Composition message timeliness assessments"@en .
+ensc:exceptionEvidenceRecorded a skos:Concept ; skos:inScheme ensc:TimelinessAssessments ; skos:prefLabel "exception evidence recorded (illustrative only)"@en .
 
 d:ess15kV a skos:Concept ; skos:prefLabel "AC 15 kV 16.7 Hz (illustrative concept)"@en .
 
@@ -63,7 +64,7 @@ d:trafikverket a era:Body ; rdfs:label "Trafikverket" .
 d:eress a era:Body ; rdfs:label "Eress" .
 d:nordCargo a era:Body ; rdfs:label "Nord Cargo AS (fictitious RU)" .
 d:railLease a era:Body ; rdfs:label "RailLease AB (fictitious lessor)" .
-d:nordCargo ex:railwayCompanyCode "3801" .
+d:nordCargo era:organisationCode "3801" .
 
 # These placeholders document where deployment-specific approvals must be
 # linked. They are not legal opinions, contracts, or actual retention rules.
@@ -74,12 +75,13 @@ d:departureEvent a prov:Entity ; rdfs:label "Illustrative authoritative departur
 d:departureEvent2 a prov:Entity ; rdfs:label "Illustrative authoritative departure event for run 2"@en .
 d:lateMessageEvidence a prov:Entity ; rdfs:label "Illustrative operational evidence for late composition message"@en .
 
-d:ruRole a ex:EnergyConsumerRole ; era:roleOf d:nordCargo .
+d:ruRole a ens:EnergyConsumerRole ; era:roleOf d:nordCargo .
+d:nordCargoRU a era:OrganisationRole ; era:roleOf d:nordCargo ; era:hasOrganisationRole eraor:RU-3 .
 d:keeperRole a era:OrganisationRole ; era:roleOf d:railLease .
-d:emsRespRole a ex:EMSResponsibleRole ; era:roleOf d:railLease .
-d:dcsAdminRole a ex:DCSAdministratorRole ; era:roleOf d:eress .
-d:settleOpNO a ex:SettlementOperatorRole ; era:roleOf d:baneNor .
-d:settleOpSE a ex:SettlementOperatorRole ; era:roleOf d:trafikverket .
+d:emsRespRole a ens:EMSResponsibleRole ; era:roleOf d:railLease .
+d:dcsAdminRole a ens:DCSAdministratorRole ; era:roleOf d:eress .
+d:settleOpNO a ens:SettlementOperatorRole ; era:roleOf d:baneNor .
+d:settleOpSE a ens:SettlementOperatorRole ; era:roleOf d:trafikverket .
 
 # --- Vehicles and vehicle types --------------------------------------
 
@@ -99,76 +101,76 @@ d:loco2 a era:Vehicle ;
 
 # --- On-board measurement --------------------------------------------
 
-d:ems1 a ex:EnergyMeasurementSystem ;
-    ex:installedOn d:loco1 ;
-    ex:hasMeasurementFunction d:emf1 ;
-    ex:hasDataHandlingSystem d:dhs1 ;
-    ex:measuresConsumptionPoint d:cp1 ;
-    ex:emsStandardVersion exc:EN50463-2017 ;
-    ex:emsResponsible d:emsRespRole .
-d:emf1 a ex:EnergyMeasurementFunction .
-d:dhs1 a ex:DataHandlingSystem .
+d:ems1 a ens:EnergyMeasurementSystem ;
+    ens:installedOn d:loco1 ;
+    ens:hasMeasurementFunction d:emf1 ;
+    ens:hasDataHandlingSystem d:dhs1 ;
+    ens:measuresConsumptionPoint d:cp1 ;
+    ens:emsStandardVersion ensc:EN50463-2017 ;
+    ens:emsResponsible d:emsRespRole .
+d:emf1 a ens:EnergyMeasurementFunction .
+d:dhs1 a ens:DataHandlingSystem .
 
-d:ems2 a ex:EnergyMeasurementSystem ;             # R4 warning: typeB has no meter
-    ex:installedOn d:loco2 ;
-    ex:hasMeasurementFunction d:emf2 ;
-    ex:measuresConsumptionPoint d:cp2 ;
-    ex:emsStandardVersion exc:EN50463-2012 ;
-    ex:emsResponsible d:emsRespRole .
-d:emf2 a ex:EnergyMeasurementFunction .
+d:ems2 a ens:EnergyMeasurementSystem ;             # R4 warning: typeB has no meter
+    ens:installedOn d:loco2 ;
+    ens:hasMeasurementFunction d:emf2 ;
+    ens:measuresConsumptionPoint d:cp2 ;
+    ens:emsStandardVersion ensc:EN50463-2012 ;
+    ens:emsResponsible d:emsRespRole .
+d:emf2 a ens:EnergyMeasurementFunction .
 
-d:cp1 a ex:ConsumptionPoint ; ex:consumptionPointId "918061890013" ; ex:consumptionPointOf d:loco1 .
-d:cp2 a ex:ConsumptionPoint ; ex:consumptionPointId "917421940025" ; ex:consumptionPointOf d:loco2 .
+d:cp1 a ens:ConsumptionPoint ; ens:consumptionPointId "918061890013" ; ens:consumptionPointOf d:loco1 .
+d:cp2 a ens:ConsumptionPoint ; ens:consumptionPointId "917421940025" ; ens:consumptionPointOf d:loco2 .
 
 # --- CEBD and readings -----------------------------------------------
 
-d:cebd1 a ex:CompiledEnergyBillingData ;
-    ex:compiledBy d:ems1 ;
-    ex:hasReading d:r1 , d:r2 , d:r3 .
+d:cebd1 a ens:CompiledEnergyBillingData ;
+    ens:compiledBy d:ems1 ;
+    ens:hasReading d:r1 , d:r2 , d:r3 .
 
-d:cebd2 a ex:CompiledEnergyBillingData ;
-    ex:compiledBy d:ems2 ;
-    ex:hasReading d:r4 .
+d:cebd2 a ens:CompiledEnergyBillingData ;
+    ens:compiledBy d:ems2 ;
+    ens:hasReading d:r4 .
 
-d:r1 a ex:EnergyReading ;
-    ex:readingOfConsumptionPoint d:cp1 ; ex:measuredBy d:emf1 ;
-    ex:measurementQuality exc:qualityAccepted ;
-    ex:readingPeriod [ a time:Interval ;
+d:r1 a ens:EnergyReading ;
+    ens:readingOfConsumptionPoint d:cp1 ; ens:measuredBy d:emf1 ;
+    ens:measurementQuality ensc:qualityAccepted ;
+    ens:readingPeriod [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T06:00:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T06:05:00Z"^^xsd:dateTimeStamp ] ] ;
-    ex:activeEnergyConsumed 410.5 ; ex:activeEnergyRegenerated 12.0 ; ex:reactiveEnergy 30.2 ;
+    ens:activeEnergyConsumed 410.5 ; ens:activeEnergyRegenerated 12.0 ; ens:reactiveEnergy 30.2 ;
     geo:hasGeometry [ geo:asWKT "POINT(12.003 60.190)"^^geo:wktLiteral ] ;
-    ex:readingOnTrack d:trackNO .
+    ens:readingOnTrack d:trackNO .
 
-d:r2 a ex:EnergyReading ;
-    ex:readingOfConsumptionPoint d:cp1 ; ex:measuredBy d:emf1 ;
-    ex:measurementQuality exc:qualityAccepted ;
-    ex:readingPeriod [ a time:Interval ;
+d:r2 a ens:EnergyReading ;
+    ens:readingOfConsumptionPoint d:cp1 ; ens:measuredBy d:emf1 ;
+    ens:measurementQuality ensc:qualityAccepted ;
+    ens:readingPeriod [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T06:05:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T06:10:00Z"^^xsd:dateTimeStamp ] ] ;
-    ex:activeEnergyConsumed 380.0 ; ex:activeEnergyRegenerated 8.5 ; ex:reactiveEnergy 28.0 ;
+    ens:activeEnergyConsumed 380.0 ; ens:activeEnergyRegenerated 8.5 ; ens:reactiveEnergy 28.0 ;
     geo:hasGeometry [ geo:asWKT "POINT(12.010 60.150)"^^geo:wktLiteral ] ;
-    ex:readingOnTrack d:trackNO .
+    ens:readingOnTrack d:trackNO .
 
-d:r3 a ex:ReadingBlock ;                          # one-minute block, in Sweden
-    ex:readingOfConsumptionPoint d:cp1 ; ex:measuredBy d:emf1 ;
-    ex:measurementQuality exc:qualityAccepted ;
-    ex:readingPeriod [ a time:Interval ;
+d:r3 a ens:ReadingBlock ;                          # one-minute block, in Sweden
+    ens:readingOfConsumptionPoint d:cp1 ; ens:measuredBy d:emf1 ;
+    ens:measurementQuality ensc:qualityAccepted ;
+    ens:readingPeriod [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T08:40:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T08:41:00Z"^^xsd:dateTimeStamp ] ] ;
-    ex:activeEnergyConsumed 95.2 ; ex:activeEnergyRegenerated 3.1 ; ex:reactiveEnergy 6.4 ;
+    ens:activeEnergyConsumed 95.2 ; ens:activeEnergyRegenerated 3.1 ; ens:reactiveEnergy 6.4 ;
     geo:hasGeometry [ geo:asWKT "POINT(12.290 59.880)"^^geo:wktLiteral ] ;
-    ex:readingOnTrack d:trackSE .
+    ens:readingOnTrack d:trackSE .
 
-d:r4 a ex:EnergyReading ;                         # never allocated
-    ex:readingOfConsumptionPoint d:cp2 ; ex:measuredBy d:emf2 ;
-    ex:measurementQuality exc:qualityAccepted ;
-    ex:readingPeriod [ a time:Interval ;
+d:r4 a ens:EnergyReading ;                         # never allocated
+    ens:readingOfConsumptionPoint d:cp2 ; ens:measuredBy d:emf2 ;
+    ens:measurementQuality ensc:qualityAccepted ;
+    ens:readingPeriod [ a time:Interval ;
         time:hasBeginning [ time:inXSDDateTimeStamp "2026-10-15T07:00:00Z"^^xsd:dateTimeStamp ] ;
         time:hasEnd       [ time:inXSDDateTimeStamp "2026-10-15T07:05:00Z"^^xsd:dateTimeStamp ] ] ;
-    ex:activeEnergyConsumed 250.0 ; ex:activeEnergyRegenerated 0.0 ;
+    ens:activeEnergyConsumed 250.0 ; ens:activeEnergyRegenerated 0.0 ;
     geo:hasGeometry [ geo:asWKT "POINT(11.950 60.200)"^^geo:wktLiteral ] ;
-    ex:readingOnTrack d:trackNO .
+    ens:readingOnTrack d:trackNO .
 
 # --- Infrastructure (RINF terms) -------------------------------------
 
@@ -190,32 +192,32 @@ d:plOslo a era:PrimaryLocation ; era:primaryLocationName "Alnabru"@no .
 
 # --- Ground systems --------------------------------------------------
 
-d:eressDCS a ex:DataCollectingSystem ;
-    ex:receivesFrom d:ems1 , d:ems2 ;
-    ex:forwardsTo d:erex ;
-    ex:operatedBy d:dcsAdminRole .
+d:eressDCS a ens:DataCollectingSystem ;
+    ens:receivesFrom d:ems1 , d:ems2 ;
+    ens:forwardsTo d:erex ;
+    ens:operatedBy d:dcsAdminRole .
 
-d:erex a ex:ExchangeFunction ;
+d:erex a ens:ExchangeFunction ;
     rdfs:label "Erex" ;
-    ex:forwardsTo d:settleNO , d:settleSE ;
-    ex:exchangesWith d:foreignExchange ;
-    ex:exchangeProtocol exc:IRS90930 .
+    ens:forwardsTo d:settleNO , d:settleSE ;
+    ens:exchangesWith d:foreignExchange ;
+    ens:exchangeProtocol ensc:IRS90930 .
 
-d:foreignExchange a ex:ExchangeFunction ;
+d:foreignExchange a ens:ExchangeFunction ;
     rdfs:label "Neighbouring exchange function (illustrative)" ;
-    ex:exchangeProtocol exc:IRS90930 .
+    ens:exchangeProtocol ensc:IRS90930 .
 
-d:legacyExchange a ex:ExchangeFunction ;
+d:legacyExchange a ens:ExchangeFunction ;
     rdfs:label "Legacy exchange (illustrative)" ;
-    ex:exchangeProtocol exc:UTILTS .
+    ens:exchangeProtocol ensc:UTILTS .
 
-d:settleNO a ex:SettlementSystem ; ex:servesZone d:zoneNO ; ex:operatedBy d:settleOpNO .
-d:settleSE a ex:SettlementSystem ; ex:servesZone d:zoneSE ; ex:operatedBy d:settleOpSE .
-d:settleNO ex:exchangeContains d:exchangeTcm1NO, d:exchangeTri1NO, d:exchangeTcm2NO .
-d:settleSE ex:exchangeContains d:exchangeTcm1SE, d:exchangeTri1SE .
+d:settleNO a ens:SettlementSystem ; ens:servesZone d:zoneNO ; ens:operatedBy d:settleOpNO .
+d:settleSE a ens:SettlementSystem ; ens:servesZone d:zoneSE ; ens:operatedBy d:settleOpSE .
+d:settleNO ens:exchangeContains d:exchangeTcm1NO, d:exchangeTri1NO, d:exchangeTcm2NO .
+d:settleSE ens:exchangeContains d:exchangeTcm1SE, d:exchangeTri1SE .
 
-d:zoneNO a ex:SettlementZone ; ex:zoneCountry country:NOR ; ex:delimitedBy d:rbpMagnor .
-d:zoneSE a ex:SettlementZone ; ex:zoneCountry country:SWE ; ex:delimitedBy d:rbpMagnor .
+d:zoneNO a ens:SettlementZone ; ens:zoneCountry country:NOR ; ens:delimitedBy d:rbpMagnor .
+d:zoneSE a ens:SettlementZone ; ens:zoneCountry country:SWE ; ens:delimitedBy d:rbpMagnor .
 
 # --- TEL TSI messages (rc.3 telematics terms) ------------------------
 
@@ -223,7 +225,7 @@ d:tcm1 a era:TrainCompositionMessage ;
     era:messageHeader [ era:messageDateTimeCreated "2026-10-15T05:50:00Z"^^xsd:dateTime ] ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:trainCompositionJourneySection d:js1 ;
-    ex:aboutTrainRun d:run1 .
+    ens:aboutRunningTrain d:run1 .
 d:js1 a era:TrainCompositionJourneySection ;
     era:locoNumber "91 80 6189 001-3" ;
     era:regenerativeBrake [ era:regenerativeBrakeFitted true ] ;
@@ -234,7 +236,7 @@ d:tcm2 a era:TrainCompositionMessage ;            # timing evidence is illustrat
     era:messageHeader [ era:messageDateTimeCreated "2026-10-15T17:00:00Z"^^xsd:dateTime ] ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41888" ] ;
     era:trainCompositionJourneySection d:js2 ;
-    ex:aboutTrainRun d:run2 .
+    ens:aboutRunningTrain d:run2 .
 d:js2 a era:TrainCompositionJourneySection ;
     era:locoNumber "917421940025" ;
     era:journeySection [ era:journeySectionOrigin [ era:bookedLocationDateTime "2026-10-15T07:00:00Z"^^xsd:dateTime ] ] ;
@@ -243,118 +245,122 @@ d:js2 a era:TrainCompositionJourneySection ;
 d:tri1 a era:TrainRunningInformationMessage ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:responsibleRU "3801" ;
-    ex:responsibleRUOrganisation d:nordCargo ;
-    ex:aboutTrainRun d:run1 ;
+    ens:responsibleRUOrganisation d:nordCargo ;
+    ens:aboutRunningTrain d:run1 ;
     era:trainLocationReport
         [ era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ] ,
         [ era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ] ,
         [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
 
-d:run1 a ex:TrainRun ;
-    ex:trainRunId "NO-SE-20261015-41234-01" ;
-    ex:operationalTrainNumber "41234" ;
-    ex:runStart "2026-10-15T06:00:00Z"^^xsd:dateTime ;
-    ex:runEnd "2026-10-15T08:38:00Z"^^xsd:dateTime ;
-    ex:consumerRole d:ruRole ;
-    ex:actualDepartureTime "2026-10-15T06:02:00Z"^^xsd:dateTime ;
-    ex:actualDepartureEvidence d:departureEvent .
+d:run1 a ens:RunningTrain ;
+    era:operationalTrainNumber "41234" ;
+    era:trainDepartureDate "2026-10-15"^^xsd:date ;
+    era:trainOperatingRU "3801" ;
+    ens:operatingRailwayUndertaking d:nordCargoRU ;
+    ens:runStart "2026-10-15T06:00:00Z"^^xsd:dateTime ;
+    ens:runEnd "2026-10-15T08:38:00Z"^^xsd:dateTime ;
+    ens:consumerRole d:ruRole ;
+    ens:actualDepartureTime "2026-10-15T06:02:00Z"^^xsd:dateTime ;
+    ens:actualDepartureEvidence d:departureEvent .
 
-d:run2 a ex:TrainRun ;
-    ex:trainRunId "NO-20261015-41888-01" ;
-    ex:operationalTrainNumber "41888" ;
-    ex:runStart "2026-10-15T07:00:00Z"^^xsd:dateTime ;
-    ex:runEnd "2026-10-15T12:00:00Z"^^xsd:dateTime ;
-    ex:consumerRole d:ruRole ;
-    ex:actualDepartureTime "2026-10-15T07:02:00Z"^^xsd:dateTime ;
-    ex:actualDepartureEvidence d:departureEvent2 .
+d:run2 a ens:RunningTrain ;
+    era:operationalTrainNumber "41888" ;
+    era:trainDepartureDate "2026-10-15"^^xsd:date ;
+    era:trainOperatingRU "3801" ;
+    ens:operatingRailwayUndertaking d:nordCargoRU ;
+    ens:runStart "2026-10-15T07:00:00Z"^^xsd:dateTime ;
+    ens:runEnd "2026-10-15T12:00:00Z"^^xsd:dateTime ;
+    ens:consumerRole d:ruRole ;
+    ens:actualDepartureTime "2026-10-15T07:02:00Z"^^xsd:dateTime ;
+    ens:actualDepartureEvidence d:departureEvent2 .
 
-d:tcm2 ex:timelinessAssessment exc:exceptionEvidenceRecorded ;
-    ex:timelinessEvidence d:lateMessageEvidence ;
-    ex:timelinessAuthority d:authorityToVerify .
+d:tcm2 ens:timelinessAssessment ensc:exceptionEvidenceRecorded ;
+    ens:timelinessEvidence d:lateMessageEvidence ;
+    ens:timelinessAuthority d:authorityToVerify .
 
 # Exchange instances are illustrative audit events. Authorities and retention
 # rules must be replaced by deployment-approved references.
-d:exchangeTcm1NO a ex:DataExchangeActivity ;
-    ex:exchangedMessage d:tcm1 ; ex:exchangeSender d:baneNor ;
-    ex:exchangeRecipient d:settleNO ; ex:exchangeTime "2026-10-15T05:51:00Z"^^xsd:dateTime ; ex:messageVersion "1" ;
-    ex:exchangeOutcome exc:received ; ex:exchangePurpose exc:energySettlement ;
-    ex:exchangeAuthority d:authorityToVerify ; ex:retentionPolicy d:retentionToApprove .
-d:exchangeTcm1SE a ex:DataExchangeActivity ;
-    ex:exchangedMessage d:tcm1 ; ex:exchangeSender d:trafikverket ;
-    ex:exchangeRecipient d:settleSE ; ex:exchangeTime "2026-10-15T05:52:00Z"^^xsd:dateTime ; ex:messageVersion "1" ;
-    ex:exchangeOutcome exc:received ; ex:exchangePurpose exc:energySettlement ;
-    ex:exchangeAuthority d:authorityToVerify ; ex:retentionPolicy d:retentionToApprove .
-d:exchangeTri1NO a ex:DataExchangeActivity ;
-    ex:exchangedMessage d:tri1 ; ex:exchangeSender d:baneNor ;
-    ex:exchangeRecipient d:settleNO ; ex:exchangeTime "2026-10-15T08:39:00Z"^^xsd:dateTime ; ex:messageVersion "1" ;
-    ex:exchangeOutcome exc:received ; ex:exchangePurpose exc:energySettlement ;
-    ex:exchangeAuthority d:authorityToVerify ; ex:retentionPolicy d:retentionToApprove .
-d:exchangeTri1SE a ex:DataExchangeActivity ;
-    ex:exchangedMessage d:tri1 ; ex:exchangeSender d:trafikverket ;
-    ex:exchangeRecipient d:settleSE ; ex:exchangeTime "2026-10-15T08:40:00Z"^^xsd:dateTime ; ex:messageVersion "1" ;
-    ex:exchangeOutcome exc:received ; ex:exchangePurpose exc:energySettlement ;
-    ex:exchangeAuthority d:authorityToVerify ; ex:retentionPolicy d:retentionToApprove .
-d:exchangeTcm2NO a ex:DataExchangeActivity ;
-    ex:exchangedMessage d:tcm2 ; ex:exchangeSender d:baneNor ;
-    ex:exchangeRecipient d:settleNO ; ex:exchangeTime "2026-10-15T17:01:00Z"^^xsd:dateTime ; ex:messageVersion "1" ;
-    ex:exchangeOutcome exc:received ; ex:exchangePurpose exc:energySettlement ;
-    ex:exchangeAuthority d:authorityToVerify ; ex:retentionPolicy d:retentionToApprove .
+d:exchangeTcm1NO a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tcm1 ; ens:exchangeSender d:baneNor ;
+    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T05:51:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
+    ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
+d:exchangeTcm1SE a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tcm1 ; ens:exchangeSender d:trafikverket ;
+    ens:exchangeRecipient d:settleSE ; ens:exchangeTime "2026-10-15T05:52:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
+    ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
+d:exchangeTri1NO a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tri1 ; ens:exchangeSender d:baneNor ;
+    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T08:39:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
+    ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
+d:exchangeTri1SE a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tri1 ; ens:exchangeSender d:trafikverket ;
+    ens:exchangeRecipient d:settleSE ; ens:exchangeTime "2026-10-15T08:40:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
+    ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
+d:exchangeTcm2NO a ens:DataExchangeActivity ;
+    ens:exchangedMessage d:tcm2 ; ens:exchangeSender d:baneNor ;
+    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T17:01:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
+    ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 
 # --- Settlement outcome ----------------------------------------------
 
-d:alloc1 a ex:EnergyAllocation ;
-    ex:allocatesReading d:r1 , d:r2 ;
-    ex:hasAllocationComponent d:alloc1r1 , d:alloc1r2 ;
-    ex:allocatedTo d:ruRole ; ex:allocatedInZone d:zoneNO ;
-    ex:allocationStatus exc:meteredValid ; ex:producedBy d:settleNO ;
-    ex:matchedComposition d:tcm1 ; ex:matchedRunningInformation d:tri1 ;
-    ex:matchedTrainRun d:run1 ;
-    ex:allocatedActiveEnergyConsumed 790.5 ;
-    ex:allocatedActiveEnergyRegenerated 20.5 ;
-    ex:allocatedNetActiveEnergy 770.0 ;
-    ex:allocationMethod exc:meteredByConsumptionPoint ;
-    ex:allocationRule d:allocationRuleV1 ; ex:allocationVersion "1" .
+d:alloc1 a ens:EnergyAllocation ;
+    ens:allocatesReading d:r1 , d:r2 ;
+    ens:hasAllocationComponent d:alloc1r1 , d:alloc1r2 ;
+    ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneNO ;
+    ens:allocationStatus ensc:meteredValid ; ens:producedBy d:settleNO ;
+    ens:matchedComposition d:tcm1 ; ens:matchedRunningInformation d:tri1 ;
+    ens:matchedRunningTrain d:run1 ;
+    ens:allocatedActiveEnergyConsumed 790.5 ;
+    ens:allocatedActiveEnergyRegenerated 20.5 ;
+    ens:allocatedNetActiveEnergy 770.0 ;
+    ens:allocationMethod ensc:meteredByConsumptionPoint ;
+    ens:allocationRule d:allocationRuleV1 ; ens:allocationVersion "1" .
 
-d:alloc2 a ex:EnergyAllocation ;
-    ex:allocatesReading d:r3 ;
-    ex:hasAllocationComponent d:alloc2r3 ;
-    ex:allocatedTo d:ruRole ; ex:allocatedInZone d:zoneSE ;
-    ex:allocationStatus exc:meteredValid ; ex:producedBy d:settleSE ;
-    ex:matchedComposition d:tcm1 ; ex:matchedRunningInformation d:tri1 ;
-    ex:matchedTrainRun d:run1 ;
-    ex:allocatedActiveEnergyConsumed 95.2 ;
-    ex:allocatedActiveEnergyRegenerated 3.1 ;
-    ex:allocatedNetActiveEnergy 92.1 ;
-    ex:allocationMethod exc:meteredByConsumptionPoint ;
-    ex:allocationRule d:allocationRuleV1 ; ex:allocationVersion "1" .
+d:alloc2 a ens:EnergyAllocation ;
+    ens:allocatesReading d:r3 ;
+    ens:hasAllocationComponent d:alloc2r3 ;
+    ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneSE ;
+    ens:allocationStatus ensc:meteredValid ; ens:producedBy d:settleSE ;
+    ens:matchedComposition d:tcm1 ; ens:matchedRunningInformation d:tri1 ;
+    ens:matchedRunningTrain d:run1 ;
+    ens:allocatedActiveEnergyConsumed 95.2 ;
+    ens:allocatedActiveEnergyRegenerated 3.1 ;
+    ens:allocatedNetActiveEnergy 92.1 ;
+    ens:allocationMethod ensc:meteredByConsumptionPoint ;
+    ens:allocationRule d:allocationRuleV1 ; ens:allocationVersion "1" .
 
-d:alloc3 a ex:EnergyAllocation ;                  # estimated, no reading used
-    ex:hasAllocationComponent d:alloc3estimate ;
-    ex:allocatedTo d:ruRole ; ex:allocatedInZone d:zoneNO ;
-    ex:allocationStatus exc:estimated ; ex:producedBy d:settleNO ;
-    ex:matchedComposition d:tcm2 ; ex:matchedTrainRun d:run2 ;
-    ex:allocatedActiveEnergyConsumed 250.0 ;
-    ex:allocatedActiveEnergyRegenerated 0.0 ;
-    ex:allocatedNetActiveEnergy 250.0 ;
-    ex:allocationMethod exc:estimatedFromOperationalData ;
-    ex:allocationRule d:allocationRuleV1 ; ex:allocationVersion "1" .
+d:alloc3 a ens:EnergyAllocation ;                  # estimated, no reading used
+    ens:hasAllocationComponent d:alloc3estimate ;
+    ens:allocatedTo d:ruRole ; ens:allocatedInZone d:zoneNO ;
+    ens:allocationStatus ensc:estimated ; ens:producedBy d:settleNO ;
+    ens:matchedComposition d:tcm2 ; ens:matchedRunningTrain d:run2 ;
+    ens:allocatedActiveEnergyConsumed 250.0 ;
+    ens:allocatedActiveEnergyRegenerated 0.0 ;
+    ens:allocatedNetActiveEnergy 250.0 ;
+    ens:allocationMethod ensc:estimatedFromOperationalData ;
+    ens:allocationRule d:allocationRuleV1 ; ens:allocationVersion "1" .
 
-d:alloc1r1 a ex:AllocationComponent ;
-    ex:componentReading d:r1 ;
-    ex:componentActiveEnergyConsumed 410.5 ;
-    ex:componentActiveEnergyRegenerated 12.0 ;
-    ex:componentNetActiveEnergy 398.5 .
-d:alloc1r2 a ex:AllocationComponent ;
-    ex:componentReading d:r2 ;
-    ex:componentActiveEnergyConsumed 380.0 ;
-    ex:componentActiveEnergyRegenerated 8.5 ;
-    ex:componentNetActiveEnergy 371.5 .
-d:alloc2r3 a ex:AllocationComponent ;
-    ex:componentReading d:r3 ;
-    ex:componentActiveEnergyConsumed 95.2 ;
-    ex:componentActiveEnergyRegenerated 3.1 ;
-    ex:componentNetActiveEnergy 92.1 .
-d:alloc3estimate a ex:AllocationComponent ;
-    ex:componentActiveEnergyConsumed 250.0 ;
-    ex:componentActiveEnergyRegenerated 0.0 ;
-    ex:componentNetActiveEnergy 250.0 .
+d:alloc1r1 a ens:AllocationComponent ;
+    ens:componentReading d:r1 ;
+    ens:componentActiveEnergyConsumed 410.5 ;
+    ens:componentActiveEnergyRegenerated 12.0 ;
+    ens:componentNetActiveEnergy 398.5 .
+d:alloc1r2 a ens:AllocationComponent ;
+    ens:componentReading d:r2 ;
+    ens:componentActiveEnergyConsumed 380.0 ;
+    ens:componentActiveEnergyRegenerated 8.5 ;
+    ens:componentNetActiveEnergy 371.5 .
+d:alloc2r3 a ens:AllocationComponent ;
+    ens:componentReading d:r3 ;
+    ens:componentActiveEnergyConsumed 95.2 ;
+    ens:componentActiveEnergyRegenerated 3.1 ;
+    ens:componentNetActiveEnergy 92.1 .
+d:alloc3estimate a ens:AllocationComponent ;
+    ens:componentActiveEnergyConsumed 250.0 ;
+    ens:componentActiveEnergyRegenerated 0.0 ;
+    ens:componentNetActiveEnergy 250.0 .

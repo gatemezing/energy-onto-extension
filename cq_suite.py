@@ -9,7 +9,7 @@ Usage:
 Steps:
   1. Load the ontology draft and the example data.
   2. Run the SHACL shapes against the pinned ERA ontology snapshot: this
-     checks the examples and derives ex:tractionUnitVehicle.
+     checks the examples and derives ens:tractionUnitVehicle.
   3. Run every CQ and compare with its expected answer.
   4. Optionally render the Markdown report.
 """
@@ -28,8 +28,8 @@ EXAMPLES = "era-energy-settlement-examples.ttl"
 DEFAULT_ERA_ONTOLOGY = "era-ontology-v4.0.0-rc.3.ttl"
 
 PREFIXES = """
-PREFIX ex:      <http://example.org/era-energy#>
-PREFIX exc:     <http://example.org/era-energy/concepts/>
+PREFIX ens:      <http://data.europa.eu/dy6/def/energy/>
+PREFIX ensc:     <http://data.europa.eu/dy6/def/energy/concepts/>
 PREFIX era:     <http://data.europa.eu/949/>
 PREFIX d:       <http://example.org/data/>
 PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -59,7 +59,7 @@ SETS = [
              "Selection: Which [CE1] [OPE] [CE2]?", "ABox",
              """SELECT ?ems WHERE {
   ?vehicle era:vehicleNumber "918061890013" .
-  ?ems ex:installedOn ?vehicle .
+  ?ems ens:installedOn ?vehicle .
 }""", [("ems1",)]),
             ("CQ1.2", "Which components (measurement function, data handling system) does EMS ems1 host?",
              "Selection over a property hierarchy", "ABox",
@@ -70,7 +70,7 @@ SETS = [
             ("CQ1.3", "Is every EMS both a SAREF meter and a SOSA platform?",
              "Existence (TBox): Is [CE1] a [CE2]?", "TBox",
              """ASK {
-  ex:EnergyMeasurementSystem rdfs:subClassOf saref:Meter , sosa:Platform .
+  ens:EnergyMeasurementSystem rdfs:subClassOf saref:Meter , sosa:Platform .
 }""", [("true",)]),
         ],
     },
@@ -82,14 +82,14 @@ SETS = [
             ("CQ2.1", "Which consumption point does EMS ems1 measure, and what is its identifier?",
              "Selection with attribute", "ABox",
              """SELECT ?cp ?id WHERE {
-  d:ems1 ex:measuresConsumptionPoint ?cp .
-  ?cp ex:consumptionPointId ?id .
+  d:ems1 ens:measuresConsumptionPoint ?cp .
+  ?cp ens:consumptionPointId ?id .
 }""", [("cp1", "918061890013")]),
             ("CQ2.2", "Which registered vehicle does the consumption point identifier '91 80 6189 001-3' designate?",
              "Selection with value matching", "ABox",
              """SELECT ?vehicle WHERE {
-  ?cp ex:consumptionPointOf ?vehicle .
-  ?cp ex:consumptionPointId ?id .
+  ?cp ens:consumptionPointOf ?vehicle .
+  ?cp ens:consumptionPointId ?id .
   ?vehicle era:vehicleNumber ?evn .
   FILTER (REPLACE(STR(?id), "[ -]", "") = REPLACE("91 80 6189 001-3", "[ -]", ""))
   FILTER (REPLACE(STR(?evn), "[ -]", "") = REPLACE(STR(?id), "[ -]", ""))
@@ -97,7 +97,7 @@ SETS = [
             ("CQ2.3", "How many consumption points have an identifier different from their vehicle's EVN?",
              "Counting: How many [CE1] [OPE] [CE2]?", "ABox",
              """SELECT (COUNT(?cp) AS ?n) WHERE {
-  ?cp ex:consumptionPointId ?id ; ex:consumptionPointOf/era:vehicleNumber ?evn .
+  ?cp ens:consumptionPointId ?id ; ens:consumptionPointOf/era:vehicleNumber ?evn .
   FILTER (REPLACE(STR(?id), "[ -]", "") != REPLACE(STR(?evn), "[ -]", ""))
 }""", [("0",)]),
         ],
@@ -110,22 +110,22 @@ SETS = [
             ("CQ3.1", "Which readings does CEBD cebd1 contain, and when does each period start?",
              "Selection with temporal attribute", "ABox",
              """SELECT ?reading (SUBSTR(STR(?start), 12, 5) AS ?hhmm) WHERE {
-  d:cebd1 ex:hasReading ?reading .
-  ?reading ex:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
+  d:cebd1 ens:hasReading ?reading .
+  ?reading ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
 }""", [("r1", "06:00"), ("r2", "06:05"), ("r3", "08:40")]),
             ("CQ3.2", "What is the total active energy consumed by consumption point cp1 during UTC day 15 October 2026?",
              "Aggregation over a time window", "ABox",
              """SELECT (SUM(?kwh) AS ?total) WHERE {
-  ?reading ex:readingOfConsumptionPoint d:cp1 ;
-           ex:activeEnergyConsumed ?kwh ;
-           ex:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start ;
-           ex:readingPeriod/time:hasEnd/time:inXSDDateTimeStamp ?end .
+  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+           ens:activeEnergyConsumed ?kwh ;
+           ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start ;
+           ens:readingPeriod/time:hasEnd/time:inXSDDateTimeStamp ?end .
   FILTER (STR(?start) >= "2026-10-15T00:00:00Z" &&
           STR(?start) < "2026-10-16T00:00:00Z")
 }""", [("885.7",)]),
             ("CQ3.3", "Which readings are one-minute reading blocks?",
              "Selection by subtype", "ABox",
-             """SELECT ?reading WHERE { ?reading a ex:ReadingBlock . }""", [("r3",)]),
+             """SELECT ?reading WHERE { ?reading a ens:ReadingBlock . }""", [("r3",)]),
         ],
     },
     {
@@ -136,17 +136,17 @@ SETS = [
             ("CQ4.1", "How much energy did consumption point cp1 return to the contact line during UTC day 15 October 2026?",
              "Aggregation", "ABox",
              """SELECT (SUM(?kwh) AS ?total) WHERE {
-  ?reading ex:readingOfConsumptionPoint d:cp1 ;
-           ex:activeEnergyRegenerated ?kwh ;
-           ex:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
+  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+           ens:activeEnergyRegenerated ?kwh ;
+           ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
   FILTER (STR(?start) >= "2026-10-15T00:00:00Z" &&
           STR(?start) < "2026-10-16T00:00:00Z")
 }""", [("23.6",)]),
             ("CQ4.2", "What is the net energy (consumed minus regenerated) of each reading of cp1?",
              "Derived value per individual", "ABox",
              """SELECT ?reading ((?in - ?out) AS ?net) WHERE {
-  ?reading ex:readingOfConsumptionPoint d:cp1 ;
-           ex:activeEnergyConsumed ?in ; ex:activeEnergyRegenerated ?out .
+  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+           ens:activeEnergyConsumed ?in ; ens:activeEnergyRegenerated ?out .
 }""", [("r1", "398.5"), ("r2", "371.5"), ("r3", "92.1")]),
             ("CQ4.3", "Is a regenerative brake fitted on the traction unit of train 41234?",
              "Existence via reused term (rc.3 telematics)", "ABox",
@@ -164,19 +164,19 @@ SETS = [
             ("CQ5.1", "On which running track and in which country was reading r1 taken?",
              "Selection along a path", "ABox",
              """SELECT ?track ?country WHERE {
-  d:r1 ex:readingOnTrack ?track .
+  d:r1 ens:readingOnTrack ?track .
   ?track era:inCountry ?country .
 }""", [("trackNO", "NOR")]),
             ("CQ5.2", "Which energy supply system and maximum train current applied where reading r3 was taken?",
              "Selection along a path to reused RINF terms", "ABox",
              """SELECT ?supply ?maxCurrent WHERE {
-  d:r3 ex:readingOnTrack/era:contactLineSystem ?cls .
+  d:r3 ens:readingOnTrack/era:contactLineSystem ?cls .
   ?cls era:energySupplySystem ?supply ; era:maxTrainCurrent ?maxCurrent .
 }""", [("ess15kV", "1000")]),
             ("CQ5.3", "How many readings lack a position?",
              "Counting (data completeness)", "ABox",
              """SELECT (COUNT(?reading) AS ?n) WHERE {
-  ?reading a/rdfs:subClassOf* ex:EnergyReading .
+  ?reading a/rdfs:subClassOf* ens:EnergyReading .
   FILTER NOT EXISTS { ?reading geo:hasGeometry ?g . }
 }""", [("0",)]),
         ],
@@ -188,29 +188,29 @@ SETS = [
         "cqs": [
             ("CQ6.1", "Which DCS receives the data of EMS ems1?",
              "Selection: Which [CE1] [OPE] [CE2]?", "ABox",
-             """SELECT ?dcs WHERE { ?dcs a ex:DataCollectingSystem ; ex:receivesFrom d:ems1 . }""",
+             """SELECT ?dcs WHERE { ?dcs a ens:DataCollectingSystem ; ens:receivesFrom d:ems1 . }""",
              [("eressDCS",)]),
             ("CQ6.2", "To which exchange function does that DCS forward data?",
              "Selection along a path", "ABox",
              """SELECT ?exchange WHERE {
-  ?dcs ex:receivesFrom d:ems1 ; ex:forwardsTo ?exchange .
-  ?exchange a ex:ExchangeFunction .
+  ?dcs ens:receivesFrom d:ems1 ; ens:forwardsTo ?exchange .
+  ?exchange a ens:ExchangeFunction .
 }""", [("erex",)]),
             ("CQ6.3", "Which organisation administers the DCS that receives ems1's data?",
              "Selection through a role", "ABox",
              """SELECT ?org WHERE {
-  ?dcs ex:receivesFrom d:ems1 ; ex:operatedBy ?role .
-  ?role a ex:DCSAdministratorRole ; era:roleOf ?org .
+  ?dcs ens:receivesFrom d:ems1 ; ens:operatedBy ?role .
+  ?role a ens:DCSAdministratorRole ; era:roleOf ?org .
 }""", [("eress",)]),
             ("CQ6.4", "Which auditable exchanges delivered composition data to the Norwegian and Swedish infrastructure managers?",
              "Selection over exchange activity", "ABox",
              """SELECT ?recipient ?outcome WHERE {
-  ?exchange a ex:DataExchangeActivity ;
-            ex:exchangedMessage d:tcm1 ;
-            ex:exchangeRecipient ?recipient ;
-            ex:exchangeOutcome ?outcome ;
-            ex:exchangeAuthority ?authority ;
-            ex:retentionPolicy ?retention .
+  ?exchange a ens:DataExchangeActivity ;
+            ens:exchangedMessage d:tcm1 ;
+            ens:exchangeRecipient ?recipient ;
+            ens:exchangeOutcome ?outcome ;
+            ens:exchangeAuthority ?authority ;
+            ens:retentionPolicy ?retention .
 }""", [("settleNO", "received"), ("settleSE", "received")]),
         ],
     },
@@ -222,17 +222,17 @@ SETS = [
             ("CQ7.1", "Which settlement systems does Erex feed?",
              "Selection", "ABox",
              """SELECT ?settlement WHERE {
-  d:erex ex:forwardsTo ?settlement . ?settlement a ex:SettlementSystem .
+  d:erex ens:forwardsTo ?settlement . ?settlement a ens:SettlementSystem .
 }""", [("settleNO",), ("settleSE",)]),
             ("CQ7.2", "With which exchange functions does Erex exchange data, and with which protocol?",
              "Selection over a symmetric relation", "ABox",
              """SELECT ?other ?protocol WHERE {
-  d:erex ex:exchangesWith|^ex:exchangesWith ?other .
-  ?other ex:exchangeProtocol ?protocol .
+  d:erex ens:exchangesWith|^ens:exchangesWith ?other .
+  ?other ens:exchangeProtocol ?protocol .
 }""", [("foreignExchange", "IRS90930")]),
             ("CQ7.3", "Which exchange functions still use a legacy protocol?",
              "Selection by value", "ABox",
-             """SELECT ?exchange WHERE { ?exchange ex:exchangeProtocol exc:UTILTS . }""",
+             """SELECT ?exchange WHERE { ?exchange ens:exchangeProtocol ensc:UTILTS . }""",
              [("legacyExchange",)]),
         ],
     },
@@ -244,17 +244,17 @@ SETS = [
             ("CQ8.1", "Which zone and country does each settlement system serve?",
              "Selection with several attributes", "ABox",
              """SELECT ?settlement ?zone ?country WHERE {
-  ?settlement ex:servesZone ?zone . ?zone ex:zoneCountry ?country .
+  ?settlement ens:servesZone ?zone . ?zone ens:zoneCountry ?country .
 }""", [("settleNO", "zoneNO", "NOR"), ("settleSE", "zoneSE", "SWE")]),
             ("CQ8.2", "Which settlement system is responsible for energy consumed in Sweden?",
              "Selection by value", "ABox",
              """SELECT ?settlement WHERE {
-  ?settlement ex:servesZone/ex:zoneCountry country:SWE .
+  ?settlement ens:servesZone/ens:zoneCountry country:SWE .
 }""", [("settleSE",)]),
             ("CQ8.3", "Which organisation operates the Norwegian settlement system?",
              "Selection through a role", "ABox",
              """SELECT ?org WHERE {
-  ?settlement ex:servesZone/ex:zoneCountry country:NOR ; ex:operatedBy/era:roleOf ?org .
+  ?settlement ens:servesZone/ens:zoneCountry country:NOR ; ens:operatedBy/era:roleOf ?org .
 }""", [("baneNor",)]),
         ],
     },
@@ -265,7 +265,7 @@ SETS = [
         "cqs": [
             ("CQ9.1", "Which reference border points delimit the Norwegian zone, and what are their identifiers?",
              "Selection with attribute", "ABox",
-             """SELECT ?rbp ?id WHERE { d:zoneNO ex:delimitedBy ?rbp . ?rbp era:borderPointId ?id . }""",
+             """SELECT ?rbp ?id WHERE { d:zoneNO ens:delimitedBy ?rbp . ?rbp era:borderPointId ?id . }""",
              [("rbpMagnor", "NO-SE-MAG")]),
             ("CQ9.2", "Which operational points refer to border point NO-SE-MAG?",
              "Selection by inverse path", "ABox",
@@ -275,7 +275,7 @@ SETS = [
             ("CQ9.3", "Which pairs of settlement zones are adjacent through a shared border point?",
              "Relation between individuals", "ABox",
              """SELECT ?zone1 ?zone2 WHERE {
-  ?zone1 ex:delimitedBy ?rbp . ?zone2 ex:delimitedBy ?rbp .
+  ?zone1 ens:delimitedBy ?rbp . ?zone2 ens:delimitedBy ?rbp .
   FILTER (STR(?zone1) < STR(?zone2))
 }""", [("zoneNO", "zoneSE")]),
         ],
@@ -294,11 +294,11 @@ SETS = [
              "Taxonomy (TBox): What are the subtypes of [CE1]?", "TBox",
              """SELECT ?role WHERE {
   ?role rdfs:subClassOf era:OrganisationRole .
-  FILTER STRSTARTS(STR(?role), "http://example.org/era-energy#")
+  FILTER STRSTARTS(STR(?role), "http://data.europa.eu/dy6/def/energy/")
 }""", [("DCSAdministratorRole",), ("EMSResponsibleRole",), ("EnergyConsumerRole",), ("SettlementOperatorRole",)]),
             ("CQ10.3", "Which organisation is responsible for EMS ems1?",
              "Selection through a role", "ABox",
-             """SELECT ?org WHERE { d:ems1 ex:emsResponsible/era:roleOf ?org . }""",
+             """SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }""",
              [("railLease",)]),
         ],
     },
@@ -319,13 +319,13 @@ SETS = [
              "Selection via normalized identifier rule", "ABox",
              """SELECT ?vehicle WHERE {
   ?msg era:operationalTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
-       era:trainCompositionJourneySection/ex:tractionUnitVehicle ?vehicle .
+       era:trainCompositionJourneySection/ens:tractionUnitVehicle ?vehicle .
 }""", [("loco1",)]),
             ("CQ11.3", "Which composition messages were created after the train's evidenced actual departure?",
              "Temporal comparison", "ABox",
              """SELECT ?msg WHERE {
   ?msg era:messageHeader/era:messageDateTimeCreated ?sent ;
-       ex:aboutTrainRun/ex:actualDepartureTime ?departure .
+       ens:aboutRunningTrain/ens:actualDepartureTime ?departure .
   FILTER (?sent > ?departure)
 }""", [("tcm2",)]),
         ],
@@ -349,11 +349,11 @@ SETS = [
              """             SELECT DISTINCT ?settlement WHERE {
                ?msg a era:TrainRunningInformationMessage ;
                     era:operationalTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
-                    ex:aboutTrainRun d:run1 .
-               ?exchange a ex:DataExchangeActivity ;
-                         ex:exchangedMessage ?msg ;
-                         ex:exchangeRecipient ?settlement ;
-                         ex:exchangePurpose exc:energySettlement .
+                    ens:aboutRunningTrain d:run1 .
+               ?exchange a ens:DataExchangeActivity ;
+                         ens:exchangedMessage ?msg ;
+                         ens:exchangeRecipient ?settlement ;
+                         ens:exchangePurpose ensc:energySettlement .
              }""", [("settleNO",), ("settleSE",)]),
             ("CQ12.3", "When did train 41234 pass a border operational point, and which one?",
              "Join of telematics and RINF data", "ABox",
@@ -365,8 +365,19 @@ SETS = [
 }""", [("opMagnor", "08:30")]),
             ("CQ12.4", "Which organization is identified as the responsible RU on running message tri1?",
              "Selection through the resolved organization link", "ABox",
-             """SELECT ?org WHERE { d:tri1 ex:responsibleRUOrganisation ?org . }""",
+             """SELECT ?org WHERE { d:tri1 ens:responsibleRUOrganisation ?org . }""",
              [("nordCargo",)]),
+            ("CQ12.5", "Which railway undertaking operates running train 41234 departing on 15 October 2026, in which ERA role, and under which company code?",
+             "Selection through the ERA organisation-role pattern", "ABox",
+             """SELECT ?org ?role ?code WHERE {
+  ?run era:operationalTrainNumber "41234" ;
+       era:trainDepartureDate "2026-10-15"^^xsd:date ;
+       ens:operatingRailwayUndertaking ?ruRole .
+  ?ruRole era:roleOf ?org ;
+          era:hasOrganisationRole ?role .
+  ?org era:organisationCode ?code .
+}""",
+             [("nordCargo", "RU-3", "3801")]),
         ],
     },
     {
@@ -377,29 +388,29 @@ SETS = [
             ("CQ13.1", "To which consumer and zone is reading r1 allocated?",
              "Selection through a role", "ABox",
              """SELECT ?org ?zone WHERE {
-  ?allocation ex:allocatesReading d:r1 ;
-              ex:allocatedTo/era:roleOf ?org ; ex:allocatedInZone ?zone .
+  ?allocation ens:allocatesReading d:r1 ;
+              ens:allocatedTo/era:roleOf ?org ; ens:allocatedInZone ?zone .
 }""", [("nordCargo", "zoneNO")]),
             ("CQ13.2", "How much metered energy is allocated to Nord Cargo in each settlement zone?",
              "Aggregation grouped by individual", "ABox",
              """SELECT ?zone (SUM(?kwh) AS ?total) WHERE {
-  ?allocation ex:allocatedTo/era:roleOf d:nordCargo ;
-              ex:allocationStatus exc:meteredValid ;
-              ex:allocatedInZone ?zone ;
-                           ex:allocatedActiveEnergyConsumed ?kwh .
+  ?allocation ens:allocatedTo/era:roleOf d:nordCargo ;
+              ens:allocationStatus ensc:meteredValid ;
+              ens:allocatedInZone ?zone ;
+                           ens:allocatedActiveEnergyConsumed ?kwh .
 } GROUP BY ?zone""", [("zoneNO", "790.5"), ("zoneSE", "95.2")]),
             ("CQ13.3", "Which composition and running information were used for allocation alloc1?",
              "Selection (traceability)", "ABox",
              """SELECT ?composition ?running WHERE {
-  d:alloc1 ex:matchedComposition ?composition ; ex:matchedRunningInformation ?running .
+  d:alloc1 ens:matchedComposition ?composition ; ens:matchedRunningInformation ?running .
 }""", [("tcm1", "tri1")]),
             ("CQ13.4", "What consumed, regenerated, and net energy quantities were allocated in each zone?",
              "Selection with explicit settlement quantities", "ABox",
              """SELECT ?zone ?consumed ?regenerated ?net WHERE {
-  ?allocation ex:allocatedInZone ?zone ;
-              ex:allocatedActiveEnergyConsumed ?consumed ;
-              ex:allocatedActiveEnergyRegenerated ?regenerated ;
-              ex:allocatedNetActiveEnergy ?net .
+  ?allocation ens:allocatedInZone ?zone ;
+              ens:allocatedActiveEnergyConsumed ?consumed ;
+              ens:allocatedActiveEnergyRegenerated ?regenerated ;
+              ens:allocatedNetActiveEnergy ?net .
 }""", [("zoneNO", "790.5", "20.5", "770.0"),
        ("zoneSE", "95.2", "3.1", "92.1"),
        ("zoneNO", "250.0", "0.0", "250.0")]),
@@ -412,19 +423,19 @@ SETS = [
         "cqs": [
             ("CQ14.1", "Which allocations are estimated rather than metered?",
              "Selection by value", "ABox",
-             """SELECT ?allocation WHERE { ?allocation ex:allocationStatus exc:estimated . }""",
+             """SELECT ?allocation WHERE { ?allocation ens:allocationStatus ensc:estimated . }""",
              [("alloc3",)]),
             ("CQ14.2", "Which readings have not been allocated to any consumer?",
              "Negation (closed-world check)", "ABox",
              """SELECT ?reading WHERE {
-  ?reading a/rdfs:subClassOf* ex:EnergyReading .
-  FILTER NOT EXISTS { ?allocation ex:allocatesReading ?reading . }
+  ?reading a/rdfs:subClassOf* ens:EnergyReading .
+  FILTER NOT EXISTS { ?allocation ens:allocatesReading ?reading . }
 }""", [("r4",)]),
             ("CQ14.3", "From which EMS does allocation alloc2 ultimately derive?",
              "Provenance path", "ABox",
              """SELECT DISTINCT ?ems WHERE {
-  d:alloc2 ex:allocatesReading ?reading .
-  ?cebd ex:hasReading ?reading ; ex:compiledBy ?ems .
+  d:alloc2 ens:allocatesReading ?reading .
+  ?cebd ens:hasReading ?reading ; ens:compiledBy ?ems .
 }""", [("ems1",)]),
         ],
     },
@@ -436,19 +447,19 @@ SETS = [
             ("CQ15.1", "Which EN 50463 edition does each EMS declare?",
              "Selection with label", "ABox",
              """SELECT ?ems ?edition WHERE {
-  ?ems ex:emsStandardVersion/skos:prefLabel ?edition .
+  ?ems ens:emsStandardVersion/skos:prefLabel ?edition .
 }""", [("ems1", "EN 50463:2017"), ("ems2", "EN 50463:2012")]),
             ("CQ15.2", "Which vehicles carry an EMS although their type does not declare an energy meter?",
              "Negation across registers (cf. SHACL R4)", "ABox",
              """SELECT ?vehicle WHERE {
-  ?ems ex:installedOn ?vehicle . ?vehicle era:vehicleType ?type .
+  ?ems ens:installedOn ?vehicle . ?vehicle era:vehicleType ?type .
   FILTER NOT EXISTS { ?type era:configDependentParameter/era:hasOnboardEnergyMeasurement true . }
 }""", [("loco2",)]),
             ("CQ15.3", "How many EMS lack a declared standard edition?",
              "Counting (completeness)", "ABox",
              """SELECT (COUNT(?ems) AS ?n) WHERE {
-  ?ems a ex:EnergyMeasurementSystem .
-  FILTER NOT EXISTS { ?ems ex:emsStandardVersion ?v . }
+  ?ems a ens:EnergyMeasurementSystem .
+  FILTER NOT EXISTS { ?ems ens:emsStandardVersion ?v . }
 }""", [("0",)]),
         ],
     },
@@ -460,14 +471,14 @@ GAPS = [
      "The draft records a timing assessment, evidence reference, and authority reference, but the cited rule, allowed window, and meaning of a qualifying anomaly have not been verified against the official instrument.",
      "Verify the operative TEL TSI text and message schema with ERA/legal experts; use a controlled outcome vocabulary and evidence mapping without treating a populated link as proof of compliance."),
     ("G2", "What was the train's actual departure time?",
-     "ex:actualDepartureTime now distinguishes actual from booked time and requires an evidence reference; no authoritative departure event or interface mapping is validated by the synthetic example.",
+     "ens:actualDepartureTime now distinguishes actual from booked time and requires an evidence reference; no authoritative departure event or interface mapping is validated by the synthetic example.",
      "Map an authoritative operating event and its provenance for each deployment; do not infer departure from the first location report without an approved operational rule."),
     ("G3", "Which energy supplier delivered the allocated energy, and at what price?",
      "Supplier, contract, and price data are outside this iteration and must not be inferred from settlement party or infrastructure operator.",
      "Add a separate market/contract module after verifying the operative legal interface obligations and responsible actors."),
     ("G4", "How were network losses allocated between consumers?",
      "Loss coefficients and their allocation (AS-03 §5.6.2(g), Infrabel 96 % rule) are not modelled.",
-     "Add a loss allocation method concept and coefficient to ex:EnergyAllocation."),
+     "Add a loss allocation method concept and coefficient to ens:EnergyAllocation."),
     ("G5", "In which unit is the train weight of a composition message expressed?",
      "era:trainWeight (xsd:int) has no era:unitOfMeasure in rc.3.",
      "Raise with ERA (TAF practice: tonnes)."),
@@ -519,8 +530,8 @@ def run(rc3_path=DEFAULT_ERA_ONTOLOGY):
 
 def validate_allocation_accounting(data):
     """Check arithmetic that requires aggregation across allocation components."""
-    ex = rdflib.Namespace("http://example.org/era-energy#")
-    exc = rdflib.Namespace("http://example.org/era-energy/concepts/")
+    ex = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/")
+    exc = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/concepts/")
     issues = []
     allocated_by_reading = defaultdict(lambda: [Decimal(0), Decimal(0)])
 
@@ -568,7 +579,7 @@ def validate_allocation_accounting(data):
 
 def validate_negative_cases(data, ont):
     """Prove the main identity and allocation constraints reject bad fixtures."""
-    ex = rdflib.Namespace("http://example.org/era-energy#")
+    ex = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/")
     d = rdflib.Namespace("http://example.org/data/")
     failures = []
 
@@ -598,6 +609,53 @@ def validate_negative_cases(data, ont):
         failures.append("Validation accepted allocation components exceeding the source reading")
     if not isinstance(allocation_report, rdflib.Graph):
         failures.append(f"SHACL allocation negative test could not run: {allocation_report}")
+
+    bad_forwarding = rdflib.Graph()
+    for triple in data:
+        bad_forwarding.add(triple)
+    bad_forwarding.add((d.eressDCS, ex.forwardsTo, d.settleNO))
+    forwarding_conforms, _, _ = pyshacl.validate(
+        bad_forwarding, shacl_graph=SHAPES, ont_graph=ont, inference="none",
+        advanced=True, allow_warnings=True, inplace=True)
+    if forwarding_conforms:
+        failures.append("SHACL accepted a DCS forwarding directly to a settlement system")
+
+    bad_ems = rdflib.Graph()
+    for triple in data:
+        bad_ems.add(triple)
+    bad_ems.remove((d.ems1, ex.installedOn, None))
+    ems_conforms, _, _ = pyshacl.validate(
+        bad_ems, shacl_graph=SHAPES, ont_graph=ont, inference="none",
+        advanced=True, allow_warnings=True, inplace=True)
+    if ems_conforms:
+        failures.append("SHACL accepted an EMS that is not installed on a vehicle")
+
+    org_roles = rdflib.Namespace("http://data.europa.eu/949/concepts/organisation-roles/")
+    era = rdflib.Namespace("http://data.europa.eu/949/")
+    bad_ru_cases = {
+        "an operating RU role typed as vehicle keeper": (
+            [(d.nordCargoRU, era.hasOrganisationRole, None)],
+            [(d.nordCargoRU, era.hasOrganisationRole, org_roles.Keeper)]),
+        "an operating RU code that differs from the body's organisation code": (
+            [(d.run1, era.trainOperatingRU, None)],
+            [(d.run1, era.trainOperatingRU, rdflib.Literal("9999"))]),
+        "two running trains with the same train number and departure date": (
+            [(d.run2, era.operationalTrainNumber, None)],
+            [(d.run2, era.operationalTrainNumber, rdflib.Literal("41234"))]),
+    }
+    for label, (removed, added) in bad_ru_cases.items():
+        bad_ru = rdflib.Graph()
+        for triple in data:
+            bad_ru.add(triple)
+        for pattern in removed:
+            bad_ru.remove(pattern)
+        for triple in added:
+            bad_ru.add(triple)
+        ru_conforms, _, _ = pyshacl.validate(
+            bad_ru, shacl_graph=SHAPES, ont_graph=ont, inference="none",
+            advanced=True, allow_warnings=True, inplace=True)
+        if ru_conforms:
+            failures.append(f"SHACL accepted {label}")
     return failures
 
 
@@ -607,7 +665,7 @@ def render(conforms, shacl, results, accounting_issues, md_path):
     out = []
     w = out.append
     w("# Competency questions – ERA energy settlement extension\n")
-    w("Validation of the ontology draft **v0.5** (`era-energy-settlement-draft.ttl`) and its shapes "
+    w("Validation of the ontology draft **v0.6** (`era-energy-settlement-draft.ttl`) and its shapes "
       "against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.\n")
     w(f"**Result: {passed} of {len(results)} competency questions pass.** "
       f"SHACL conforms: **{conforms}**; allocation arithmetic issues: **{len(accounting_issues)}**; "
@@ -644,7 +702,7 @@ def render(conforms, shacl, results, accounting_issues, md_path):
     w("| Purpose | Represent traction energy measurement, exchange and settlement data, linked to ERA registers and TEL TSI messages |")
     w("| Scope | EMS to CEBD to DCS to exchange function to settlement system to allocation; matching with composition and running information; borders and grid context |")
     w("| Out of scope (this iteration) | Energy market and supply contracts, prices, network losses (see section 4) |")
-    w("| Implementation | OWL 2 (RDFS-level axioms) and SHACL, `ex:` extension of `era:` v4.0.0-rc.3, reusing SOSA/SSN, SAREF, QUDT, PROV-O, OWL-Time, GeoSPARQL |")
+    w("| Implementation | OWL 2 (RDFS-level axioms) and SHACL, `ens:` extension of `era:` v4.0.0-rc.3, reusing SOSA/SSN, SAREF, QUDT, PROV-O, OWL-Time, GeoSPARQL |")
     w("| Intended users | Eress partner IMs, settlement operators, RUs, ERA, regulatory bodies |")
     w("| Intended uses | Cross-border allocation support, evidence-oriented ENE TSI review, settlement reconciliation, EMS cross-acceptance analysis |\n")
 
@@ -688,7 +746,7 @@ def render(conforms, shacl, results, accounting_issues, md_path):
 
     w("## 5. Notes on the tests\n")
     w("- **No OWL reasoner is used.** Subclass and subproperty entailments are written as property paths "
-      "(`rdf:type/rdfs:subClassOf*`, `rdfs:subPropertyOf*`). CQ7.2 uses `ex:exchangesWith|^ex:exchangesWith` because "
+      "(`rdf:type/rdfs:subClassOf*`, `rdfs:subPropertyOf*`). CQ7.2 uses `ens:exchangesWith|^ens:exchangesWith` because "
       "the symmetry of the property is only entailed by a reasoner.")
     w("- **CQ11.2 depends on a SHACL rule.** The link from the composition journey section's normalized `era:locoNumber` "
       "to a registered vehicle is derived only when it matches a valid 12-digit vehicle number.")
