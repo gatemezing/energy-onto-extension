@@ -1,11 +1,11 @@
-@prefix ens:   <http://data.europa.eu/dy6/> .
+@prefix ens:   <http://data.europa.eu/dy6/def/energy/> .
 @prefix era:   <http://data.europa.eu/949/> .
 @prefix sh:    <http://www.w3.org/ns/shacl#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov:  <http://www.w3.org/ns/prov#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
-@prefix ensc:  <http://data.europa.eu/dy6/concepts/> .
-@prefix enssh: <http://data.europa.eu/dy6/shapes/> .
+@prefix ensc:  <http://data.europa.eu/dy6/def/energy/concepts/> .
+@prefix enssh: <http://data.europa.eu/dy6/def/energy/shapes/> .
 
 enssh:ConsumptionPointShape a sh:NodeShape ;
     sh:targetClass ens:ConsumptionPoint ;
@@ -24,7 +24,7 @@ enssh:ConsumptionPointShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Consumption-point ID must normalize to the linked vehicle's 12-digit EVN." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
@@ -44,7 +44,7 @@ enssh:TractionUnitVehicleShape a sh:NodeShape ;
     sh:sparql [
         sh:message "A locomotive EVN must normalize to exactly one registered vehicle." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
@@ -57,7 +57,7 @@ enssh:TractionUnitVehicleShape a sh:NodeShape ;
     sh:rule [
         a sh:SPARQLRule ;
         sh:construct """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             CONSTRUCT { $this ens:tractionUnitVehicle ?vehicle }
             WHERE {
@@ -106,7 +106,7 @@ enssh:EnergyReadingShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Reading period must have a beginning strictly before its end." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX time: <http://www.w3.org/2006/time#>
             SELECT $this
             WHERE {
@@ -184,7 +184,7 @@ enssh:EnergyAllocationShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Net active energy must equal allocated consumption minus allocated regeneration." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:allocatedActiveEnergyConsumed ?consumed ;
@@ -197,8 +197,8 @@ enssh:EnergyAllocationShape a sh:NodeShape ;
     sh:sparql [
         sh:message "A metered allocation must cite source readings, run, composition, and running information." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
-            PREFIX ensc: <http://data.europa.eu/dy6/concepts/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX ensc: <http://data.europa.eu/dy6/def/energy/concepts/>
             SELECT $this
             WHERE {
                 {
@@ -226,8 +226,8 @@ enssh:EnergyAllocationShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Allocation component source readings must exactly match the allocation's cited readings." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
-            PREFIX ensc: <http://data.europa.eu/dy6/concepts/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX ensc: <http://data.europa.eu/dy6/def/energy/concepts/>
             SELECT $this
             WHERE {
                 {
@@ -249,7 +249,7 @@ enssh:EnergyAllocationShape a sh:NodeShape ;
     sh:sparql [
         sh:message "The allocation consumer must match the consumer assigned to its running train." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:matchedRunningTrain ?run ;
@@ -278,7 +278,7 @@ enssh:AllocationComponentShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Component net active energy must equal consumed minus regenerated." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:componentActiveEnergyConsumed ?consumed ;
@@ -291,7 +291,7 @@ enssh:AllocationComponentShape a sh:NodeShape ;
     sh:sparql [
         sh:message "The sum of components attributed to a source reading must not exceed its measured consumed energy." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:componentReading ?reading .
@@ -342,7 +342,7 @@ enssh:TrainRunShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Running-train identifiers must be unique in the graph." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:runningTrainId ?id .
@@ -354,7 +354,7 @@ enssh:TrainRunShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Running-train start must precede its end, and actual departure must fall within the run interval." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 {
@@ -373,7 +373,7 @@ enssh:TrainRunShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Actual departure time and its evidence reference must be supplied together." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 {
@@ -400,7 +400,7 @@ enssh:TrainMessageShape a sh:NodeShape ;
     sh:sparql [
         sh:message "The linked run's operational train number must match the message number." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
@@ -413,7 +413,7 @@ enssh:TrainMessageShape a sh:NodeShape ;
     sh:sparql [
         sh:message "A composition message created after actual departure needs a timeliness assessment and supporting evidence." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
@@ -432,7 +432,7 @@ enssh:TrainMessageShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Running-report timestamps must fall within the linked running train's validity interval." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
@@ -456,7 +456,7 @@ enssh:RunningMessageShape a sh:NodeShape ;
     sh:sparql [
         sh:message "The resolved RU organization must match the source responsibleRU company code." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
@@ -524,7 +524,7 @@ enssh:DataExchangeActivityShape a sh:NodeShape ;
     sh:sparql [
         sh:message "The exchange recipient's receipt record must point back to this exchange activity." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:exchangeRecipient ?recipient .
@@ -552,7 +552,7 @@ enssh:ForwardsToShape a sh:NodeShape ;
     sh:sparql [
         sh:message "ens:forwardsTo must link a DCS to an exchange function, or an exchange function to a settlement system." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/>
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this ?value WHERE {
                 $this ens:forwardsTo ?value .
                 FILTER NOT EXISTS {

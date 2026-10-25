@@ -1,6 +1,6 @@
 # ERA energy settlement extension
 
-A proposed OWL/RDF extension of the ERA ontology, in the namespace `http://data.europa.eu/dy6/` (prefix `ens:`), for traction-energy readings, allocation components, exchange evidence, and links to ERA telematics/RINF concepts. The example data is synthetic. This is an ontology proposal, not a certified settlement implementation or legal compliance assessment.
+A proposed OWL/RDF extension of the ERA ontology, in the namespace `http://data.europa.eu/dy6/def/energy/` (prefix `ens:`), for traction-energy readings, allocation components, exchange evidence, and links to ERA telematics/RINF concepts. The example data is synthetic. This is an ontology proposal, not a certified settlement implementation or legal compliance assessment.
 
 ## Run the checks
 

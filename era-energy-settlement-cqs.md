@@ -522,7 +522,7 @@ SELECT ?org WHERE {
 ```sparql
 SELECT ?role WHERE {
   ?role rdfs:subClassOf era:OrganisationRole .
-  FILTER STRSTARTS(STR(?role), "http://data.europa.eu/dy6/")
+  FILTER STRSTARTS(STR(?role), "http://data.europa.eu/dy6/def/energy/")
 }
 ```
 

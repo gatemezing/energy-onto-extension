@@ -1,5 +1,5 @@
-@prefix ens:    <http://data.europa.eu/dy6/> .
-@prefix ensc:   <http://data.europa.eu/dy6/concepts/> .
+@prefix ens:    <http://data.europa.eu/dy6/def/energy/> .
+@prefix ensc:   <http://data.europa.eu/dy6/def/energy/concepts/> .
 @prefix era:   <http://data.europa.eu/949/> .
 @prefix d:     <http://example.org/data/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .

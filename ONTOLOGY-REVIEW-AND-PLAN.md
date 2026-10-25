@@ -1,6 +1,6 @@
 # Ontology engineering review and update plan
 
-Scope: `era-energy-settlement-draft.ttl` (vocabulary), `era-energy-settlement-shapes.ttl`, the example graph and the competency-question suite, reviewed against ERA ontology v4.0.0-rc.3. Target: a **proposal to ERA governance**, published under `http://data.europa.eu/dy6/`.
+Scope: `era-energy-settlement-draft.ttl` (vocabulary), `era-energy-settlement-shapes.ttl`, the example graph and the competency-question suite, reviewed against ERA ontology v4.0.0-rc.3. Target: a **proposal to ERA governance**, published under `http://data.europa.eu/dy6/def/energy/`.
 
 The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requirements G1–G6 (`era-energy-settlement-cqs.md` §4) remain valid; this document covers modelling quality, reuse and publication.
 
@@ -39,8 +39,8 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 
 ## 2. Changes made on this branch (v0.6)
 
-1. Namespace `http://data.europa.eu/dy6/`; prefixes `ens:` (vocabulary), `ensc:` (concepts), `enssh:` (shapes). Synthetic instances stay in `http://example.org/data/`.
-2. Ontology header: `dct:title`, `dct:description`, `owl:versionIRI <http://data.europa.eu/dy6/0.6.0>`, `owl:versionInfo "0.6.0"`, `dct:modified`, `vann:preferredNamespacePrefix/Uri`, `vs:term_status` (ERA convention).
+1. Namespace `http://data.europa.eu/dy6/def/energy/`; prefixes `ens:` (vocabulary), `ensc:` (concepts), `enssh:` (shapes). Synthetic instances stay in `http://example.org/data/`.
+2. Ontology header: `dct:title`, `dct:description`, `owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.6.0>`, `owl:versionInfo "0.6.0"`, `dct:modified`, `vann:preferredNamespacePrefix/Uri`, `vs:term_status` (ERA convention).
 3. Every `ens:` term: `rdfs:label`, `rdfs:isDefinedBy`, `vs:term_status "unstable"`, and a `skos:definition` or comment.
 4. `ens:TrainRun` renamed `ens:RunningTrain ⊑ era:Train` (hence `⊑ era:OperationalTrainNumberIdentifier`), so `era:operationalTrainNumber` replaces `ens:operationalTrainNumber` and `era:trainDepartureDate`/`era:trainOperatingRU` become available; renamed properties `ens:runningTrainId`, `ens:aboutRunningTrain`, `ens:matchedRunningTrain`; new `ens:runningTrainIdent → era:TrainIdent`; `runStart`/`runEnd` documented as an attribution window, not actual departure.
 5. `skos:closeMatch` removed from ontology terms (replaced by `rdfs:seeAlso`), see R18.
@@ -70,13 +70,13 @@ Result: 48/48 CQs, SHACL conforms, accounting and all negative tests pass.
 ### P3 – v0.9: scope extensions (open requirements)
 
 - G4 network losses: `ens:LossAllocationMethod` concept + coefficient on allocation, with arithmetic tests.
-- G3 market/contract: separate module (`dy6` sub-module), not merged into the core, once legal interface duties are verified.
+- G3 market/contract: separate module (`dy6/def/energy` sub-module), not merged into the core, once legal interface duties are verified.
 - Richer test data: multi-day runs, mixed time zones, multiple consumers, estimated and split components.
 - EVN check-digit validation once the rule is confirmed against the authoritative register.
 
 ### P4 – publication and ERA governance (in parallel)
 
-- Confirm with the Publications Office / ERA that `dy6` is the allocated identifier and set up dereferencing and content negotiation for terms, `0.6.0` version IRIs and shapes.
+- Confirm with the Publications Office / ERA that `dy6/def/energy` is the allocated path and set up dereferencing and content negotiation for terms, `0.6.0` version IRIs and shapes.
 - Licence statement (ERA uses Commission Decision 2017/863 for its ontology) and contributors in the header.
 - Quality gates in CI: `cq_suite.py`, OWL 2 DL profile check (ROBOT `validate-profile`), OOPS! pitfall scan, HTML documentation (pyLODE or Widoco).
 - Upstream change requests to the ERA ontology: object link from `era:LocoIdent`/`era:locoNumber` to `era:Vehicle`; unit of `era:trainWeight` (G5); clarify whether the run key should be `era:TrainIdent`.
@@ -85,4 +85,4 @@ Result: 48/48 CQs, SHACL conforms, accounting and all negative tests pass.
 
 1. Party pattern: roles vs bodies for sender, recipient and operator (R10).
 2. Whether the SOSA expansion of readings is normative or an optional view (R13).
-3. Confirmation of `dy6` allocation and the licence to publish under.
+3. Confirmation of the `dy6/def/energy` allocation and the licence to publish under.

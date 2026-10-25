@@ -28,8 +28,8 @@ EXAMPLES = "era-energy-settlement-examples.ttl"
 DEFAULT_ERA_ONTOLOGY = "era-ontology-v4.0.0-rc.3.ttl"
 
 PREFIXES = """
-PREFIX ens:      <http://data.europa.eu/dy6/>
-PREFIX ensc:     <http://data.europa.eu/dy6/concepts/>
+PREFIX ens:      <http://data.europa.eu/dy6/def/energy/>
+PREFIX ensc:     <http://data.europa.eu/dy6/def/energy/concepts/>
 PREFIX era:     <http://data.europa.eu/949/>
 PREFIX d:       <http://example.org/data/>
 PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -294,7 +294,7 @@ SETS = [
              "Taxonomy (TBox): What are the subtypes of [CE1]?", "TBox",
              """SELECT ?role WHERE {
   ?role rdfs:subClassOf era:OrganisationRole .
-  FILTER STRSTARTS(STR(?role), "http://data.europa.eu/dy6/")
+  FILTER STRSTARTS(STR(?role), "http://data.europa.eu/dy6/def/energy/")
 }""", [("DCSAdministratorRole",), ("EMSResponsibleRole",), ("EnergyConsumerRole",), ("SettlementOperatorRole",)]),
             ("CQ10.3", "Which organisation is responsible for EMS ems1?",
              "Selection through a role", "ABox",
@@ -519,8 +519,8 @@ def run(rc3_path=DEFAULT_ERA_ONTOLOGY):
 
 def validate_allocation_accounting(data):
     """Check arithmetic that requires aggregation across allocation components."""
-    ex = rdflib.Namespace("http://data.europa.eu/dy6/")
-    exc = rdflib.Namespace("http://data.europa.eu/dy6/concepts/")
+    ex = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/")
+    exc = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/concepts/")
     issues = []
     allocated_by_reading = defaultdict(lambda: [Decimal(0), Decimal(0)])
 
@@ -568,7 +568,7 @@ def validate_allocation_accounting(data):
 
 def validate_negative_cases(data, ont):
     """Prove the main identity and allocation constraints reject bad fixtures."""
-    ex = rdflib.Namespace("http://data.europa.eu/dy6/")
+    ex = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/")
     d = rdflib.Namespace("http://example.org/data/")
     failures = []
 
