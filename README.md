@@ -75,7 +75,7 @@ The same suite runs in GitHub Actions on every push and pull request (`.github/w
 
 ## Presentation
 
-A 13-slide overview (architecture figures of the main concepts and relations, sample competency questions, quality gates and requests to ERA) is published as a Claude artifact: <https://claude.ai/artifact/7PfPUbvX7nmpfyEXc7VKp7>. The link is private until its owner shares it.
+A 14-slide overview (architecture figures of the main concepts and relations, including the organisation-role pattern, sample competency questions, quality gates and requests to ERA) is published as a Claude artifact: <https://claude.ai/artifact/7PfPUbvX7nmpfyEXc7VKp7>. The link is private until its owner shares it.
 
 ## Roadmap
 
