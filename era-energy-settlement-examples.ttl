@@ -16,7 +16,7 @@
 @prefix country: <http://publications.europa.eu/resource/authority/country/> .
 
 # =====================================================================
-# Example data for validating the energy settlement extension (v0.7)
+# Example data for validating the energy settlement extension (v0.8)
 # against the competency questions in era-energy-settlement-cqs.md.
 #
 # Scenario: freight train 41234, operated by a fictitious RU, runs from
@@ -86,6 +86,8 @@ d:emsRespRole a ens:EMSResponsibleRole ; era:roleOf d:railLease .
 d:dcsAdminRole a ens:DCSAdministratorRole ; era:roleOf d:eress .
 d:settleOpNO a ens:SettlementOperatorRole ; era:roleOf d:baneNor .
 d:settleOpSE a ens:SettlementOperatorRole ; era:roleOf d:trafikverket .
+d:imNO a era:OrganisationRole ; era:roleOf d:baneNor ; era:hasOrganisationRole eraor:IM .
+d:imSE a era:OrganisationRole ; era:roleOf d:trafikverket ; era:hasOrganisationRole eraor:IM .
 
 # --- Vehicles and vehicle types --------------------------------------
 
@@ -300,21 +302,21 @@ d:js2 a era:TrainCompositionJourneySection ;
 d:tri1 a era:TrainRunningInformationMessage ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:responsibleRU "3801" ;
-    ens:responsibleRUOrganisation d:nordCargo ;
+    ens:responsibleRailwayUndertaking d:nordCargoRU ;
     ens:aboutRunningTrain d:run1 ;
     era:trainLocationReport [ era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ] .
 
 d:tri2 a era:TrainRunningInformationMessage ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:responsibleRU "3801" ;
-    ens:responsibleRUOrganisation d:nordCargo ;
+    ens:responsibleRailwayUndertaking d:nordCargoRU ;
     ens:aboutRunningTrain d:run1 ;
     era:trainLocationReport [ era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ] .
 
 d:tri3 a era:TrainRunningInformationMessage ;
     era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
     era:responsibleRU "3801" ;
-    ens:responsibleRUOrganisation d:nordCargo ;
+    ens:responsibleRailwayUndertaking d:nordCargoRU ;
     ens:aboutRunningTrain d:run1 ;
     era:trainLocationReport [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
 
@@ -347,33 +349,33 @@ d:tcm2 ens:timelinessAssessment ensc:exceptionEvidenceRecorded ;
 # Exchange instances are illustrative audit events. Authorities and retention
 # rules must be replaced by deployment-approved references.
 d:exchangeTcm1NO a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tcm1 ; ens:exchangeSender d:baneNor ;
-    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T05:51:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangedMessage d:tcm1 ; ens:exchangeSender d:imNO ;
+    ens:exchangeRecipient d:settleOpNO ; ens:exchangeTime "2026-10-15T05:51:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 d:exchangeTcm1SE a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tcm1 ; ens:exchangeSender d:trafikverket ;
-    ens:exchangeRecipient d:settleSE ; ens:exchangeTime "2026-10-15T05:52:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangedMessage d:tcm1 ; ens:exchangeSender d:imSE ;
+    ens:exchangeRecipient d:settleOpSE ; ens:exchangeTime "2026-10-15T05:52:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 d:exchangeTri1NO a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tri1 ; ens:exchangeSender d:baneNor ;
-    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T07:11:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangedMessage d:tri1 ; ens:exchangeSender d:imNO ;
+    ens:exchangeRecipient d:settleOpNO ; ens:exchangeTime "2026-10-15T07:11:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 d:exchangeTri2NO a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tri2 ; ens:exchangeSender d:baneNor ;
-    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T08:31:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangedMessage d:tri2 ; ens:exchangeSender d:imNO ;
+    ens:exchangeRecipient d:settleOpNO ; ens:exchangeTime "2026-10-15T08:31:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 d:exchangeTri3SE a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tri3 ; ens:exchangeSender d:trafikverket ;
-    ens:exchangeRecipient d:settleSE ; ens:exchangeTime "2026-10-15T08:40:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangedMessage d:tri3 ; ens:exchangeSender d:imSE ;
+    ens:exchangeRecipient d:settleOpSE ; ens:exchangeTime "2026-10-15T08:40:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 d:exchangeTcm2NO a ens:DataExchangeActivity ;
-    ens:exchangedMessage d:tcm2 ; ens:exchangeSender d:baneNor ;
-    ens:exchangeRecipient d:settleNO ; ens:exchangeTime "2026-10-15T17:01:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
+    ens:exchangedMessage d:tcm2 ; ens:exchangeSender d:imNO ;
+    ens:exchangeRecipient d:settleOpNO ; ens:exchangeTime "2026-10-15T17:01:00Z"^^xsd:dateTime ; ens:messageVersion "1" ;
     ens:exchangeOutcome ensc:received ; ens:exchangePurpose ensc:energySettlement ;
     ens:exchangeAuthority d:authorityToVerify ; ens:retentionPolicy d:retentionToApprove .
 

@@ -1,8 +1,8 @@
 # Competency questions – ERA energy settlement extension
 
-Validation of the ontology draft **v0.7** (`era-energy-settlement-draft.ttl`) and its shapes against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.
+Validation of the ontology draft **v0.8** (`era-energy-settlement-draft.ttl`) and its shapes against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.
 
-**Result: 51 of 51 competency questions pass.** SHACL conforms: **True**; allocation arithmetic issues: **0**; SHACL results: **0**.
+**Result: 52 of 52 competency questions pass.** SHACL conforms: **True**; allocation arithmetic issues: **0**; SHACL results: **0**.
 
 OWL 2 DL check (HermiT): consistent **True**; unsatisfiable classes: **0**; DL negative tests: **passed**.
 
@@ -44,7 +44,7 @@ The CQs were produced and validated with current practice in ontology requiremen
 | S7 | Exchange function and cross-border exchange | CQ7.1, CQ7.2, CQ7.3 | 3/3 |
 | S8 | Settlement systems and zones | CQ8.1, CQ8.2, CQ8.3 | 3/3 |
 | S9 | Border points | CQ9.1, CQ9.2, CQ9.3 | 3/3 |
-| S10 | Roles (IRS 90930) | CQ10.1, CQ10.2, CQ10.3 | 3/3 |
+| S10 | Roles (IRS 90930) | CQ10.1, CQ10.2, CQ10.3, CQ10.4 | 4/4 |
 | S11 | Train composition (TEL TSI 2.5.1(16)) | CQ11.1, CQ11.2, CQ11.3 | 3/3 |
 | S12 | Train running information (TEL TSI 2.5.2(8)) | CQ12.1, CQ12.2, CQ12.3, CQ12.4, CQ12.5 | 5/5 |
 | S13 | Allocation and matching | CQ13.1, CQ13.2, CQ13.3, CQ13.4 | 4/4 |
@@ -380,14 +380,14 @@ SELECT ?org WHERE {
 
 - Archetype: Selection over exchange activity
 - Type: ABox
-- Expected: settleNO, received; settleSE, received
-- Result: settleNO, received; settleSE, received → **PASS**
+- Expected: baneNor, received; trafikverket, received
+- Result: baneNor, received; trafikverket, received → **PASS**
 
 ```sparql
-SELECT ?recipient ?outcome WHERE {
+SELECT ?org ?outcome WHERE {
   ?exchange a ens:DataExchangeActivity ;
             ens:exchangedMessage d:tcm1 ;
-            ens:exchangeRecipient ?recipient ;
+            ens:exchangeRecipient/era:roleOf ?org ;
             ens:exchangeOutcome ?outcome ;
             ens:exchangeAuthority ?authority ;
             ens:retentionPolicy ?retention .
@@ -571,6 +571,21 @@ SELECT ?role WHERE {
 SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }
 ```
 
+#### CQ10.4 – Does any current ens: property point to an era:Body rather than to an era:OrganisationRole?
+
+- Archetype: Existence (TBox): Is there a [P] with range [CE]?
+- Type: TBox
+- Expected: false
+- Result: false → **PASS**
+
+```sparql
+ASK {
+  ?property rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+            rdfs:range era:Body .
+  FILTER NOT EXISTS { ?property owl:deprecated true }
+}
+```
+
 ### S11. Train composition (TEL TSI 2.5.1(16))
 
 **User story:** As a settlement system, I want the composition message to give me each traction unit's EVN and the train mass in time, so that I can allocate and validate consumption.
@@ -659,8 +674,8 @@ SELECT ?place (SUBSTR(STR(?when), 12, 5) AS ?hhmm) ?ru WHERE {
                     ens:aboutRunningTrain d:run1 .
                ?exchange a ens:DataExchangeActivity ;
                          ens:exchangedMessage ?msg ;
-                         ens:exchangeRecipient ?settlement ;
                          ens:exchangePurpose ensc:energySettlement .
+               ?settlement ens:exchangeContains ?exchange .
              }
 ```
 
@@ -680,15 +695,18 @@ SELECT ?op (SUBSTR(STR(?when), 12, 5) AS ?hhmm) WHERE {
 }
 ```
 
-#### CQ12.4 – Which organization is identified as the responsible RU on running message tri1?
+#### CQ12.4 – Which organization is identified as the responsible RU on running message tri1, and in which ERA role?
 
-- Archetype: Selection through the resolved organization link
+- Archetype: Selection through a role
 - Type: ABox
-- Expected: nordCargo
-- Result: nordCargo → **PASS**
+- Expected: nordCargo, RU-3
+- Result: nordCargo, RU-3 → **PASS**
 
 ```sparql
-SELECT ?org WHERE { d:tri1 ens:responsibleRUOrganisation ?org . }
+SELECT ?org ?role WHERE {
+  d:tri1 ens:responsibleRailwayUndertaking ?ruRole .
+  ?ruRole era:roleOf ?org ; era:hasOrganisationRole ?role .
+}
 ```
 
 #### CQ12.5 – Which railway undertaking operates running train 41234 departing on 15 October 2026, in which ERA role, and under which company code?

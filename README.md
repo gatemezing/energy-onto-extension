@@ -5,7 +5,7 @@ A proposed OWL 2 extension of the [ERA ontology](https://gitlab.com/era-europa-e
 | | |
 |---|---|
 | Namespace | `http://data.europa.eu/dy6/def/energy/` (prefix `ens:`); concepts `…/concepts/` (`ensc:`), shapes `…/shapes/` (`enssh:`) |
-| Version | 0.7.0 (`owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.7.0>`) |
+| Version | 0.8.0 (`owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.8.0>`) |
 | Baseline | ERA ontology v4.0.0-rc.3 (vendored) |
 | Licence | [EUPL v1.2](LICENSE) |
 | Status | Draft; all terms `vs:term_status "unstable"` |
@@ -20,7 +20,7 @@ The example data is synthetic. This is an ontology proposal, not a certified set
 | Readings | `ens:CompiledEnergyBillingData` and `ens:EnergyReading`, both `sosa:ObservationCollection` (SSN-Ext); member `sosa:Observation`s of `ens:ConsumedActiveEnergy`, `ens:RegeneratedActiveEnergy`, `ens:MeasuredReactiveEnergy` with `qudt:QuantityValue` results | SOSA/SSN, SSN-Ext, QUDT, OWL-Time, GeoSPARQL |
 | Grid and borders | `ens:readingOnTrack` → `era:RunningTrack`; `ens:SettlementZone` (⊑ `era:Feature`) delimited by `era:ReferenceBorderPoint` | RINF |
 | Ground systems (IRS 90930) | `ens:DataCollectingSystem` → `ens:ExchangeFunction` → `ens:SettlementSystem` (`ens:forwardsTo`) | |
-| Roles | `ens:EnergyConsumerRole`, `ens:EMSResponsibleRole`, … ⊑ `era:OrganisationRole`; operating RU via `ens:operatingRailwayUndertaking` with the ERA `organisation-roles/RU` concepts | ERA organisation roles |
+| Roles | Every party-valued property targets an `era:OrganisationRole`, played by an `era:Body` (`era:roleOf`) and typed with an ERA organisation-roles concept: consumer, EMS responsible, operators, exchange sender and recipient, operating and responsible RU | ERA organisation roles |
 | Running trains (TEL TSI) | `ens:RunningTrain` ⊑ `era:Train`, keyed by `era:operationalTrainNumber` + `era:trainDepartureDate`; linked from `era:TrainCompositionMessage` and `era:TrainRunningInformationMessage` | ERA telematics |
 | Allocation | `ens:EnergyAllocation` with `ens:AllocationComponent`s per source reading; consumer, zone, status, method, rule | PROV-O |
 | Exchange evidence | `ens:DataExchangeActivity` (⊑ `prov:Activity`): message, version, sender, recipient, time, outcome, purpose, authority, retention | PROV-O |
@@ -51,9 +51,9 @@ python3 cq_suite.py --md era-energy-settlement-cqs.md
 `cq_suite.py` exits non-zero if any check fails. It:
 
 1. validates the example graph with SHACL and applies the SHACL rules (EVN-to-vehicle link, reading shortcuts derived from SOSA observations);
-2. runs the 51 competency questions as SPARQL queries with expected answers;
+2. runs the 52 competency questions as SPARQL queries with expected answers;
 3. verifies allocation component arithmetic;
-4. confirms that invalid fixtures are rejected: EVN mismatch, over-allocation, wrong data-forwarding chain, EMS without vehicle, non-RU operating role, RU code mismatch, duplicate train key, wrong energy unit, missing consumed-energy observation;
+4. confirms that invalid fixtures are rejected: EVN mismatch, over-allocation, wrong data-forwarding chain, EMS without vehicle, non-RU operating role, RU code mismatch, duplicate train key, sender given as a body, recipient not operating the receiving system, role without body, responsible RU code mismatch, wrong energy unit, missing consumed-energy observation;
 5. checks **OWL 2 DL consistency with HermiT** on the ERA snapshot, the extension, the examples and SOSA/SSN/SSN-Ext, reports unsatisfiable classes, and proves with two fixtures that an inconsistent ABox and an unsatisfiable class are detected.
 
 Options: pass another ERA ontology file as the first argument; `--skip-dl` skips step 5. The DL check also runs on its own with `python3 dl_check.py [extra.ttl …]`; it prints the adjustments it makes where the inputs are outside OWL 2 DL (see the module docstring).
