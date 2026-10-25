@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: EUPL-1.2
 @prefix ens:   <http://data.europa.eu/dy6/def/energy/> .
 @prefix era:   <http://data.europa.eu/949/> .
 @prefix sh:    <http://www.w3.org/ns/shacl#> .
@@ -6,6 +7,10 @@
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 @prefix ensc:  <http://data.europa.eu/dy6/def/energy/concepts/> .
 @prefix eraor: <http://data.europa.eu/949/concepts/organisation-roles/> .
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix qudt:  <http://qudt.org/schema/qudt/> .
+@prefix time:  <http://www.w3.org/2006/time#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix enssh: <http://data.europa.eu/dy6/def/energy/shapes/> .
 
 enssh:ConsumptionPointShape a sh:NodeShape ;
@@ -73,30 +78,29 @@ enssh:TractionUnitVehicleShape a sh:NodeShape ;
     ] .
 
 enssh:EnergyReadingShape a sh:NodeShape ;
-    sh:targetSubjectsOf ens:readingPeriod ;
+    sh:targetClass ens:EnergyReading ;
     sh:property [
-        sh:path ens:readingOfConsumptionPoint ;
+        sh:path sosa:hasFeatureOfInterest ;
         sh:class ens:ConsumptionPoint ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;
     sh:property [
-        sh:path ens:readingPeriod ;
-        sh:class <http://www.w3.org/2006/time#Interval> ;
+        sh:path sosa:madeBySensor ;
+        sh:maxCount 0 ;
+        sh:message "State sosa:madeBySensor on the member observations, not on the reading: with the SSN axioms (sosa:Sensor only makes sosa:Observation), a collection made by a sensor would be inferred to be an observation." ;
+    ] ;
+    sh:property [
+        sh:path sosa:phenomenonTime ;
+        sh:class time:Interval ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;
     sh:property [
-        sh:path ens:activeEnergyConsumed ;
-        sh:datatype xsd:decimal ;
-        sh:minCount 1 ;
-        sh:minInclusive 0 ;
-    ] ;
-    sh:property [
-        sh:path ens:activeEnergyRegenerated ;
-        sh:datatype xsd:decimal ;
-        sh:minCount 1 ;
-        sh:minInclusive 0 ;
+        sh:path sosa:hasMember ;
+        sh:class sosa:Observation ;
+        sh:node enssh:EnergyObservationShape ;
+        sh:minCount 2 ;
     ] ;
     sh:property [
         sh:path ens:measurementQuality ;
@@ -105,18 +109,136 @@ enssh:EnergyReadingShape a sh:NodeShape ;
         sh:maxCount 1 ;
     ] ;
     sh:sparql [
-        sh:message "Reading period must have a beginning strictly before its end." ;
+        sh:message "A reading must have a member observation of consumed and of regenerated active energy." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX sosa: <http://www.w3.org/ns/sosa/>
+            SELECT $this ?property
+            WHERE {
+                { BIND(ens:ConsumedActiveEnergy AS ?property) }
+                UNION
+                { BIND(ens:RegeneratedActiveEnergy AS ?property) }
+                FILTER NOT EXISTS { $this sosa:hasMember/sosa:observedProperty ?property }
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "A reading must not have two member observations of the same property." ;
+        sh:select """
+            PREFIX sosa: <http://www.w3.org/ns/sosa/>
+            SELECT DISTINCT $this ?property
+            WHERE {
+                $this sosa:hasMember ?first , ?second .
+                ?first sosa:observedProperty ?property .
+                ?second sosa:observedProperty ?property .
+                FILTER(?first != ?second)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "Reading period must have a beginning strictly before its end." ;
+        sh:select """
+            PREFIX sosa: <http://www.w3.org/ns/sosa/>
             PREFIX time: <http://www.w3.org/2006/time#>
             SELECT $this
             WHERE {
-                $this ens:readingPeriod ?interval .
+                $this sosa:phenomenonTime ?interval .
                 ?interval time:hasBeginning/time:inXSDDateTimeStamp ?start ;
                           time:hasEnd/time:inXSDDateTimeStamp ?end .
                 FILTER(?start >= ?end)
             }
         """ ;
+    ] ;
+    sh:rule [
+        a sh:SPARQLRule ;
+        rdfs:comment "Derives the compact CEBD shortcuts from the SOSA member observations." ;
+        sh:construct """
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX sosa: <http://www.w3.org/ns/sosa/>
+            PREFIX qudt: <http://qudt.org/schema/qudt/>
+            CONSTRUCT { $this ?shortcut ?value }
+            WHERE {
+                $this sosa:hasMember ?member .
+                {
+                    ?member sosa:observedProperty ens:ConsumedActiveEnergy .
+                    BIND(ens:activeEnergyConsumed AS ?shortcut)
+                }
+                UNION
+                {
+                    ?member sosa:observedProperty ens:RegeneratedActiveEnergy .
+                    BIND(ens:activeEnergyRegenerated AS ?shortcut)
+                }
+                UNION
+                {
+                    ?member sosa:observedProperty ens:MeasuredReactiveEnergy .
+                    BIND(ens:reactiveEnergy AS ?shortcut)
+                }
+                ?member sosa:hasResult/qudt:numericValue ?value .
+            }
+        """ ;
+    ] .
+
+enssh:EnergyObservationShape a sh:NodeShape ;
+    sh:property [
+        sh:path sosa:madeBySensor ;
+        sh:class ens:EnergyMeasurementFunction ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path sosa:observedProperty ;
+        sh:in ( ens:ConsumedActiveEnergy ens:RegeneratedActiveEnergy ens:MeasuredReactiveEnergy ) ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path sosa:hasResult ;
+        sh:class qudt:QuantityValue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ( sosa:hasResult qudt:numericValue ) ;
+        sh:datatype xsd:decimal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:minInclusive 0 ;
+    ] ;
+    sh:sparql [
+        sh:message "Active energy results must be in kWh (unit:KiloW-HR) and reactive energy results in kvarh (unit:KiloVAR-HR)." ;
+        sh:select """
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX sosa: <http://www.w3.org/ns/sosa/>
+            PREFIX qudt: <http://qudt.org/schema/qudt/>
+            PREFIX unit: <http://qudt.org/vocab/unit/>
+            SELECT $this
+            WHERE {
+                {
+                    $this sosa:observedProperty ?property .
+                    FILTER(?property IN (ens:ConsumedActiveEnergy, ens:RegeneratedActiveEnergy))
+                    FILTER NOT EXISTS { $this sosa:hasResult/qudt:unit unit:KiloW-HR }
+                }
+                UNION
+                {
+                    $this sosa:observedProperty ens:MeasuredReactiveEnergy .
+                    FILTER NOT EXISTS { $this sosa:hasResult/qudt:unit unit:KiloVAR-HR }
+                }
+            }
+        """ ;
+    ] .
+
+enssh:CompiledEnergyBillingDataShape a sh:NodeShape ;
+    sh:targetClass ens:CompiledEnergyBillingData ;
+    sh:property [
+        sh:path sosa:hasMember ;
+        sh:class ens:EnergyReading ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ens:compiledBy ;
+        sh:class ens:EnergyMeasurementSystem ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] .
 
 enssh:EnergyAllocationShape a sh:NodeShape ;
@@ -562,10 +684,15 @@ enssh:DataExchangeActivityShape a sh:NodeShape ;
 enssh:EnergyMeasurementSystemShape a sh:NodeShape ;
     sh:targetClass ens:EnergyMeasurementSystem ;
     sh:property [
-        sh:path ens:installedOn ;
+        sh:path sosa:isHostedBy ;
         sh:class era:Vehicle ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path sosa:hosts ;
+        sh:or ( [ sh:class ens:EnergyMeasurementFunction ] [ sh:class ens:DataHandlingSystem ] ) ;
+        sh:minCount 1 ;
     ] ;
     sh:property [
         sh:path ens:measuresConsumptionPoint ;

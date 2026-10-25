@@ -1,2 +1,5 @@
 rdflib==6.2.0
 pyshacl==0.20.0
+# pyshacl 0.20.0 imports pkg_resources, which setuptools removed in 82.0
+setuptools<82
+owlready2==0.51

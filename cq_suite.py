@@ -1,17 +1,22 @@
+# SPDX-License-Identifier: EUPL-1.2
 """Competency question test suite for the ERA energy settlement extension.
 
 Each competency question (CQ) is an executable SPARQL query with an
 expected answer, so the CQs act as acceptance tests (LOT validation).
 
 Usage:
-    python3 cq_suite.py [era-ontology-v4.0.0-rc.3.ttl] [--md era-energy-settlement-cqs.md]
+    python3 cq_suite.py [era-ontology-v4.0.0-rc.3.ttl] [--md era-energy-settlement-cqs.md] [--skip-dl]
 
 Steps:
   1. Load the ontology draft and the example data.
   2. Run the SHACL shapes against the pinned ERA ontology snapshot: this
      checks the examples and derives ens:tractionUnitVehicle.
   3. Run every CQ and compare with its expected answer.
-  4. Optionally render the Markdown report.
+  4. Check OWL 2 DL consistency with HermiT (dl_check.py) on the ERA
+     snapshot, the extension, the examples and SOSA/SSN/SSN-Ext, and prove
+     with two fixtures that inconsistency and unsatisfiable classes are
+     detected. Needs Java; --skip-dl skips it.
+  5. Optionally render the Markdown report.
 """
 import argparse
 import sys
@@ -21,6 +26,8 @@ from decimal import Decimal
 import pyshacl
 import rdflib
 from rdflib.namespace import SH
+
+import dl_check
 
 DRAFT = "era-energy-settlement-draft.ttl"
 SHAPES = "era-energy-settlement-shapes.ttl"
@@ -39,6 +46,7 @@ PREFIX time:    <http://www.w3.org/2006/time#>
 PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 PREFIX sosa:    <http://www.w3.org/ns/sosa/>
+PREFIX qudt:    <http://qudt.org/schema/qudt/>
 PREFIX saref:   <https://saref.etsi.org/core/>
 PREFIX country: <http://publications.europa.eu/resource/authority/country/>
 """
@@ -59,7 +67,7 @@ SETS = [
              "Selection: Which [CE1] [OPE] [CE2]?", "ABox",
              """SELECT ?ems WHERE {
   ?vehicle era:vehicleNumber "918061890013" .
-  ?ems ens:installedOn ?vehicle .
+  ?ems sosa:isHostedBy ?vehicle .
 }""", [("ems1",)]),
             ("CQ1.2", "Which components (measurement function, data handling system) does EMS ems1 host?",
              "Selection over a property hierarchy", "ABox",
@@ -72,6 +80,13 @@ SETS = [
              """ASK {
   ens:EnergyMeasurementSystem rdfs:subClassOf saref:Meter , sosa:Platform .
 }""", [("true",)]),
+            ("CQ1.4", "Which observable properties does the measurement function of EMS ems1 observe?",
+             "Selection through SOSA hosting and observation", "ABox",
+             """SELECT ?property WHERE {
+  d:ems1 sosa:hosts ?emf .
+  ?emf a ens:EnergyMeasurementFunction ;
+       sosa:observes ?property .
+}""", [("ConsumedActiveEnergy",), ("MeasuredReactiveEnergy",), ("RegeneratedActiveEnergy",)]),
         ],
     },
     {
@@ -110,22 +125,33 @@ SETS = [
             ("CQ3.1", "Which readings does CEBD cebd1 contain, and when does each period start?",
              "Selection with temporal attribute", "ABox",
              """SELECT ?reading (SUBSTR(STR(?start), 12, 5) AS ?hhmm) WHERE {
-  d:cebd1 ens:hasReading ?reading .
-  ?reading ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
+  d:cebd1 sosa:hasMember ?reading .
+  ?reading sosa:phenomenonTime/time:hasBeginning/time:inXSDDateTimeStamp ?start .
 }""", [("r1", "06:00"), ("r2", "06:05"), ("r3", "08:40")]),
             ("CQ3.2", "What is the total active energy consumed by consumption point cp1 during UTC day 15 October 2026?",
              "Aggregation over a time window", "ABox",
              """SELECT (SUM(?kwh) AS ?total) WHERE {
-  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+  ?reading sosa:hasFeatureOfInterest d:cp1 ;
            ens:activeEnergyConsumed ?kwh ;
-           ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start ;
-           ens:readingPeriod/time:hasEnd/time:inXSDDateTimeStamp ?end .
+           sosa:phenomenonTime/time:hasBeginning/time:inXSDDateTimeStamp ?start ;
+           sosa:phenomenonTime/time:hasEnd/time:inXSDDateTimeStamp ?end .
   FILTER (STR(?start) >= "2026-10-15T00:00:00Z" &&
           STR(?start) < "2026-10-16T00:00:00Z")
 }""", [("885.7",)]),
             ("CQ3.3", "Which readings are one-minute reading blocks?",
              "Selection by subtype", "ABox",
              """SELECT ?reading WHERE { ?reading a ens:ReadingBlock . }""", [("r3",)]),
+            ("CQ3.4", "Which observed property, value and unit does each member observation of reading r1 report?",
+             "Selection through the SOSA observation collection", "ABox",
+             """SELECT ?property ?value ?unit WHERE {
+  d:r1 rdf:type/rdfs:subClassOf* sosa:ObservationCollection ;
+       sosa:hasMember ?observation .
+  ?observation a sosa:Observation ;
+               sosa:observedProperty ?property ;
+               sosa:hasResult [ qudt:numericValue ?value ; qudt:unit ?unit ] .
+}""", [("ConsumedActiveEnergy", "410.5", "KiloW-HR"),
+       ("MeasuredReactiveEnergy", "30.2", "KiloVAR-HR"),
+       ("RegeneratedActiveEnergy", "12.0", "KiloW-HR")]),
         ],
     },
     {
@@ -136,16 +162,16 @@ SETS = [
             ("CQ4.1", "How much energy did consumption point cp1 return to the contact line during UTC day 15 October 2026?",
              "Aggregation", "ABox",
              """SELECT (SUM(?kwh) AS ?total) WHERE {
-  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+  ?reading sosa:hasFeatureOfInterest d:cp1 ;
            ens:activeEnergyRegenerated ?kwh ;
-           ens:readingPeriod/time:hasBeginning/time:inXSDDateTimeStamp ?start .
+           sosa:phenomenonTime/time:hasBeginning/time:inXSDDateTimeStamp ?start .
   FILTER (STR(?start) >= "2026-10-15T00:00:00Z" &&
           STR(?start) < "2026-10-16T00:00:00Z")
 }""", [("23.6",)]),
             ("CQ4.2", "What is the net energy (consumed minus regenerated) of each reading of cp1?",
              "Derived value per individual", "ABox",
              """SELECT ?reading ((?in - ?out) AS ?net) WHERE {
-  ?reading ens:readingOfConsumptionPoint d:cp1 ;
+  ?reading sosa:hasFeatureOfInterest d:cp1 ;
            ens:activeEnergyConsumed ?in ; ens:activeEnergyRegenerated ?out .
 }""", [("r1", "398.5"), ("r2", "371.5"), ("r3", "92.1")]),
             ("CQ4.3", "Is a regenerative brake fitted on the traction unit of train 41234?",
@@ -435,7 +461,7 @@ SETS = [
              "Provenance path", "ABox",
              """SELECT DISTINCT ?ems WHERE {
   d:alloc2 ens:allocatesReading ?reading .
-  ?cebd ens:hasReading ?reading ; ens:compiledBy ?ems .
+  ?cebd sosa:hasMember ?reading ; ens:compiledBy ?ems .
 }""", [("ems1",)]),
         ],
     },
@@ -452,7 +478,7 @@ SETS = [
             ("CQ15.2", "Which vehicles carry an EMS although their type does not declare an energy meter?",
              "Negation across registers (cf. SHACL R4)", "ABox",
              """SELECT ?vehicle WHERE {
-  ?ems ens:installedOn ?vehicle . ?vehicle era:vehicleType ?type .
+  ?ems sosa:isHostedBy ?vehicle . ?vehicle era:vehicleType ?type .
   FILTER NOT EXISTS { ?type era:configDependentParameter/era:hasOnboardEnergyMeasurement true . }
 }""", [("loco2",)]),
             ("CQ15.3", "How many EMS lack a declared standard edition?",
@@ -495,7 +521,7 @@ def short(term):
     return str(term)
 
 
-def run(rc3_path=DEFAULT_ERA_ONTOLOGY):
+def run(rc3_path=DEFAULT_ERA_ONTOLOGY, skip_dl=False):
     data = rdflib.Graph()
     data.parse(DRAFT)
     data.parse(EXAMPLES)
@@ -523,9 +549,45 @@ def run(rc3_path=DEFAULT_ERA_ONTOLOGY):
                 got = [tuple(short(v) for v in row) for row in res]
             ok = sorted(got) == sorted(expected)
             results.append((cq_set["id"], cq_id, ok, sorted(got)))
+    dl = None if skip_dl else validate_dl(rc3_path)
     return (conforms, sorted(shacl), results,
             validate_allocation_accounting(data),
-            validate_negative_cases(data, ont))
+            validate_negative_cases(data, ont), dl)
+
+
+def validate_dl(rc3_path):
+    """Run HermiT on the merged graph and on two fixtures it must reject."""
+    era = rdflib.Namespace("http://data.europa.eu/949/")
+    ens = rdflib.Namespace("http://data.europa.eu/dy6/def/energy/")
+    d = rdflib.Namespace("http://example.org/data/")
+    merged = dl_check.load(dl_check.default_inputs(rc3_path))
+    result = dl_check.run_hermit(merged)
+    failures = []
+
+    # Two location reports on one message: era:trainLocationReport and
+    # era:locationDateTime are functional, so this must be inconsistent.
+    second_report = rdflib.Graph()
+    for triple in merged:
+        second_report.add(triple)
+    report = rdflib.BNode()
+    second_report.add((d.tri1, era.trainLocationReport, report))
+    second_report.add((report, era.locationDateTime,
+                       rdflib.Literal("2026-10-15T08:30:00Z", datatype=rdflib.XSD.dateTime)))
+    if dl_check.run_hermit(second_report).consistent:
+        failures.append("HermiT accepted a running message with two location reports")
+
+    # A class under both era:Body and era:OrganisationRole, which rc.3
+    # declares disjoint, must be reported as unsatisfiable.
+    unsatisfiable = rdflib.Graph()
+    for triple in merged:
+        unsatisfiable.add(triple)
+    unsatisfiable.add((ens.BodyRoleFixture, rdflib.RDF.type, rdflib.OWL.Class))
+    unsatisfiable.add((ens.BodyRoleFixture, rdflib.RDFS.subClassOf, era.Body))
+    unsatisfiable.add((ens.BodyRoleFixture, rdflib.RDFS.subClassOf, era.OrganisationRole))
+    fixture = dl_check.run_hermit(unsatisfiable)
+    if not any("BodyRoleFixture" in c for c in fixture.unsatisfiable):
+        failures.append("HermiT did not report a class under two disjoint classes as unsatisfiable")
+    return result, failures
 
 
 def validate_allocation_accounting(data):
@@ -599,8 +661,12 @@ def validate_negative_cases(data, ont):
     bad_allocation = rdflib.Graph()
     for triple in data:
         bad_allocation.add(triple)
-    bad_allocation.remove((d.r1, ex.activeEnergyConsumed, rdflib.Literal("410.5", datatype=rdflib.XSD.decimal)))
-    bad_allocation.add((d.r1, ex.activeEnergyConsumed, rdflib.Literal("400.0", datatype=rdflib.XSD.decimal)))
+    sosa = rdflib.Namespace("http://www.w3.org/ns/sosa/")
+    qudt = rdflib.Namespace("http://qudt.org/schema/qudt/")
+    consumed_result = bad_allocation.value(d["r1-consumed"], sosa.hasResult)
+    bad_allocation.remove((consumed_result, qudt.numericValue, None))
+    bad_allocation.add((consumed_result, qudt.numericValue, rdflib.Literal("400.0", datatype=rdflib.XSD.decimal)))
+    bad_allocation.remove((d.r1, ex.activeEnergyConsumed, None))
     allocation_conforms, allocation_report, _ = pyshacl.validate(
         bad_allocation, shacl_graph=SHAPES, ont_graph=ont, inference="none",
         advanced=True, allow_warnings=True, inplace=True)
@@ -623,7 +689,7 @@ def validate_negative_cases(data, ont):
     bad_ems = rdflib.Graph()
     for triple in data:
         bad_ems.add(triple)
-    bad_ems.remove((d.ems1, ex.installedOn, None))
+    bad_ems.remove((d.ems1, rdflib.URIRef("http://www.w3.org/ns/sosa/isHostedBy"), None))
     ems_conforms, _, _ = pyshacl.validate(
         bad_ems, shacl_graph=SHAPES, ont_graph=ont, inference="none",
         advanced=True, allow_warnings=True, inplace=True)
@@ -643,6 +709,13 @@ def validate_negative_cases(data, ont):
             [(d.run2, era.operationalTrainNumber, None)],
             [(d.run2, era.operationalTrainNumber, rdflib.Literal("41234"))]),
     }
+    unit_ns = rdflib.Namespace("http://qudt.org/vocab/unit/")
+    regenerated_result = data.value(d["r1-regenerated"], sosa.hasResult)
+    bad_ru_cases["an active energy result in kvarh"] = (
+        [(regenerated_result, qudt.unit, None)],
+        [(regenerated_result, qudt.unit, unit_ns["KiloVAR-HR"])])
+    bad_ru_cases["a reading without a consumed active energy observation"] = (
+        [(d.r2, sosa.hasMember, d["r2-consumed"])], [])
     for label, (removed, added) in bad_ru_cases.items():
         bad_ru = rdflib.Graph()
         for triple in data:
@@ -659,17 +732,23 @@ def validate_negative_cases(data, ont):
     return failures
 
 
-def render(conforms, shacl, results, accounting_issues, md_path):
+def render(conforms, shacl, results, accounting_issues, md_path, dl=None):
     by_id = {cq_id: (ok, got) for _, cq_id, ok, got in results}
     passed = sum(1 for r in results if r[2])
     out = []
     w = out.append
     w("# Competency questions – ERA energy settlement extension\n")
-    w("Validation of the ontology draft **v0.6** (`era-energy-settlement-draft.ttl`) and its shapes "
+    w("Validation of the ontology draft **v0.7** (`era-energy-settlement-draft.ttl`) and its shapes "
       "against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.\n")
     w(f"**Result: {passed} of {len(results)} competency questions pass.** "
       f"SHACL conforms: **{conforms}**; allocation arithmetic issues: **{len(accounting_issues)}**; "
       f"SHACL results: **{len(shacl)}**.\n")
+    if dl is None:
+        w("OWL 2 DL check (HermiT): **skipped**.\n")
+    else:
+        dl_result, dl_failures = dl
+        w(f"OWL 2 DL check (HermiT): consistent **{dl_result.consistent}**; unsatisfiable classes: "
+          f"**{len(dl_result.unsatisfiable)}**; DL negative tests: **{'passed' if not dl_failures else 'failed'}**.\n")
     w("Generated by `cq_suite.py`, which runs every CQ as a SPARQL query over the draft plus "
       "`era-energy-settlement-examples.ttl`. Re-run it after any change to the ontology.\n")
 
@@ -745,11 +824,22 @@ def render(conforms, shacl, results, accounting_issues, md_path):
       "production settlement use.\n")
 
     w("## 5. Notes on the tests\n")
-    w("- **No OWL reasoner is used.** Subclass and subproperty entailments are written as property paths "
+    w("- **CQs run without a reasoner.** Subclass and subproperty entailments are written as property paths "
       "(`rdf:type/rdfs:subClassOf*`, `rdfs:subPropertyOf*`). CQ7.2 uses `ens:exchangesWith|^ens:exchangesWith` because "
       "the symmetry of the property is only entailed by a reasoner.")
+    w("- **OWL 2 DL consistency is checked with HermiT** (`dl_check.py`) on the ERA snapshot, the extension, the "
+      "examples and the vendored W3C SOSA, SSN and SSN-Ext files. Two fixtures prove that it detects an inconsistent "
+      "ABox (two location reports on one running message, against the functional `era:trainLocationReport`) and an "
+      "unsatisfiable class (a subclass of the disjoint `era:Body` and `era:OrganisationRole`).")
+    if dl is not None and dl[0].adjustments:
+        w("  Inputs adjusted for OWL 2 DL before reasoning: " + "; ".join(dl[0].adjustments) + ". "
+          "HermiT runs with `--ignoreUnsupportedDatatypes` because `xsd:date` is outside the OWL 2 datatype map.")
     w("- **CQ11.2 depends on a SHACL rule.** The link from the composition journey section's normalized `era:locoNumber` "
       "to a registered vehicle is derived only when it matches a valid 12-digit vehicle number.")
+    w("- **Readings are SOSA observation collections.** The source data states each energy value as a member "
+      "`sosa:Observation` with a QUDT result. The compact `ens:activeEnergyConsumed`, `ens:activeEnergyRegenerated` "
+      "and `ens:reactiveEnergy` values used by the S3, S4 and S13 questions are derived from those observations by "
+      "the `enssh:EnergyReadingShape` rule.")
     w("- **Allocation arithmetic checks** verify component totals and cap aggregate component values at each source "
       "reading. The energy quantities are not prices and do not define market, contract, tax, or network-loss treatment.")
     w("- **Legal and privacy caveat:** exchange authority and retention references in examples are placeholders. "
@@ -780,8 +870,9 @@ def main():
     ap.add_argument("rc3", nargs="?", default=DEFAULT_ERA_ONTOLOGY,
                     help=f"ERA ontology Turtle file (default: {DEFAULT_ERA_ONTOLOGY})")
     ap.add_argument("--md")
+    ap.add_argument("--skip-dl", action="store_true", help="skip the HermiT OWL 2 DL consistency check")
     args = ap.parse_args()
-    conforms, shacl, results, accounting_issues, negative_failures = run(args.rc3)
+    conforms, shacl, results, accounting_issues, negative_failures, dl = run(args.rc3, args.skip_dl)
     print(f"SHACL conforms: {conforms}; results: {shacl}")
     for set_id, cq_id, ok, got in results:
         print(f"{'PASS' if ok else 'FAIL'} {cq_id:<7} {got}")
@@ -796,10 +887,26 @@ def main():
             print("FAIL negative constraint test:", failure)
     else:
         print("Negative constraint tests: passed")
+    dl_ok = True
+    if dl is None:
+        print("OWL 2 DL check (HermiT): skipped")
+    else:
+        result, dl_failures = dl
+        for adjustment in result.adjustments:
+            print("DL input adjusted:", adjustment)
+        if result.error:
+            print("FAIL HermiT error:", result.error)
+        print(f"OWL 2 DL check (HermiT): consistent={result.consistent}; "
+              f"unsatisfiable classes: {result.unsatisfiable or 'none'}")
+        for failure in dl_failures:
+            print("FAIL DL negative test:", failure)
+        if not dl_failures:
+            print("DL negative tests: passed")
+        dl_ok = result.consistent and not result.unsatisfiable and not dl_failures
     if args.md:
-        render(conforms, shacl, results, accounting_issues, args.md)
+        render(conforms, shacl, results, accounting_issues, args.md, dl)
         print("wrote", args.md)
-    sys.exit(0 if all(r[2] for r in results) and conforms
+    sys.exit(0 if all(r[2] for r in results) and conforms and dl_ok
              and not accounting_issues and not negative_failures else 1)
 
 
