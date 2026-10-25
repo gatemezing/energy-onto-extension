@@ -8,7 +8,7 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 
 **Strengths**
 
-- A clear requirements basis: 48 executable competency questions, plus SHACL tests, arithmetic checks and negative fixtures, run against a vendored ERA release (LOT-style ORSD → implementation → evaluation).
+- A clear requirements basis: 49 executable competency questions, plus SHACL tests, arithmetic checks and negative fixtures, run against a vendored ERA release (LOT-style ORSD → implementation → evaluation).
 - Good reuse: SOSA/SSN for measurement, SAREF meter, PROV for evidence and exchange, OWL-Time, GeoSPARQL, QUDT units through the ERA `era:unitOfMeasure` convention, and RINF/telematics anchors (`era:Vehicle`, `era:RunningTrack`, `era:ReferenceBorderPoint`, `era:TrainCompositionMessage`).
 - Clean separation between the data model, its validation (SHACL) and legal evidence; the model never claims compliance.
 - No modification of `era:` terms, only extension.
@@ -28,7 +28,8 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R9 | Header comments contradicted the model (TrainRun "removed") and the CQ count | Low | **Fixed in v0.6** |
 | R10 | Inconsistent party pattern: some properties target `era:Body` (`exchangeSender`, `responsibleRUOrganisation`), others `era:OrganisationRole` (`operatedBy`, `allocatedTo`) | High | Open → P1 |
 | R11 | Implicit PROV agents: `compiledBy`/`producedBy` ⊑ `prov:wasAttributedTo` (range `prov:Agent`) make EMS and settlement systems agents by inference only; ground systems have no superclass | Medium | Open → P1 |
-| R12 | `ens:railwayCompanyCode` duplicates `era:organisationCode` (ERA-allocated code on `era:Body`) | Medium | Open → P1 |
+| R12 | `ens:railwayCompanyCode` duplicates `era:organisationCode` (ERA-allocated code on `era:Body`) | Medium | **Fixed in v0.6**: deprecated, `dct:isReplacedBy era:organisationCode` |
+| R20 | `era:trainOperatingRU` is a datatype property (company code string), but the operating RU should be the organisation role of a body acting as railway undertaking | Medium | **Fixed locally in v0.6**: `ens:operatingRailwayUndertaking → era:OrganisationRole` typed with ERA `organisation-roles/RU` (or `RU-1`…`RU-7`); the code stays in `era:trainOperatingRU` and must equal the body's `era:organisationCode`. Upstream request in P4 |
 | R13 | `ens:EnergyReading` is both `sosa:Observation` and `geo:Feature` and carries several results as datatype properties (CEBD record shape) | Medium | Open → P2 |
 | R14 | Concept schemes are defined only in the example data; `AllocationStatuses` mixes status and method (`estimated`, `fallback-to-keeper`) | Medium | Open → P2 |
 | R15 | Corrections expressed as `ens:allocationVersion` string; no supersession or reversal | Medium | Open → P2 |
@@ -42,13 +43,14 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 1. Namespace `http://data.europa.eu/dy6/def/energy/`; prefixes `ens:` (vocabulary), `ensc:` (concepts), `enssh:` (shapes). Synthetic instances stay in `http://example.org/data/`.
 2. Ontology header: `dct:title`, `dct:description`, `owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.6.0>`, `owl:versionInfo "0.6.0"`, `dct:modified`, `vann:preferredNamespacePrefix/Uri`, `vs:term_status` (ERA convention).
 3. Every `ens:` term: `rdfs:label`, `rdfs:isDefinedBy`, `vs:term_status "unstable"`, and a `skos:definition` or comment.
-4. `ens:TrainRun` renamed `ens:RunningTrain ⊑ era:Train` (hence `⊑ era:OperationalTrainNumberIdentifier`), so `era:operationalTrainNumber` replaces `ens:operationalTrainNumber` and `era:trainDepartureDate`/`era:trainOperatingRU` become available; renamed properties `ens:runningTrainId`, `ens:aboutRunningTrain`, `ens:matchedRunningTrain`; new `ens:runningTrainIdent → era:TrainIdent`; `runStart`/`runEnd` documented as an attribution window, not actual departure.
+4. `ens:TrainRun` renamed `ens:RunningTrain ⊑ era:Train` (hence `⊑ era:OperationalTrainNumberIdentifier`), so `era:operationalTrainNumber` replaces `ens:operationalTrainNumber` and `era:trainDepartureDate`/`era:trainOperatingRU` become available; renamed properties `ens:aboutRunningTrain`, `ens:matchedRunningTrain`; `ens:runningTrainId` removed, the key is `era:operationalTrainNumber` + `era:trainDepartureDate` (uniqueness checked in SHACL); new `ens:runningTrainIdent → era:TrainIdent`; `runStart`/`runEnd` documented as an attribution window, not actual departure.
 5. `skos:closeMatch` removed from ontology terms (replaced by `rdfs:seeAlso`), see R18.
+   Operating RU: `ens:operatingRailwayUndertaking` to an `era:OrganisationRole` with `era:hasOrganisationRole` RU/RU-n and `era:roleOf` a body; `enssh:RailwayUndertakingRoleShape`; `ens:railwayCompanyCode` deprecated for `era:organisationCode` (R12, R20). New CQ12.5 and three negative tests (non-RU role, code mismatch, duplicate train key).
 6. `ens:allocatesReading owl:propertyChainAxiom (ens:hasAllocationComponent ens:componentReading)`.
 7. Domains/ranges for `ens:forwardsTo` and `ens:exchangeProtocol`.
 8. Shapes moved to `enssh:`; new `enssh:EnergyMeasurementSystemShape` and `enssh:ForwardsToShape`; dangling validation-rule links fixed. Two new negative tests (DCS → settlement system; EMS without vehicle).
 
-Result: 48/48 CQs, SHACL conforms, accounting and all negative tests pass.
+Result: 49/49 CQs, SHACL conforms, accounting and all negative tests pass.
 
 ## 3. Roadmap
 
@@ -56,7 +58,7 @@ Result: 48/48 CQs, SHACL conforms, accounting and all negative tests pass.
 
 - Apply one party pattern (recommended: **roles for responsibilities in context, bodies for identity**, linked by `era:roleOf`): `exchangeSender`/`exchangeRecipient` → roles or agents; `responsibleRUOrganisation` kept as the resolution of a code to a body.
 - Declare ground systems and EMS as `prov:SoftwareAgent` (or `sosa:System` + `prov:Agent`) so the PROV attribution is explicit; give `ens:operatedBy` a domain.
-- Deprecate `ens:railwayCompanyCode` (`owl:deprecated true`, `dct:isReplacedBy era:organisationCode`) and resolve `era:responsibleRU` through the ERA Organisation Code Register.
+- Apply the operating-RU role pattern to `ens:responsibleRUOrganisation` (message → role instead of body) and to `ens:consumerRole`, and type `ens:EnergyConsumerRole` instances with an ERA role concept where one fits.
 - Add test data and CQs with `era:TrainIdent` (TAF/TAP core elements) and a reused operational train number across two runs.
 
 ### P2 – v0.8: measurement, vocabularies and lifecycle
@@ -79,7 +81,7 @@ Result: 48/48 CQs, SHACL conforms, accounting and all negative tests pass.
 - Confirm with the Publications Office / ERA that `dy6/def/energy` is the allocated path and set up dereferencing and content negotiation for terms, `0.6.0` version IRIs and shapes.
 - Licence statement (ERA uses Commission Decision 2017/863 for its ontology) and contributors in the header.
 - Quality gates in CI: `cq_suite.py`, OWL 2 DL profile check (ROBOT `validate-profile`), OOPS! pitfall scan, HTML documentation (pyLODE or Widoco).
-- Upstream change requests to the ERA ontology: object link from `era:LocoIdent`/`era:locoNumber` to `era:Vehicle`; unit of `era:trainWeight` (G5); clarify whether the run key should be `era:TrainIdent`.
+- Upstream change requests to the ERA ontology: object link from `era:LocoIdent`/`era:locoNumber` to `era:Vehicle`; unit of `era:trainWeight` (G5); clarify whether the run key should be `era:TrainIdent`; make `era:trainOperatingRU` (and `era:responsibleRU`) object properties to `era:OrganisationRole`, or add object counterparts, so `ens:operatingRailwayUndertaking` can be retired.
 
 ## 4. Decisions needed
 

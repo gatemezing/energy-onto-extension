@@ -1,6 +1,7 @@
 @prefix ens:    <http://data.europa.eu/dy6/def/energy/> .
 @prefix ensc:   <http://data.europa.eu/dy6/def/energy/concepts/> .
 @prefix era:   <http://data.europa.eu/949/> .
+@prefix eraor: <http://data.europa.eu/949/concepts/organisation-roles/> .
 @prefix d:     <http://example.org/data/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
@@ -63,7 +64,7 @@ d:trafikverket a era:Body ; rdfs:label "Trafikverket" .
 d:eress a era:Body ; rdfs:label "Eress" .
 d:nordCargo a era:Body ; rdfs:label "Nord Cargo AS (fictitious RU)" .
 d:railLease a era:Body ; rdfs:label "RailLease AB (fictitious lessor)" .
-d:nordCargo ens:railwayCompanyCode "3801" .
+d:nordCargo era:organisationCode "3801" .
 
 # These placeholders document where deployment-specific approvals must be
 # linked. They are not legal opinions, contracts, or actual retention rules.
@@ -75,6 +76,7 @@ d:departureEvent2 a prov:Entity ; rdfs:label "Illustrative authoritative departu
 d:lateMessageEvidence a prov:Entity ; rdfs:label "Illustrative operational evidence for late composition message"@en .
 
 d:ruRole a ens:EnergyConsumerRole ; era:roleOf d:nordCargo .
+d:nordCargoRU a era:OrganisationRole ; era:roleOf d:nordCargo ; era:hasOrganisationRole eraor:RU-3 .
 d:keeperRole a era:OrganisationRole ; era:roleOf d:railLease .
 d:emsRespRole a ens:EMSResponsibleRole ; era:roleOf d:railLease .
 d:dcsAdminRole a ens:DCSAdministratorRole ; era:roleOf d:eress .
@@ -251,8 +253,10 @@ d:tri1 a era:TrainRunningInformationMessage ;
         [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
 
 d:run1 a ens:RunningTrain ;
-    ens:runningTrainId "NO-SE-20261015-41234-01" ;
     era:operationalTrainNumber "41234" ;
+    era:trainDepartureDate "2026-10-15"^^xsd:date ;
+    era:trainOperatingRU "3801" ;
+    ens:operatingRailwayUndertaking d:nordCargoRU ;
     ens:runStart "2026-10-15T06:00:00Z"^^xsd:dateTime ;
     ens:runEnd "2026-10-15T08:38:00Z"^^xsd:dateTime ;
     ens:consumerRole d:ruRole ;
@@ -260,8 +264,10 @@ d:run1 a ens:RunningTrain ;
     ens:actualDepartureEvidence d:departureEvent .
 
 d:run2 a ens:RunningTrain ;
-    ens:runningTrainId "NO-20261015-41888-01" ;
     era:operationalTrainNumber "41888" ;
+    era:trainDepartureDate "2026-10-15"^^xsd:date ;
+    era:trainOperatingRU "3801" ;
+    ens:operatingRailwayUndertaking d:nordCargoRU ;
     ens:runStart "2026-10-15T07:00:00Z"^^xsd:dateTime ;
     ens:runEnd "2026-10-15T12:00:00Z"^^xsd:dateTime ;
     ens:consumerRole d:ruRole ;

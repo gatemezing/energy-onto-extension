@@ -20,7 +20,7 @@
 # DRAFT v0.6 – ERA ontology extension for traction energy settlement
 #   (proposal for ERA governance; namespace http://data.europa.eu/dy6/def/energy/)
 # LOT activity: Ontology implementation (conceptualisation + reuse),
-#   validated against the 48 competency questions executed by cq_suite.py
+#   validated against the 49 competency questions executed by cq_suite.py
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following
@@ -41,8 +41,12 @@
 #     a subclass of era:Train; era:operationalTrainNumber replaces
 #     ens:operationalTrainNumber. It can carry the TAF/TAP unique train
 #     identification (era:TrainIdent) through ens:runningTrainIdent.
-#     Related properties renamed: ens:runningTrainId, ens:aboutRunningTrain,
-#     ens:matchedRunningTrain.
+#     Related properties renamed: ens:aboutRunningTrain,
+#     ens:matchedRunningTrain. ens:runningTrainId removed: a running train
+#     is keyed by era:operationalTrainNumber + era:trainDepartureDate.
+#   - New ens:operatingRailwayUndertaking -> era:OrganisationRole with the
+#     ERA RU role concept; era:trainOperatingRU keeps the source code.
+#   - ens:railwayCompanyCode deprecated in favour of era:organisationCode.
 #   - No SKOS mapping properties on classes or properties: skos:closeMatch
 #     to saref:Measurement replaced by rdfs:seeAlso.
 #   - ens:allocatesReading is entailed from allocation components by an
@@ -553,14 +557,16 @@ ens:runningTrainIdent a owl:ObjectProperty ;
     rdfs:domain ens:RunningTrain ; rdfs:range era:TrainIdent ;
     rdfs:label "running train identification"@en ;
     skos:definition "TAF/TAP TSI unique identification of the contracted train (era:TrainIdent) under which this train runs."@en ;
-    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged; ens:runningTrainId remains for local or legacy keys."@en .
+    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged. Otherwise the key is era:operationalTrainNumber together with era:trainDepartureDate, as in the TAF/TAP train identification."@en .
 
-ens:runningTrainId a owl:DatatypeProperty ;
-    rdfs:label "running train identifier"@en ;
-    skos:definition "Stable identifier of the running train, independent of the reusable operational train number."@en ;
+ens:operatingRailwayUndertaking a owl:ObjectProperty ;
+    era:shaclShapeValidationRule enssh:RunningTrainShape ;
+    rdfs:label "operating railway undertaking"@en ;
+    skos:definition "Organisation role in which a body operates the running train as railway undertaking."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:RunningTrain ; rdfs:range xsd:string .
+    rdfs:domain ens:RunningTrain ; rdfs:range era:OrganisationRole ;
+    rdfs:comment "Object counterpart of era:trainOperatingRU, which in rc.3 is a datatype property holding the company code. Keep the source code in era:trainOperatingRU and link the resolved role here: the role has era:hasOrganisationRole RU (or a narrower RU-n concept of the ERA organisation-roles scheme) and era:roleOf the body whose era:organisationCode equals the source code. The operating RU is not necessarily the energy consumer (see ens:consumerRole)."@en .
 
 ens:runStart a owl:DatatypeProperty ;
     rdfs:label "run start"@en ;
@@ -594,9 +600,11 @@ ens:responsibleRUOrganisation a owl:ObjectProperty ;
 ens:railwayCompanyCode a owl:DatatypeProperty ;
     rdfs:label "railway company code"@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
-    vs:term_status "unstable" ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy era:organisationCode ;
     rdfs:domain era:Body ; rdfs:range xsd:string ;
-    rdfs:comment "Organization identifier corresponding to a telematics company code; populate only from an authoritative code mapping."@en .
+    rdfs:comment "Deprecated in v0.6: use era:organisationCode, the code allocated by ERA to a body, which the telematics company codes (era:trainOperatingRU, era:responsibleRU) refer to."@en .
 
 ens:aboutRunningTrain a owl:ObjectProperty ;
     rdfs:label "about running train"@en ;
@@ -820,6 +828,11 @@ era:LocoIdent a owl:Class .
 era:TrainIdent a owl:Class .
 era:Train a owl:Class .
 era:operationalTrainNumber a owl:DatatypeProperty .
+era:trainDepartureDate a owl:DatatypeProperty .
+era:trainOperatingRU a owl:DatatypeProperty .
+era:organisationCode a owl:DatatypeProperty .
+era:roleOf a owl:ObjectProperty .
+era:hasOrganisationRole a owl:ObjectProperty .
 skos:definition a owl:AnnotationProperty .
 vs:term_status a owl:AnnotationProperty .
 era:TrainCompositionMessage a owl:Class .

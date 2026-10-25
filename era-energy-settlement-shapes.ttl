@@ -5,6 +5,7 @@
 @prefix prov:  <http://www.w3.org/ns/prov#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 @prefix ensc:  <http://data.europa.eu/dy6/def/energy/concepts/> .
+@prefix eraor: <http://data.europa.eu/949/concepts/organisation-roles/> .
 @prefix enssh: <http://data.europa.eu/dy6/def/energy/shapes/> .
 
 enssh:ConsumptionPointShape a sh:NodeShape ;
@@ -302,13 +303,25 @@ enssh:AllocationComponentShape a sh:NodeShape ;
         """ ;
     ] .
 
-enssh:TrainRunShape a sh:NodeShape ;
+enssh:RunningTrainShape a sh:NodeShape ;
     sh:targetClass ens:RunningTrain ;
     sh:property [
-        sh:path ens:runningTrainId ;
-        sh:datatype xsd:string ;
+        sh:path era:trainDepartureDate ;
+        sh:datatype xsd:date ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path era:trainOperatingRU ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ens:operatingRailwayUndertaking ;
+        sh:class era:OrganisationRole ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:node enssh:RailwayUndertakingRoleShape ;
     ] ;
     sh:property [
         sh:path era:operationalTrainNumber ;
@@ -340,14 +353,27 @@ enssh:TrainRunShape a sh:NodeShape ;
         sh:maxCount 1 ;
     ] ;
     sh:sparql [
-        sh:message "Running-train identifiers must be unique in the graph." ;
+        sh:message "Operational train number and departure date must identify one running train." ;
         sh:select """
-            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
-                $this ens:runningTrainId ?id .
-                ?other ens:runningTrainId ?id .
+                $this era:operationalTrainNumber ?number ; era:trainDepartureDate ?date .
+                ?other era:operationalTrainNumber ?number ; era:trainDepartureDate ?date .
                 FILTER(?other != $this)
+            }
+        """ ;
+    ] ;
+    sh:sparql [
+        sh:message "The operating RU role must belong to the body whose ERA organisation code is the source era:trainOperatingRU code." ;
+        sh:select """
+            PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
+            PREFIX era: <http://data.europa.eu/949/>
+            SELECT $this
+            WHERE {
+                $this era:trainOperatingRU ?sourceCode ;
+                      ens:operatingRailwayUndertaking/era:roleOf ?body .
+                FILTER NOT EXISTS { ?body era:organisationCode ?sourceCode }
             }
         """ ;
     ] ;
@@ -462,7 +488,7 @@ enssh:RunningMessageShape a sh:NodeShape ;
             WHERE {
                 $this era:responsibleRU ?sourceCode ;
                       ens:responsibleRUOrganisation ?organization .
-                FILTER NOT EXISTS { ?organization ens:railwayCompanyCode ?sourceCode }
+                FILTER NOT EXISTS { ?organization era:organisationCode ?sourceCode }
             }
         """ ;
     ] .
@@ -562,4 +588,17 @@ enssh:ForwardsToShape a sh:NodeShape ;
                 }
             }
         """ ;
+    ] .
+
+enssh:RailwayUndertakingRoleShape a sh:NodeShape ;
+    sh:property [
+        sh:path era:roleOf ;
+        sh:class era:Body ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path era:hasOrganisationRole ;
+        sh:in ( eraor:RU eraor:RU-1 eraor:RU-2 eraor:RU-3 eraor:RU-4 eraor:RU-5 eraor:RU-6 eraor:RU-7 ) ;
+        sh:minCount 1 ;
+        sh:message "The operating railway undertaking must be an organisation role typed with the ERA RU concept or one of its narrower RU-n concepts." ;
     ] .

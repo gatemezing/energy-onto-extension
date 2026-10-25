@@ -367,6 +367,17 @@ SETS = [
              "Selection through the resolved organization link", "ABox",
              """SELECT ?org WHERE { d:tri1 ens:responsibleRUOrganisation ?org . }""",
              [("nordCargo",)]),
+            ("CQ12.5", "Which railway undertaking operates running train 41234 departing on 15 October 2026, in which ERA role, and under which company code?",
+             "Selection through the ERA organisation-role pattern", "ABox",
+             """SELECT ?org ?role ?code WHERE {
+  ?run era:operationalTrainNumber "41234" ;
+       era:trainDepartureDate "2026-10-15"^^xsd:date ;
+       ens:operatingRailwayUndertaking ?ruRole .
+  ?ruRole era:roleOf ?org ;
+          era:hasOrganisationRole ?role .
+  ?org era:organisationCode ?code .
+}""",
+             [("nordCargo", "RU-3", "3801")]),
         ],
     },
     {
@@ -618,6 +629,33 @@ def validate_negative_cases(data, ont):
         advanced=True, allow_warnings=True, inplace=True)
     if ems_conforms:
         failures.append("SHACL accepted an EMS that is not installed on a vehicle")
+
+    org_roles = rdflib.Namespace("http://data.europa.eu/949/concepts/organisation-roles/")
+    era = rdflib.Namespace("http://data.europa.eu/949/")
+    bad_ru_cases = {
+        "an operating RU role typed as vehicle keeper": (
+            [(d.nordCargoRU, era.hasOrganisationRole, None)],
+            [(d.nordCargoRU, era.hasOrganisationRole, org_roles.Keeper)]),
+        "an operating RU code that differs from the body's organisation code": (
+            [(d.run1, era.trainOperatingRU, None)],
+            [(d.run1, era.trainOperatingRU, rdflib.Literal("9999"))]),
+        "two running trains with the same train number and departure date": (
+            [(d.run2, era.operationalTrainNumber, None)],
+            [(d.run2, era.operationalTrainNumber, rdflib.Literal("41234"))]),
+    }
+    for label, (removed, added) in bad_ru_cases.items():
+        bad_ru = rdflib.Graph()
+        for triple in data:
+            bad_ru.add(triple)
+        for pattern in removed:
+            bad_ru.remove(pattern)
+        for triple in added:
+            bad_ru.add(triple)
+        ru_conforms, _, _ = pyshacl.validate(
+            bad_ru, shacl_graph=SHAPES, ont_graph=ont, inference="none",
+            advanced=True, allow_warnings=True, inplace=True)
+        if ru_conforms:
+            failures.append(f"SHACL accepted {label}")
     return failures
 
 
