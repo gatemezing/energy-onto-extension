@@ -19,10 +19,10 @@
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 
 # =====================================================================
-# DRAFT v0.8 – ERA ontology extension for traction energy settlement
+# DRAFT v0.9 – ERA ontology extension for traction energy settlement
 #   (proposal for ERA governance; namespace http://data.europa.eu/dy6/def/energy/)
 # LOT activity: Ontology implementation (conceptualisation + reuse),
-#   validated against the 52 competency questions executed by cq_suite.py
+#   validated against the 53 competency questions executed by cq_suite.py
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following
@@ -33,7 +33,14 @@
 #   and 2.5.2(8); ENE TSI Art. 9(4); EN 50463:2017 and prEN revision;
 #   UIC IRS 90930; Eress guidelines.
 #
-# Changes from v0.7:
+# Changes from v0.8:
+#   - The EMS, the data handling system, the data collecting system, the
+#     exchange function and the settlement system are ssn:System (R11).
+#     The data handling system used sosa:System, which W3C SOSA/SSN does
+#     not define (R26). No prov:Agent superclass is stated: agency stays
+#     an inference from ens:compiledBy and ens:producedBy.
+#
+# Changes from v0.7 (v0.8):
 #   - One party pattern (R10): every party-valued ens: property targets
 #     era:OrganisationRole; the role reaches its era:Body through
 #     era:roleOf and its kind through era:hasOrganisationRole.
@@ -103,9 +110,9 @@
     rdfs:label "ERA energy settlement extension (draft)"@en ;
     dct:title "ERA energy settlement extension"@en ;
     dct:description "Proposed extension of the ERA ontology for on-board traction energy measurement, energy data exchange and settlement allocation, linked to ERA telematics (TEL TSI) and RINF concepts."@en ;
-    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.8.0> ;
-    owl:versionInfo "0.8.0" ;
-    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.7.0> ;
+    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.9.0> ;
+    owl:versionInfo "0.9.0" ;
+    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.8.0> ;
     dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
     dct:created "2026-10-15"^^xsd:date ;
     dct:modified "2026-10-25"^^xsd:date ;
@@ -123,7 +130,7 @@
 ens:EnergyMeasurementSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf saref:Meter , sosa:Platform ;
+    rdfs:subClassOf saref:Meter , sosa:Platform , ssn:System ;
     rdfs:label "Energy measurement system (EMS)"@en ;
     skos:definition "On-board system measuring energy taken from and returned to the contact line, compiling CEBD and transmitting it to a DCS (EN 50463)."@en ;
     rdfs:comment "Instance-level counterpart of the vehicle type parameter era:hasOnboardEnergyMeasurement (ERATV 4.10.12)."@en .
@@ -138,7 +145,7 @@ ens:EnergyMeasurementFunction a owl:Class ;
 ens:DataHandlingSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf sosa:System ;
+    rdfs:subClassOf ssn:System ;
     rdfs:label "Data handling system (DHS)"@en ;
     skos:definition "Function merging EMF data with time and position to compile, store and send CEBD (EN 50463-3)."@en .
 
@@ -363,21 +370,25 @@ ens:MeasuredReactiveEnergy a sosa:ObservableProperty , owl:NamedIndividual ;
 
 ens:DataCollectingSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    rdfs:subClassOf ssn:System ;
     vs:term_status "unstable" ;
     rdfs:label "Data collecting system (DCS)"@en ;
     skos:definition "On-ground system receiving CEBD from EMSs and forwarding it to settlement."@en .
 
 ens:ExchangeFunction a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    rdfs:subClassOf ssn:System ;
     vs:term_status "unstable" ;
     rdfs:label "Exchange function"@en ;
     skos:definition "Function sorting energy data and allocating it to the correct settlement zone, including cross-border exchange (IRS 90930). Example: Erex."@en .
 
 ens:SettlementSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    rdfs:subClassOf ssn:System ;
     vs:term_status "unstable" ;
     rdfs:label "Settlement system"@en ;
-    skos:definition "On-ground system validating CEBD, estimating missing data and allocating consumption to parties (ENE TSI Art. 9(4))."@en .
+    skos:definition "On-ground system validating CEBD, estimating missing data and allocating consumption to parties (ENE TSI Art. 9(4))."@en ;
+    rdfs:comment "Like the data collecting system and the exchange function, an ssn:System. It is a prov:Agent only by inference from ens:producedBy (⊑ prov:wasAttributedTo); no prov:Agent superclass is stated."@en .
 
 ens:SettlementZone a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;

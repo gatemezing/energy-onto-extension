@@ -2,22 +2,23 @@
 
 Scope: `era-energy-settlement-draft.ttl` (vocabulary), `era-energy-settlement-shapes.ttl`, the example graph and the competency-question suite, reviewed against ERA ontology v4.0.0-rc.3. Target: a **proposal to ERA governance**, published under `http://data.europa.eu/dy6/def/energy/`.
 
-**Current draft: 0.8.0** (`owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.8.0>`), licensed under EUPL v1.2.
+**Current draft: 0.9.0** (`owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.9.0>`), licensed under EUPL v1.2.
 
 The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requirements G1–G6 (`era-energy-settlement-cqs.md` §4) remain valid; this document covers modelling quality, reuse and publication.
 
 ## 1. Assessment summary
 
-**Status at 0.8.0**
+**Status at 0.9.0**
 
 | | |
 |---|---|
-| Competency questions | 52 of 52 pass, in 15 sets |
+| Competency questions | 53 of 53 pass, in 15 sets |
 | Invalid fixtures rejected | 15 (13 by SHACL or the arithmetic check, 2 by HermiT) |
 | OWL 2 DL (HermiT) | Consistent; no unsatisfiable classes |
 | Terms | 94 `ens:` terms, each labelled, defined and given a term status; 9 deprecated with `dct:isReplacedBy` |
+| Reused terms | 71 of 71 `sosa:`, `ssn:` and `era:` terms declared at their source |
 | CI | `cq_suite.py` runs on every push and pull request (GitHub Actions) |
-| Findings | 25 recorded: 16 fixed, 1 partly fixed, 2 worked around upstream, 6 open |
+| Findings | 26 recorded: 18 fixed, 1 partly fixed, 2 worked around upstream, 5 open |
 
 **Strengths**
 
@@ -41,7 +42,7 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R8 | `ens:forwardsTo` / `ens:exchangeProtocol` without domain/range; no check of admissible flow | Low | **Fixed in 0.6**, with `enssh:ForwardsToShape` |
 | R9 | Header comments contradicted the model (TrainRun "removed") and the CQ count | Low | **Fixed in 0.6** |
 | R10 | Inconsistent party pattern: some properties targeted `era:Body` (`exchangeSender`, `responsibleRUOrganisation`), others `era:OrganisationRole` | High | **Fixed in 0.8**: every party-valued `ens:` property targets `era:OrganisationRole`; CQ10.4 guards it |
-| R11 | Implicit PROV agents: `compiledBy`/`producedBy` ⊑ `prov:wasAttributedTo` (range `prov:Agent`) make EMS and settlement systems agents by inference only; ground systems have no superclass | Medium | Open → 0.9 |
+| R11 | Implicit PROV agents: `compiledBy`/`producedBy` ⊑ `prov:wasAttributedTo` (range `prov:Agent`) make EMS and settlement systems agents by inference only; ground systems have no superclass | Medium | **Fixed in 0.9**: the EMS, data handling, data collecting, exchange and settlement systems are `ssn:System`; agency stays an inference (decision, §4); CQ6.5 |
 | R12 | `ens:railwayCompanyCode` duplicates `era:organisationCode` (ERA-allocated code on `era:Body`) | Medium | **Fixed in 0.6**: deprecated, `dct:isReplacedBy era:organisationCode` |
 | R13 | `ens:EnergyReading` was both `sosa:Observation` and `geo:Feature` and carried several results as datatype properties | Medium | **Fixed in 0.7**: reading = `sosa:ObservationCollection` (SSN-Ext) of `sosa:Observation`s with `qudt:QuantityValue` results |
 | R14 | Concept schemes are defined only in the example data; `AllocationStatuses` mixes status and method (`estimated`, `fallback-to-keeper`) | Medium | Open → 0.10 |
@@ -56,8 +57,16 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R23 | Example message `d:tri1` carried three `era:trainLocationReport`s, but rc.3 declares it functional; HermiT found the ABox inconsistent (SHACL and the CQs did not) | High | **Fixed in 0.7**: one location report per message; a DL negative test keeps it detected |
 | R24 | ERA rc.3 restricts `era:dNvroll` to `xsd:double` with `xsd:decimal` facet values, which is not valid OWL 2 DL | Low (upstream) | Worked around in `dl_check.py` (facets cast and reported); upstream request in §3 |
 | R25 | SSN (property chains defining `sosa:usedProcedure`) combined with SSN-Ext (`ObservationCollection ⊑ ≤1 sosa:usedProcedure`) is outside OWL 2 DL | Low (W3C) | Worked around in `dl_check.py`: that one SSN-Ext axiom (unused here) is dropped and reported |
+| R26 | `ens:DataHandlingSystem ⊑ sosa:System`, a term W3C SOSA/SSN does not define (the class is `ssn:System`); nothing checked that reused terms exist | Medium | **Fixed in 0.9**: `ssn:System`; `cq_suite.py` now checks that every reused `sosa:`, `ssn:` and `era:` term is declared at its source |
 
 ## 2. Version history
+
+### 0.9.0 – systems on SSN (in progress)
+
+1. The EMS, the data handling system, the data collecting system, the exchange function and the settlement system are subclasses of `ssn:System` (R11). No `prov:Agent` superclass is stated: agency stays an inference from `ens:compiledBy` and `ens:producedBy` (decision, §4).
+2. `ens:DataHandlingSystem` used `sosa:System`, which W3C SOSA/SSN does not define; it is now `ssn:System` (R26).
+3. New gate in `cq_suite.py`: every reused `sosa:`, `ssn:` and `era:` term must be declared in the vendored W3C files or the ERA snapshot (71 terms; it flags `sosa:System` on 0.8).
+4. New CQ6.5 (classes declared as `ssn:System`). Result: 53/53 CQs, SHACL conforms, HermiT consistent.
 
 ### 0.8.0 – one party pattern
 
@@ -94,7 +103,7 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 
 ### 0.9 – agents, role concepts and identity
 
-- Declare ground systems and the EMS as PROV agents, `prov:SoftwareAgent` or `sosa:System` + `prov:Agent` (R11; see §4).
+- Ground systems and the EMS as `ssn:System` (R11): done.
 - Type every `ens:` role instance (energy consumer, EMS responsible, operators) with an ERA organisation-roles concept where one fits, as the RU and IM roles already are.
 - Test data and CQs with `era:TrainIdent` and an operational train number reused on two days (R6).
 - Run the ERA shapes that target `era:Train` on the examples (R19).
@@ -133,10 +142,10 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 **Needed**
 
 1. Confirmation of the `dy6/def/energy` allocation with the Publications Office and ERA.
-2. For R11: model the ground systems and the EMS as `prov:SoftwareAgent`, or as `sosa:System` plus `prov:Agent`.
 
 **Settled**
 
 - SOSA/SSN is the normative measurement model (0.7).
 - Licence: EUPL v1.2 (0.7).
 - All party-valued properties target `era:OrganisationRole`; systems stay the range of `ens:producedBy` and `ens:compiledBy` (0.8).
+- Ground systems and the EMS are `ssn:System` only; `prov:Agent` is left to inference (0.9).
