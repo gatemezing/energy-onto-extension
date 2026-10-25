@@ -19,10 +19,10 @@
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 
 # =====================================================================
-# DRAFT v0.7 – ERA ontology extension for traction energy settlement
+# DRAFT v0.8 – ERA ontology extension for traction energy settlement
 #   (proposal for ERA governance; namespace http://data.europa.eu/dy6/def/energy/)
 # LOT activity: Ontology implementation (conceptualisation + reuse),
-#   validated against the 51 competency questions executed by cq_suite.py
+#   validated against the 52 competency questions executed by cq_suite.py
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following
@@ -33,7 +33,16 @@
 #   and 2.5.2(8); ENE TSI Art. 9(4); EN 50463:2017 and prEN revision;
 #   UIC IRS 90930; Eress guidelines.
 #
-# Changes from v0.6:
+# Changes from v0.7:
+#   - One party pattern (R10): every party-valued ens: property targets
+#     era:OrganisationRole; the role reaches its era:Body through
+#     era:roleOf and its kind through era:hasOrganisationRole.
+#     ens:exchangeSender and ens:exchangeRecipient now target roles (the
+#     receiving system stays linked by ens:exchangeContains);
+#     ens:responsibleRUOrganisation is replaced by
+#     ens:responsibleRailwayUndertaking; ens:operatedBy has a domain.
+#
+# Changes from v0.6 (v0.7):
 #   - Licence: EUPL v1.2 (Commission Implementing Decision (EU) 2017/863),
 #     the licence of the ERA ontology.
 #   - Maximal SOSA/SSN reuse. An energy reading is a sosa:ObservationCollection
@@ -94,9 +103,9 @@
     rdfs:label "ERA energy settlement extension (draft)"@en ;
     dct:title "ERA energy settlement extension"@en ;
     dct:description "Proposed extension of the ERA ontology for on-board traction energy measurement, energy data exchange and settlement allocation, linked to ERA telematics (TEL TSI) and RINF concepts."@en ;
-    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.7.0> ;
-    owl:versionInfo "0.7.0" ;
-    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.6.0> ;
+    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.8.0> ;
+    owl:versionInfo "0.8.0" ;
+    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.7.0> ;
     dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
     dct:created "2026-10-15"^^xsd:date ;
     dct:modified "2026-10-25"^^xsd:date ;
@@ -421,10 +430,11 @@ ens:servesZone a owl:ObjectProperty ;
 
 ens:operatedBy a owl:ObjectProperty ;
     rdfs:label "operated by"@en ;
+    skos:definition "Organisation role in which a body operates a data collecting system, an exchange function or a settlement system."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:range era:OrganisationRole ;
-    rdfs:comment "Applies to DCS, exchange function and settlement system."@en .
+    rdfs:domain [ a owl:Class ; owl:unionOf ( ens:DataCollectingSystem ens:ExchangeFunction ens:SettlementSystem ) ] ;
+    rdfs:range era:OrganisationRole .
 
 ## 1.3 Roles (IRS 90930) – specialise era:OrganisationRole
 
@@ -650,13 +660,25 @@ ens:consumerRole a owl:ObjectProperty ;
     rdfs:domain ens:RunningTrain ; rdfs:range ens:EnergyConsumerRole ;
     rdfs:comment "Consumer party applicable to this run under the relevant agreement and allocation rules."@en .
 
-ens:responsibleRUOrganisation a owl:ObjectProperty ;
-    rdfs:label "responsible RU organisation"@en ;
+ens:responsibleRailwayUndertaking a owl:ObjectProperty ;
+    era:shaclShapeValidationRule enssh:RunningMessageShape ;
+    rdfs:label "responsible railway undertaking"@en ;
+    skos:definition "Organisation role in which a body is the railway undertaking responsible for the train reported by a running information message."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
     rdfs:domain era:TrainRunningInformationMessage ;
+    rdfs:range era:OrganisationRole ;
+    rdfs:comment "Object counterpart of the era:responsibleRU company code, which is kept as supplied. The role has era:hasOrganisationRole RU (or a narrower RU-n concept) and era:roleOf the body whose era:organisationCode equals the source code, as for ens:operatingRailwayUndertaking."@en .
+
+ens:responsibleRUOrganisation a owl:ObjectProperty ;
+    rdfs:label "responsible RU organisation"@en ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "deprecated" ;
+    owl:deprecated true ;
+    dct:isReplacedBy ens:responsibleRailwayUndertaking ;
+    rdfs:domain era:TrainRunningInformationMessage ;
     rdfs:range era:Body ;
-    rdfs:comment "Resolved organization for the source message's era:responsibleRU code; retain the source code as supplied."@en .
+    rdfs:comment "Deprecated in v0.8: party-valued properties target era:OrganisationRole (R10); use ens:responsibleRailwayUndertaking."@en .
 
 ens:railwayCompanyCode a owl:DatatypeProperty ;
     rdfs:label "railway company code"@en ;
@@ -734,17 +756,19 @@ ens:exchangedMessage a owl:ObjectProperty ;
 
 ens:exchangeRecipient a owl:ObjectProperty ;
     rdfs:label "exchange recipient"@en ;
-    skos:definition "Settlement system receiving the exchanged message."@en ;
+    skos:definition "Organisation role in which a body receives the exchanged message, typically the settlement operator."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:DataExchangeActivity ; rdfs:range ens:SettlementSystem .
+    rdfs:domain ens:DataExchangeActivity ; rdfs:range era:OrganisationRole ;
+    rdfs:comment "The receiving party, not the receiving system: the settlement system that received the exchange is linked by ens:exchangeContains and must be operated (ens:operatedBy) by this role. Changed in v0.8 from a settlement system range (R10)."@en .
 
 ens:exchangeSender a owl:ObjectProperty ;
     rdfs:label "exchange sender"@en ;
-    skos:definition "Organisation sending the exchanged message."@en ;
+    skos:definition "Organisation role in which a body sends the exchanged message, for example an infrastructure manager."@en ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:domain ens:DataExchangeActivity ; rdfs:range era:Body .
+    rdfs:domain ens:DataExchangeActivity ; rdfs:range era:OrganisationRole ;
+    rdfs:comment "Changed in v0.8 from an era:Body range (R10): the sender is the role the body acts in, reached through era:roleOf."@en .
 
 ens:exchangeTime a owl:DatatypeProperty ;
     rdfs:label "exchange time"@en ;

@@ -26,7 +26,7 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R7 | `ens:allocatesReading` duplicates the component path without a stated relation | Medium | **Fixed in v0.6**: OWL 2 property chain |
 | R8 | `ens:forwardsTo` / `ens:exchangeProtocol` without domain/range; no check of admissible flow | Low | **Fixed in v0.6** + `enssh:ForwardsToShape` |
 | R9 | Header comments contradicted the model (TrainRun "removed") and the CQ count | Low | **Fixed in v0.6** |
-| R10 | Inconsistent party pattern: some properties target `era:Body` (`exchangeSender`, `responsibleRUOrganisation`), others `era:OrganisationRole` (`operatedBy`, `allocatedTo`) | High | Open → P1 |
+| R10 | Inconsistent party pattern: some properties target `era:Body` (`exchangeSender`, `responsibleRUOrganisation`), others `era:OrganisationRole` (`operatedBy`, `allocatedTo`) | High | **Fixed in v0.8**: every party-valued `ens:` property targets `era:OrganisationRole` (role → `era:roleOf` body, `era:hasOrganisationRole` concept); `exchangeSender`/`exchangeRecipient` retargeted, `responsibleRUOrganisation` replaced by `responsibleRailwayUndertaking`; CQ10.4 guards it |
 | R11 | Implicit PROV agents: `compiledBy`/`producedBy` ⊑ `prov:wasAttributedTo` (range `prov:Agent`) make EMS and settlement systems agents by inference only; ground systems have no superclass | Medium | Open → P1 |
 | R12 | `ens:railwayCompanyCode` duplicates `era:organisationCode` (ERA-allocated code on `era:Body`) | Medium | **Fixed in v0.6**: deprecated, `dct:isReplacedBy era:organisationCode` |
 | R20 | `era:trainOperatingRU` is a datatype property (company code string), but the operating RU should be the organisation role of a body acting as railway undertaking | Medium | **Fixed locally in v0.6**: `ens:operatingRailwayUndertaking → era:OrganisationRole` typed with ERA `organisation-roles/RU` (or `RU-1`…`RU-7`); the code stays in `era:trainOperatingRU` and must equal the body's `era:organisationCode`. Upstream request in P4 |
@@ -41,9 +41,18 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R23 | Example message `d:tri1` carried three `era:trainLocationReport`s, but rc.3 declares `era:trainLocationReport` and `era:locationDateTime` functional; HermiT found the ABox inconsistent (SHACL and the CQs did not) | High | **Fixed in v0.7**: one location report per running-information message (`tri1`–`tri3`); a DL negative test keeps it detected |
 | R24 | ERA rc.3 restricts `era:dNvroll` to `xsd:double` with `xsd:decimal` facet values (`0.0`, `327670.0`), which is not valid OWL 2 DL | Low (upstream) | Worked around in `dl_check.py` (facets cast, reported); upstream change request in P4 |
 | R25 | SSN (property chains defining `sosa:usedProcedure`) combined with SSN-Ext (`ObservationCollection ⊑ ≤1 sosa:usedProcedure`) is outside OWL 2 DL | Low (W3C) | `dl_check.py` drops that one SSN-Ext axiom (unused here) and reports it |
-| R17 | `ens:exchangeContains` (settlement system → activity) is the undeclared inverse of `ens:exchangeRecipient`; name does not say "received" | Low | Open → P2 |
+| R17 | `ens:exchangeContains` (settlement system → activity) does not say "received"; since v0.8 it links the receiving system while `ens:exchangeRecipient` names the receiving role | Low | Open → P2 |
 
-## 2. Changes in v0.7
+## 2. Changes in v0.8
+
+1. One party pattern (R10): every party-valued `ens:` property targets `era:OrganisationRole`. The role reaches its `era:Body` through `era:roleOf` and its kind through `era:hasOrganisationRole` (ERA organisation-roles scheme).
+   - `ens:exchangeSender` and `ens:exchangeRecipient` target roles (in the examples: the IM roles of Bane NOR and Trafikverket send, the settlement operator roles receive). The receiving system stays linked by `ens:exchangeContains`, and SHACL requires it to be operated by the recipient role.
+   - `ens:responsibleRUOrganisation` (message → body) is deprecated for `ens:responsibleRailwayUndertaking` (message → RU role), checked like the operating RU: RU/RU-n concept, body's `era:organisationCode` = `era:responsibleRU`.
+   - `ens:operatedBy` has a domain (DCS, exchange function, settlement system); every `era:OrganisationRole` must have exactly one `era:roleOf` body.
+   - Systems stay the range of `ens:producedBy` and `ens:compiledBy`: they name the technical agent, not a party.
+2. Tests: new CQ10.4 (no current `ens:` property ranges over `era:Body`); CQ6.4, CQ12.2 and CQ12.4 follow the role pattern; four new negative fixtures (sender as a body, recipient not operating the receiving system, role without body, responsible RU code mismatch). 52/52 CQs pass; HermiT consistent.
+
+## 2b. Changes in v0.7
 
 1. Licence: EUPL v1.2 (`dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj>`, `LICENSE` copied from the ERA ontology repository at v4.0.0-rc.3, SPDX headers on the sources). `owl:versionIRI …/0.7.0`, `owl:priorVersion …/0.6.0`.
 2. SOSA/SSN reuse for measurement:
@@ -73,9 +82,9 @@ Result: 49/49 CQs, SHACL conforms, accounting and all negative tests pass.
 
 ### P1 – v0.7: agents, roles and identity (needs a decision, see §4)
 
-- Apply one party pattern (recommended: **roles for responsibilities in context, bodies for identity**, linked by `era:roleOf`): `exchangeSender`/`exchangeRecipient` → roles or agents; `responsibleRUOrganisation` kept as the resolution of a code to a body.
-- Declare ground systems and EMS as `prov:SoftwareAgent` (or `sosa:System` + `prov:Agent`) so the PROV attribution is explicit; give `ens:operatedBy` a domain.
-- Apply the operating-RU role pattern to `ens:responsibleRUOrganisation` (message → role instead of body) and to `ens:consumerRole`, and type `ens:EnergyConsumerRole` instances with an ERA role concept where one fits.
+- Party pattern: done in v0.8 (R10).
+- Declare ground systems and EMS as `prov:SoftwareAgent` (or `sosa:System` + `prov:Agent`) so the PROV attribution is explicit (`ens:operatedBy` got its domain in v0.8).
+- Type `ens:EnergyConsumerRole` and the other `ens:` role instances with an ERA organisation-roles concept where one fits (`ens:responsibleRailwayUndertaking` done in v0.8).
 - Add test data and CQs with `era:TrainIdent` (TAF/TAP core elements) and a reused operational train number across two runs.
 
 ### P2 – v0.8: measurement, vocabularies and lifecycle
@@ -84,7 +93,7 @@ Result: 49/49 CQs, SHACL conforms, accounting and all negative tests pass.
 - Move all concept schemes into `era-energy-settlement-concepts.ttl` under `ensc:` with definitions and `skos:notation`; split allocation **status** (valid, rejected, superseded) from **method** (metered, estimated, fallback-to-keeper).
 - Corrections: `prov:wasRevisionOf` / `ens:supersedes` between allocations, reversal components, and a CQ "current allocation for a run and zone".
 - Harmonise time: run interval as `time:Interval` or `prov:startedAtTime/endedAtTime` for actual times; require `xsd:dateTimeStamp` where timezone matters.
-- Rename `ens:exchangeContains` → `ens:receivedExchange`, `owl:inverseOf ens:exchangeRecipient`.
+- Rename `ens:exchangeContains` → `ens:receivedExchange` (settlement system → exchange activity it received).
 
 ### P3 – v0.9: scope extensions (open requirements)
 
@@ -102,7 +111,6 @@ Result: 49/49 CQs, SHACL conforms, accounting and all negative tests pass.
 
 ## 4. Decisions needed
 
-1. Party pattern: roles vs bodies for sender, recipient and operator (R10).
-2. Confirmation of the `dy6/def/energy` allocation with the Publications Office / ERA.
+1. Confirmation of the `dy6/def/energy` allocation with the Publications Office / ERA.
 
-Settled: SOSA/SSN is the normative measurement model (v0.7); licence EUPL v1.2.
+Settled: SOSA/SSN is the normative measurement model (v0.7); licence EUPL v1.2; all party-valued properties target `era:OrganisationRole` (v0.8).

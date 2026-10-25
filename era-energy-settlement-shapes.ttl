@@ -596,21 +596,22 @@ enssh:TrainMessageShape a sh:NodeShape ;
 enssh:RunningMessageShape a sh:NodeShape ;
     sh:targetClass era:TrainRunningInformationMessage ;
     sh:property [
-        sh:path ens:responsibleRUOrganisation ;
-        sh:class era:Body ;
+        sh:path ens:responsibleRailwayUndertaking ;
+        sh:class era:OrganisationRole ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
+        sh:node enssh:RailwayUndertakingRoleShape ;
     ] ;
     sh:sparql [
-        sh:message "The resolved RU organization must match the source responsibleRU company code." ;
+        sh:message "The responsible RU role must belong to the body whose ERA organisation code is the source era:responsibleRU code." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
                 $this era:responsibleRU ?sourceCode ;
-                      ens:responsibleRUOrganisation ?organization .
-                FILTER NOT EXISTS { ?organization era:organisationCode ?sourceCode }
+                      ens:responsibleRailwayUndertaking/era:roleOf ?body .
+                FILTER NOT EXISTS { ?body era:organisationCode ?sourceCode }
             }
         """ ;
     ] .
@@ -624,13 +625,13 @@ enssh:DataExchangeActivityShape a sh:NodeShape ;
     ] ;
     sh:property [
         sh:path ens:exchangeSender ;
-        sh:class era:Body ;
+        sh:class era:OrganisationRole ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;
     sh:property [
         sh:path ens:exchangeRecipient ;
-        sh:class ens:SettlementSystem ;
+        sh:class era:OrganisationRole ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
     ] ;
@@ -670,13 +671,13 @@ enssh:DataExchangeActivityShape a sh:NodeShape ;
         sh:maxCount 1 ;
     ] ;
     sh:sparql [
-        sh:message "The exchange recipient's receipt record must point back to this exchange activity." ;
+        sh:message "The exchange must be received (ens:exchangeContains) by a settlement system operated by the recipient role." ;
         sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             SELECT $this
             WHERE {
                 $this ens:exchangeRecipient ?recipient .
-                FILTER NOT EXISTS { ?recipient ens:exchangeContains $this }
+                FILTER NOT EXISTS { ?system ens:exchangeContains $this ; ens:operatedBy ?recipient }
             }
         """ ;
     ] .
@@ -728,4 +729,14 @@ enssh:RailwayUndertakingRoleShape a sh:NodeShape ;
         sh:in ( eraor:RU eraor:RU-1 eraor:RU-2 eraor:RU-3 eraor:RU-4 eraor:RU-5 eraor:RU-6 eraor:RU-7 ) ;
         sh:minCount 1 ;
         sh:message "The operating railway undertaking must be an organisation role typed with the ERA RU concept or one of its narrower RU-n concepts." ;
+    ] .
+
+enssh:OrganisationRoleShape a sh:NodeShape ;
+    sh:targetClass era:OrganisationRole ;
+    sh:property [
+        sh:path era:roleOf ;
+        sh:class era:Body ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Every organisation role is played by exactly one era:Body (era:roleOf)." ;
     ] .

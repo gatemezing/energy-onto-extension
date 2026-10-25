@@ -47,6 +47,7 @@ PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 PREFIX sosa:    <http://www.w3.org/ns/sosa/>
 PREFIX qudt:    <http://qudt.org/schema/qudt/>
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
 PREFIX saref:   <https://saref.etsi.org/core/>
 PREFIX country: <http://publications.europa.eu/resource/authority/country/>
 """
@@ -230,14 +231,14 @@ SETS = [
 }""", [("eress",)]),
             ("CQ6.4", "Which auditable exchanges delivered composition data to the Norwegian and Swedish infrastructure managers?",
              "Selection over exchange activity", "ABox",
-             """SELECT ?recipient ?outcome WHERE {
+             """SELECT ?org ?outcome WHERE {
   ?exchange a ens:DataExchangeActivity ;
             ens:exchangedMessage d:tcm1 ;
-            ens:exchangeRecipient ?recipient ;
+            ens:exchangeRecipient/era:roleOf ?org ;
             ens:exchangeOutcome ?outcome ;
             ens:exchangeAuthority ?authority ;
             ens:retentionPolicy ?retention .
-}""", [("settleNO", "received"), ("settleSE", "received")]),
+}""", [("baneNor", "received"), ("trafikverket", "received")]),
         ],
     },
     {
@@ -326,6 +327,13 @@ SETS = [
              "Selection through a role", "ABox",
              """SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }""",
              [("railLease",)]),
+            ("CQ10.4", "Does any current ens: property point to an era:Body rather than to an era:OrganisationRole?",
+             "Existence (TBox): Is there a [P] with range [CE]?", "TBox",
+             """ASK {
+  ?property rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+            rdfs:range era:Body .
+  FILTER NOT EXISTS { ?property owl:deprecated true }
+}""", [("false",)]),
         ],
     },
     {
@@ -378,8 +386,8 @@ SETS = [
                     ens:aboutRunningTrain d:run1 .
                ?exchange a ens:DataExchangeActivity ;
                          ens:exchangedMessage ?msg ;
-                         ens:exchangeRecipient ?settlement ;
                          ens:exchangePurpose ensc:energySettlement .
+               ?settlement ens:exchangeContains ?exchange .
              }""", [("settleNO",), ("settleSE",)]),
             ("CQ12.3", "When did train 41234 pass a border operational point, and which one?",
              "Join of telematics and RINF data", "ABox",
@@ -389,10 +397,13 @@ SETS = [
   ?report era:location ?location ; era:locationDateTime ?when .
   ?op era:primaryLocation ?location ; era:referenceBorderPoint ?rbp .
 }""", [("opMagnor", "08:30")]),
-            ("CQ12.4", "Which organization is identified as the responsible RU on running message tri1?",
-             "Selection through the resolved organization link", "ABox",
-             """SELECT ?org WHERE { d:tri1 ens:responsibleRUOrganisation ?org . }""",
-             [("nordCargo",)]),
+            ("CQ12.4", "Which organization is identified as the responsible RU on running message tri1, and in which ERA role?",
+             "Selection through a role", "ABox",
+             """SELECT ?org ?role WHERE {
+  d:tri1 ens:responsibleRailwayUndertaking ?ruRole .
+  ?ruRole era:roleOf ?org ; era:hasOrganisationRole ?role .
+}""",
+             [("nordCargo", "RU-3")]),
             ("CQ12.5", "Which railway undertaking operates running train 41234 departing on 15 October 2026, in which ERA role, and under which company code?",
              "Selection through the ERA organisation-role pattern", "ABox",
              """SELECT ?org ?role ?code WHERE {
@@ -716,6 +727,17 @@ def validate_negative_cases(data, ont):
         [(regenerated_result, qudt.unit, unit_ns["KiloVAR-HR"])])
     bad_ru_cases["a reading without a consumed active energy observation"] = (
         [(d.r2, sosa.hasMember, d["r2-consumed"])], [])
+    bad_ru_cases["an exchange sender given as a body instead of a role"] = (
+        [(d.exchangeTcm1NO, ex.exchangeSender, None)],
+        [(d.exchangeTcm1NO, ex.exchangeSender, d.baneNor)])
+    bad_ru_cases["an exchange recipient role that does not operate the receiving system"] = (
+        [(d.exchangeTcm1NO, ex.exchangeRecipient, None)],
+        [(d.exchangeTcm1NO, ex.exchangeRecipient, d.settleOpSE)])
+    bad_ru_cases["an organisation role without a body"] = (
+        [(d.imNO, era.roleOf, None)], [])
+    bad_ru_cases["a responsible RU role whose body has another code"] = (
+        [(d.tri1, era.responsibleRU, None)],
+        [(d.tri1, era.responsibleRU, rdflib.Literal("9999"))])
     for label, (removed, added) in bad_ru_cases.items():
         bad_ru = rdflib.Graph()
         for triple in data:
@@ -738,7 +760,7 @@ def render(conforms, shacl, results, accounting_issues, md_path, dl=None):
     out = []
     w = out.append
     w("# Competency questions – ERA energy settlement extension\n")
-    w("Validation of the ontology draft **v0.7** (`era-energy-settlement-draft.ttl`) and its shapes "
+    w("Validation of the ontology draft **v0.8** (`era-energy-settlement-draft.ttl`) and its shapes "
       "against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.\n")
     w(f"**Result: {passed} of {len(results)} competency questions pass.** "
       f"SHACL conforms: **{conforms}**; allocation arithmetic issues: **{len(accounting_issues)}**; "
