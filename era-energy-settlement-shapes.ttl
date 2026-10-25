@@ -1,12 +1,13 @@
-@prefix ens:    <http://data.europa.eu/dy6/> .
+@prefix ens:   <http://data.europa.eu/dy6/> .
 @prefix era:   <http://data.europa.eu/949/> .
 @prefix sh:    <http://www.w3.org/ns/shacl#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix prov:  <http://www.w3.org/ns/prov#> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
-@prefix ensc:   <http://data.europa.eu/dy6/concepts/> .
+@prefix ensc:  <http://data.europa.eu/dy6/concepts/> .
+@prefix enssh: <http://data.europa.eu/dy6/shapes/> .
 
-ens:ConsumptionPointShape a sh:NodeShape ;
+enssh:ConsumptionPointShape a sh:NodeShape ;
     sh:targetClass ens:ConsumptionPoint ;
     sh:property [
         sh:path ens:consumptionPointId ;
@@ -38,7 +39,7 @@ ens:ConsumptionPointShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:TractionUnitVehicleShape a sh:NodeShape ;
+enssh:TractionUnitVehicleShape a sh:NodeShape ;
     sh:targetClass era:TrainCompositionJourneySection ;
     sh:sparql [
         sh:message "A locomotive EVN must normalize to exactly one registered vehicle." ;
@@ -70,7 +71,7 @@ ens:TractionUnitVehicleShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:EnergyReadingShape a sh:NodeShape ;
+enssh:EnergyReadingShape a sh:NodeShape ;
     sh:targetSubjectsOf ens:readingPeriod ;
     sh:property [
         sh:path ens:readingOfConsumptionPoint ;
@@ -117,7 +118,7 @@ ens:EnergyReadingShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:EnergyAllocationShape a sh:NodeShape ;
+enssh:EnergyAllocationShape a sh:NodeShape ;
     sh:targetClass ens:EnergyAllocation ;
     sh:property [
         sh:path ens:hasAllocationComponent ;
@@ -258,7 +259,7 @@ ens:EnergyAllocationShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:AllocationComponentShape a sh:NodeShape ;
+enssh:AllocationComponentShape a sh:NodeShape ;
     sh:targetClass ens:AllocationComponent ;
     sh:property [
         sh:path ens:componentActiveEnergyConsumed ;
@@ -301,7 +302,7 @@ ens:AllocationComponentShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:TrainRunShape a sh:NodeShape ;
+enssh:TrainRunShape a sh:NodeShape ;
     sh:targetClass ens:TrainRun ;
     sh:property [
         sh:path ens:trainRunId ;
@@ -388,7 +389,7 @@ ens:TrainRunShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:TrainMessageShape a sh:NodeShape ;
+enssh:TrainMessageShape a sh:NodeShape ;
     sh:targetClass era:TrainCompositionMessage, era:TrainRunningInformationMessage ;
     sh:property [
         sh:path ens:aboutTrainRun ;
@@ -444,7 +445,7 @@ ens:TrainMessageShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:RunningMessageShape a sh:NodeShape ;
+enssh:RunningMessageShape a sh:NodeShape ;
     sh:targetClass era:TrainRunningInformationMessage ;
     sh:property [
         sh:path ens:responsibleRUOrganisation ;
@@ -466,7 +467,7 @@ ens:RunningMessageShape a sh:NodeShape ;
         """ ;
     ] .
 
-ens:DataExchangeActivityShape a sh:NodeShape ;
+enssh:DataExchangeActivityShape a sh:NodeShape ;
     sh:targetClass ens:DataExchangeActivity ;
     sh:property [
         sh:path ens:exchangedMessage ;
@@ -528,6 +529,37 @@ ens:DataExchangeActivityShape a sh:NodeShape ;
             WHERE {
                 $this ens:exchangeRecipient ?recipient .
                 FILTER NOT EXISTS { ?recipient ens:exchangeContains $this }
+            }
+        """ ;
+    ] .
+
+enssh:EnergyMeasurementSystemShape a sh:NodeShape ;
+    sh:targetClass ens:EnergyMeasurementSystem ;
+    sh:property [
+        sh:path ens:installedOn ;
+        sh:class era:Vehicle ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ens:measuresConsumptionPoint ;
+        sh:class ens:ConsumptionPoint ;
+        sh:minCount 1 ;
+    ] .
+
+enssh:ForwardsToShape a sh:NodeShape ;
+    sh:targetSubjectsOf ens:forwardsTo ;
+    sh:sparql [
+        sh:message "ens:forwardsTo must link a DCS to an exchange function, or an exchange function to a settlement system." ;
+        sh:select """
+            PREFIX ens: <http://data.europa.eu/dy6/>
+            SELECT $this ?value WHERE {
+                $this ens:forwardsTo ?value .
+                FILTER NOT EXISTS {
+                    { $this a ens:DataCollectingSystem . ?value a ens:ExchangeFunction . }
+                    UNION
+                    { $this a ens:ExchangeFunction . ?value a ens:SettlementSystem . }
+                }
             }
         """ ;
     ] .

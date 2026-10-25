@@ -1,6 +1,6 @@
 # Competency questions – ERA energy settlement extension
 
-Validation of the ontology draft **v0.5** (`era-energy-settlement-draft.ttl`) and its shapes against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.
+Validation of the ontology draft **v0.6** (`era-energy-settlement-draft.ttl`) and its shapes against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.
 
 **Result: 48 of 48 competency questions pass.** SHACL conforms: **True**; allocation arithmetic issues: **0**; SHACL results: **0**.
 

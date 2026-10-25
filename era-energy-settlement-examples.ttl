@@ -11,7 +11,7 @@
 @prefix country: <http://publications.europa.eu/resource/authority/country/> .
 
 # =====================================================================
-# Example data for validating the energy settlement extension (v0.5)
+# Example data for validating the energy settlement extension (v0.6)
 # against the competency questions in era-energy-settlement-cqs.md.
 #
 # Scenario: freight train 41234, operated by a fictitious RU, runs from

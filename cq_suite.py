@@ -598,6 +598,26 @@ def validate_negative_cases(data, ont):
         failures.append("Validation accepted allocation components exceeding the source reading")
     if not isinstance(allocation_report, rdflib.Graph):
         failures.append(f"SHACL allocation negative test could not run: {allocation_report}")
+
+    bad_forwarding = rdflib.Graph()
+    for triple in data:
+        bad_forwarding.add(triple)
+    bad_forwarding.add((d.eressDCS, ex.forwardsTo, d.settleNO))
+    forwarding_conforms, _, _ = pyshacl.validate(
+        bad_forwarding, shacl_graph=SHAPES, ont_graph=ont, inference="none",
+        advanced=True, allow_warnings=True, inplace=True)
+    if forwarding_conforms:
+        failures.append("SHACL accepted a DCS forwarding directly to a settlement system")
+
+    bad_ems = rdflib.Graph()
+    for triple in data:
+        bad_ems.add(triple)
+    bad_ems.remove((d.ems1, ex.installedOn, None))
+    ems_conforms, _, _ = pyshacl.validate(
+        bad_ems, shacl_graph=SHAPES, ont_graph=ont, inference="none",
+        advanced=True, allow_warnings=True, inplace=True)
+    if ems_conforms:
+        failures.append("SHACL accepted an EMS that is not installed on a vehicle")
     return failures
 
 
@@ -607,7 +627,7 @@ def render(conforms, shacl, results, accounting_issues, md_path):
     out = []
     w = out.append
     w("# Competency questions – ERA energy settlement extension\n")
-    w("Validation of the ontology draft **v0.5** (`era-energy-settlement-draft.ttl`) and its shapes "
+    w("Validation of the ontology draft **v0.6** (`era-energy-settlement-draft.ttl`) and its shapes "
       "against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.\n")
     w(f"**Result: {passed} of {len(results)} competency questions pass.** "
       f"SHACL conforms: **{conforms}**; allocation arithmetic issues: **{len(accounting_issues)}**; "

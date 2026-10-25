@@ -2,7 +2,7 @@
 
 ## Status and boundary
 
-Draft v0.5 implements the structural corrections below. It is intended to make the data model and its evidence requirements explicit; passing SHACL or the competency-question suite does **not** demonstrate that an allocation is legally correct, that a message exchange is authorized, or that a meter is certified. The records in `era-energy-settlement-examples.ttl`, including authority and retention references, are illustrative placeholders.
+Draft v0.5 introduced, and v0.6 keeps, the structural corrections below. It is intended to make the data model and its evidence requirements explicit; passing SHACL or the competency-question suite does **not** demonstrate that an allocation is legally correct, that a message exchange is authorized, or that a meter is certified. The records in `era-energy-settlement-examples.ttl`, including authority and retention references, are illustrative placeholders.
 
 The cited legal material and the applicable implementation guides must be verified against the operative official text before production use. This review has not independently confirmed Regulation (EU) 2026/253, the precise TEL TSI timing exception, ENE TSI market-interface duties, national settlement rules, or contract terms.
 
