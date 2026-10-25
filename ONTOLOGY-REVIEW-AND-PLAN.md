@@ -66,7 +66,8 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 1. The EMS, the data handling system, the data collecting system, the exchange function and the settlement system are subclasses of `ssn:System` (R11). No `prov:Agent` superclass is stated: agency stays an inference from `ens:compiledBy` and `ens:producedBy` (decision, §4).
 2. `ens:DataHandlingSystem` used `sosa:System`, which W3C SOSA/SSN does not define; it is now `ssn:System` (R26).
 3. New gate in `cq_suite.py`: every reused `sosa:`, `ssn:` and `era:` term must be declared in the vendored W3C files or the ERA snapshot (71 terms; it flags `sosa:System` on 0.8).
-4. New CQ6.5 (classes declared as `ssn:System`). Result: 53/53 CQs, SHACL conforms, HermiT consistent.
+4. Every reused class (12 ERA, 7 SOSA/SSN, and PROV-O, OWL-Time, GeoSPARQL, QUDT, SAREF and SKOS classes: 26 in all) is declared as `owl:Class` with the `rdfs:label` of its source vocabulary, in Part 3 of the draft.
+5. New CQ6.5 (classes declared as `ssn:System`). Result: 53/53 CQs, SHACL conforms, HermiT consistent.
 
 ### 0.8.0 – one party pattern
 

@@ -26,8 +26,8 @@
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following
-#   rc.3. External terms used here are typed by the bridge declarations at
-#   the end of this file.
+#   rc.3. Reused classes and properties are declared, with their source
+#   labels, in Part 3 at the end of this file.
 #
 # Sources: ERA study AS-03 (2026); TEL TSI (EU) 2026/253 Annex 2.5.1(16)
 #   and 2.5.2(8); ENE TSI Art. 9(4); EN 50463:2017 and prEN revision;
@@ -39,6 +39,8 @@
 #     The data handling system used sosa:System, which W3C SOSA/SSN does
 #     not define (R26). No prov:Agent superclass is stated: agency stays
 #     an inference from ens:compiledBy and ens:producedBy.
+#   - Part 3 declares every reused class (ERA, SOSA/SSN, PROV-O, OWL-Time,
+#     GeoSPARQL, QUDT, SAREF, SKOS) as owl:Class with its source label.
 #
 # Changes from v0.7 (v0.8):
 #   - One party pattern (R10): every party-valued ens: property targets
@@ -912,27 +914,59 @@ ens:readingOnTrack a owl:ObjectProperty ;
     rdfs:range era:RunningTrack ;
     rdfs:comment "Map-matched from the GPS fix. Then era:contactLineSystem -> era:ContactLineSystem gives era:energySupplySystem (voltage and frequency) and era:maxTrainCurrent."@en .
 
-# Bridge declarations so referenced external terms are typed when this
-# file is loaded on its own (rc.3 uses no owl:imports either).
-era:Vehicle a owl:Class .
-era:Body a owl:Class .
-era:Feature a owl:Class .
-era:OrganisationRole a owl:Class .
-era:ReferenceBorderPoint a owl:Class .
-era:RunningTrack a owl:Class .
-era:LocoIdent a owl:Class .
-era:TrainIdent a owl:Class .
-era:Train a owl:Class .
+# ---------------------------------------------------------------------
+# PART 3 – Reused classes and properties
+# ---------------------------------------------------------------------
+# Minimal declarations of the external classes this extension uses, so
+# that they are typed and labelled when this file is loaded on its own
+# (rc.3 uses no owl:imports either). Labels are copied from the source
+# vocabularies: ERA v4.0.0-rc.3 and W3C SOSA/SSN/SSN-Ext (vendored), PROV-O,
+# OWL-Time and QUDT. Their definitions stay with their publishers.
+
+## 3.1 ERA ontology v4.0.0-rc.3
+
+era:Body a owl:Class ; rdfs:label "Body"@en .
+era:Feature a owl:Class ; rdfs:label "ERA Feature"@en .
+era:LocoIdent a owl:Class ; rdfs:label "Loco ident"@en .
+era:OrganisationRole a owl:Class ; rdfs:label "Organisation Role"@en .
+era:ReferenceBorderPoint a owl:Class ; rdfs:label "Reference border point"@en .
+era:RunningTrack a owl:Class ; rdfs:label "Running track"@en .
+era:Train a owl:Class ; rdfs:label "Train"@en .
+era:TrainCompositionJourneySection a owl:Class ; rdfs:label "Train composition journey section"@en .
+era:TrainCompositionMessage a owl:Class ; rdfs:label "Train composition message"@en .
+era:TrainIdent a owl:Class ; rdfs:label "Train ident"@en .
+era:TrainRunningInformationMessage a owl:Class ; rdfs:label "Train running information message"@en .
+era:Vehicle a owl:Class ; rdfs:label "Vehicle"@en .
+
+## 3.2 W3C SOSA, SSN and SSN-Ext
+
+sosa:FeatureOfInterest a owl:Class ; rdfs:label "Feature Of Interest"@en .
+sosa:ObservableProperty a owl:Class ; rdfs:label "Observable Property"@en .
+sosa:Observation a owl:Class ; rdfs:label "Observation"@en .
+sosa:ObservationCollection a owl:Class ; rdfs:label "Collection of observations"@en .
+sosa:Platform a owl:Class ; rdfs:label "Platform"@en .
+sosa:Sensor a owl:Class ; rdfs:label "Sensor"@en .
+ssn:System a owl:Class ; rdfs:label "System"@en .
+
+## 3.3 Other W3C, OGC and ETSI vocabularies
+
+prov:Activity a owl:Class ; rdfs:label "Activity"@en .
+prov:Entity a owl:Class ; rdfs:label "Entity"@en .
+time:Interval a owl:Class ; rdfs:label "Time interval"@en .
+geo:Feature a owl:Class ; rdfs:label "Feature"@en .
+qudt:QuantityValue a owl:Class ; rdfs:label "Quantity value"@en .
+saref:Meter a owl:Class ; rdfs:label "Meter"@en .
+skos:Concept a owl:Class ; rdfs:label "Concept"@en .
+
+## 3.4 Reused properties and annotation properties
+
 era:operationalTrainNumber a owl:DatatypeProperty .
 era:trainDepartureDate a owl:DatatypeProperty .
 era:trainOperatingRU a owl:DatatypeProperty .
 era:organisationCode a owl:DatatypeProperty .
 era:roleOf a owl:ObjectProperty .
 era:hasOrganisationRole a owl:ObjectProperty .
-skos:definition a owl:AnnotationProperty .
-vs:term_status a owl:AnnotationProperty .
-era:TrainCompositionMessage a owl:Class .
-era:TrainCompositionJourneySection a owl:Class .
-era:TrainRunningInformationMessage a owl:Class .
 era:unitOfMeasure a owl:AnnotationProperty .
 era:shaclShapeValidationRule a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .
+vs:term_status a owl:AnnotationProperty .
