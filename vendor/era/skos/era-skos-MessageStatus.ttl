@@ -1,0 +1,34 @@
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://data.europa.eu/949/concepts/message-status/1> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/message-status/MessageStatus> ;
+    skos:notation "1" ;
+    skos:prefLabel "creation"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/message-status/MessageStatus> .
+
+<http://data.europa.eu/949/concepts/message-status/2> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/message-status/MessageStatus> ;
+    skos:notation "2" ;
+    skos:prefLabel "modification"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/message-status/MessageStatus> .
+
+<http://data.europa.eu/949/concepts/message-status/3> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/message-status/MessageStatus> ;
+    skos:notation "3" ;
+    skos:prefLabel "deletion"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/message-status/MessageStatus> .
+
+<http://data.europa.eu/949/concepts/message-status/MessageStatus> a skos:ConceptScheme ;
+    rdfs:label "Concept Scheme for Message status"@en ;
+    cc:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
+    dct:identifier "MessageStatus"^^xsd:string ;
+    dct:issued "2026-03-11"^^xsd:date ;
+    dct:modified "2026-03-11"^^xsd:date ;
+    skos:prefLabel "Concept Scheme for Message status"@en ;
+    dct:title "Concept Scheme for Message status"@en ;
+    skos:definition "Assigned by the Sender 1=creation, 2=modification, 3=deletion"@en .
+

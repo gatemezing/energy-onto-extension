@@ -428,14 +428,9 @@ enssh:AllocationComponentShape a sh:NodeShape ;
 enssh:RunningTrainShape a sh:NodeShape ;
     sh:targetClass ens:RunningTrain ;
     sh:property [
-        sh:path era:trainDepartureDate ;
+        sh:path ens:departureDate ;
         sh:datatype xsd:date ;
         sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] ;
-    sh:property [
-        sh:path era:trainOperatingRU ;
-        sh:datatype xsd:string ;
         sh:maxCount 1 ;
     ] ;
     sh:property [
@@ -446,7 +441,14 @@ enssh:RunningTrainShape a sh:NodeShape ;
         sh:node enssh:RailwayUndertakingRoleShape ;
     ] ;
     sh:property [
-        sh:path era:operationalTrainNumber ;
+        sh:path ens:runningTrainNumberIdentifier ;
+        sh:class era:OperationalTrainNumberIdentifier ;
+        sh:nodeKind sh:IRI ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path ( ens:runningTrainNumberIdentifier era:operationalTrainNumber ) ;
         sh:datatype xsd:string ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
@@ -477,25 +479,13 @@ enssh:RunningTrainShape a sh:NodeShape ;
     sh:sparql [
         sh:message "Operational train number and departure date must identify one running train." ;
         sh:select """
-            PREFIX era: <http://data.europa.eu/949/>
-            SELECT $this
-            WHERE {
-                $this era:operationalTrainNumber ?number ; era:trainDepartureDate ?date .
-                ?other era:operationalTrainNumber ?number ; era:trainDepartureDate ?date .
-                FILTER(?other != $this)
-            }
-        """ ;
-    ] ;
-    sh:sparql [
-        sh:message "The operating RU role must belong to the body whose ERA organisation code is the source era:trainOperatingRU code." ;
-        sh:select """
             PREFIX ens: <http://data.europa.eu/dy6/def/energy/>
             PREFIX era: <http://data.europa.eu/949/>
             SELECT $this
             WHERE {
-                $this era:trainOperatingRU ?sourceCode ;
-                      ens:operatingRailwayUndertaking/era:roleOf ?body .
-                FILTER NOT EXISTS { ?body era:organisationCode ?sourceCode }
+                $this ens:runningTrainNumberIdentifier/era:operationalTrainNumber ?number ; ens:departureDate ?date .
+                ?other ens:runningTrainNumberIdentifier/era:operationalTrainNumber ?number ; ens:departureDate ?date .
+                FILTER(?other != $this)
             }
         """ ;
     ] ;
@@ -553,7 +543,7 @@ enssh:TrainMessageShape a sh:NodeShape ;
             SELECT $this
             WHERE {
                 $this era:operationalTrainNumberIdentifier/era:operationalTrainNumber ?messageNumber ;
-                      ens:aboutRunningTrain/era:operationalTrainNumber ?runNumber .
+                      ens:aboutRunningTrain/ens:runningTrainNumberIdentifier/era:operationalTrainNumber ?runNumber .
                 FILTER(?messageNumber != ?runNumber)
             }
         """ ;

@@ -19,21 +19,34 @@
 @prefix vs:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 
 # =====================================================================
-# DRAFT v0.8 – ERA ontology extension for traction energy settlement
+# DRAFT v0.9 – ERA ontology extension for traction energy settlement
 #   (proposal for ERA governance; namespace http://data.europa.eu/dy6/def/energy/)
 # LOT activity: Ontology implementation (conceptualisation + reuse),
-#   validated against the 52 competency questions executed by cq_suite.py
+#   validated against the 56 competency questions executed by cq_suite.py
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following
-#   rc.3. External terms used here are typed by the bridge declarations at
-#   the end of this file.
+#   rc.3. Reused classes and properties are declared, with their source
+#   labels, in Part 3 at the end of this file.
 #
 # Sources: ERA study AS-03 (2026); TEL TSI (EU) 2026/253 Annex 2.5.1(16)
 #   and 2.5.2(8); ENE TSI Art. 9(4); EN 50463:2017 and prEN revision;
 #   UIC IRS 90930; Eress guidelines.
 #
-# Changes from v0.7:
+# Changes from v0.8:
+#   - The EMS, the data handling system, the data collecting system, the
+#     exchange function and the settlement system are ssn:System (R11).
+#     The data handling system used sosa:System, which W3C SOSA/SSN does
+#     not define (R26). No prov:Agent superclass is stated: agency stays
+#     an inference from ens:compiledBy and ens:producedBy.
+#   - ens:RunningTrain is no longer a subclass of era:Train (R19): ERA's TAP
+#     shape for era:Train requires era:trainNb. A running train is
+#     identified by ens:runningTrainNumberIdentifier (the shared
+#     era:OperationalTrainNumberIdentifier) and ens:departureDate.
+#   - Part 3 declares every reused class (ERA, SOSA/SSN, PROV-O, OWL-Time,
+#     GeoSPARQL, QUDT, SAREF, SKOS) as owl:Class with its source label.
+#
+# Changes from v0.7 (v0.8):
 #   - One party pattern (R10): every party-valued ens: property targets
 #     era:OrganisationRole; the role reaches its era:Body through
 #     era:roleOf and its kind through era:hasOrganisationRole.
@@ -103,9 +116,9 @@
     rdfs:label "ERA energy settlement extension (draft)"@en ;
     dct:title "ERA energy settlement extension"@en ;
     dct:description "Proposed extension of the ERA ontology for on-board traction energy measurement, energy data exchange and settlement allocation, linked to ERA telematics (TEL TSI) and RINF concepts."@en ;
-    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.8.0> ;
-    owl:versionInfo "0.8.0" ;
-    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.7.0> ;
+    owl:versionIRI <http://data.europa.eu/dy6/def/energy/0.9.0> ;
+    owl:versionInfo "0.9.0" ;
+    owl:priorVersion <http://data.europa.eu/dy6/def/energy/0.8.0> ;
     dct:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
     dct:created "2026-10-15"^^xsd:date ;
     dct:modified "2026-10-25"^^xsd:date ;
@@ -123,7 +136,7 @@
 ens:EnergyMeasurementSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf saref:Meter , sosa:Platform ;
+    rdfs:subClassOf saref:Meter , sosa:Platform , ssn:System ;
     rdfs:label "Energy measurement system (EMS)"@en ;
     skos:definition "On-board system measuring energy taken from and returned to the contact line, compiling CEBD and transmitting it to a DCS (EN 50463)."@en ;
     rdfs:comment "Instance-level counterpart of the vehicle type parameter era:hasOnboardEnergyMeasurement (ERATV 4.10.12)."@en .
@@ -138,7 +151,7 @@ ens:EnergyMeasurementFunction a owl:Class ;
 ens:DataHandlingSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf sosa:System ;
+    rdfs:subClassOf ssn:System ;
     rdfs:label "Data handling system (DHS)"@en ;
     skos:definition "Function merging EMF data with time and position to compile, store and send CEBD (EN 50463-3)."@en .
 
@@ -363,21 +376,25 @@ ens:MeasuredReactiveEnergy a sosa:ObservableProperty , owl:NamedIndividual ;
 
 ens:DataCollectingSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    rdfs:subClassOf ssn:System ;
     vs:term_status "unstable" ;
     rdfs:label "Data collecting system (DCS)"@en ;
     skos:definition "On-ground system receiving CEBD from EMSs and forwarding it to settlement."@en .
 
 ens:ExchangeFunction a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    rdfs:subClassOf ssn:System ;
     vs:term_status "unstable" ;
     rdfs:label "Exchange function"@en ;
     skos:definition "Function sorting energy data and allocating it to the correct settlement zone, including cross-border exchange (IRS 90930). Example: Erex."@en .
 
 ens:SettlementSystem a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    rdfs:subClassOf ssn:System ;
     vs:term_status "unstable" ;
     rdfs:label "Settlement system"@en ;
-    skos:definition "On-ground system validating CEBD, estimating missing data and allocating consumption to parties (ENE TSI Art. 9(4))."@en .
+    skos:definition "On-ground system validating CEBD, estimating missing data and allocating consumption to parties (ENE TSI Art. 9(4))."@en ;
+    rdfs:comment "Like the data collecting system and the exchange function, an ssn:System. It is a prov:Agent only by inference from ens:producedBy (⊑ prov:wasAttributedTo); no prov:Agent superclass is stated."@en .
 
 ens:SettlementZone a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
@@ -617,10 +634,28 @@ ens:producedBy a owl:ObjectProperty ;
 ens:RunningTrain a owl:Class ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
-    rdfs:subClassOf era:Train ;
     rdfs:label "Running train"@en ;
     skos:definition "A train running a specific service movement on the network, identified independently of its reusable operational train number."@en ;
-    rdfs:comment "Specialises the telematics era:Train (itself an era:OperationalTrainNumberIdentifier), so era:operationalTrainNumber, era:trainDepartureDate and era:trainOperatingRU apply directly. Named after era:RunningTrack. The operational number is not a key: two running trains may share it on different days. Not a prov:Activity: it denotes the train, not the movement event."@en .
+    rdfs:comment "Identified by its operational train number identifier (ens:runningTrainNumberIdentifier) together with its departure date (ens:departureDate); the number alone is not a key, since it is reused on other days. Not a subclass of era:Train since 0.9: ERA's TAP shape for era:Train requires era:trainNb, a train service number that running trains do not carry (R19). Named after era:RunningTrack."@en .
+
+ens:runningTrainNumberIdentifier a owl:ObjectProperty ;
+    era:shaclShapeValidationRule enssh:RunningTrainShape ;
+    rdfs:label "running train number identifier"@en ;
+    skos:definition "Operational train number identifier under which this train runs."@en ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:domain ens:RunningTrain ; rdfs:range era:OperationalTrainNumberIdentifier ;
+    rdfs:comment "Points to the same era:OperationalTrainNumberIdentifier node that the TEL TSI messages reference through era:operationalTrainNumberIdentifier, so that messages and running trains share the number; the node carries era:operationalTrainNumber."@en .
+
+ens:departureDate a owl:DatatypeProperty ;
+    era:shaclShapeValidationRule enssh:RunningTrainShape ;
+    rdfs:label "departure date"@en ;
+    skos:definition "Date on which the train left its origin under its operational train number."@en ;
+    rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
+    vs:term_status "unstable" ;
+    rdfs:domain ens:RunningTrain ; rdfs:range xsd:date ;
+    rdfs:seeAlso era:trainDepartureDate ;
+    rdfs:comment "Same meaning as era:trainDepartureDate, which is not used here because its domain is era:Train: on a running train it would type the running train as an era:Train again."@en .
 
 ens:runningTrainIdent a owl:ObjectProperty ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
@@ -628,7 +663,7 @@ ens:runningTrainIdent a owl:ObjectProperty ;
     rdfs:domain ens:RunningTrain ; rdfs:range era:TrainIdent ;
     rdfs:label "running train identification"@en ;
     skos:definition "TAF/TAP TSI unique identification of the contracted train (era:TrainIdent) under which this train runs."@en ;
-    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged. Otherwise the key is era:operationalTrainNumber together with era:trainDepartureDate, as in the TAF/TAP train identification."@en .
+    rdfs:comment "Preferred production key for a running train where the TAF/TAP identifiers are exchanged. Otherwise the key is the operational train number (ens:runningTrainNumberIdentifier) together with ens:departureDate."@en .
 
 ens:operatingRailwayUndertaking a owl:ObjectProperty ;
     era:shaclShapeValidationRule enssh:RunningTrainShape ;
@@ -637,7 +672,7 @@ ens:operatingRailwayUndertaking a owl:ObjectProperty ;
     rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> ;
     vs:term_status "unstable" ;
     rdfs:domain ens:RunningTrain ; rdfs:range era:OrganisationRole ;
-    rdfs:comment "Object counterpart of era:trainOperatingRU, which in rc.3 is a datatype property holding the company code. Keep the source code in era:trainOperatingRU and link the resolved role here: the role has era:hasOrganisationRole RU (or a narrower RU-n concept of the ERA organisation-roles scheme) and era:roleOf the body whose era:organisationCode equals the source code. The operating RU is not necessarily the energy consumer (see ens:consumerRole)."@en .
+    rdfs:comment "The role has era:hasOrganisationRole RU (or a narrower RU-n concept of the ERA organisation-roles scheme) and era:roleOf the body that operates the train. The operating RU is not necessarily the energy consumer (see ens:consumerRole). The source company code era:trainOperatingRU is not used on running trains since 0.9: its domain is era:Train."@en .
 
 ens:runStart a owl:DatatypeProperty ;
     rdfs:label "run start"@en ;
@@ -901,27 +936,58 @@ ens:readingOnTrack a owl:ObjectProperty ;
     rdfs:range era:RunningTrack ;
     rdfs:comment "Map-matched from the GPS fix. Then era:contactLineSystem -> era:ContactLineSystem gives era:energySupplySystem (voltage and frequency) and era:maxTrainCurrent."@en .
 
-# Bridge declarations so referenced external terms are typed when this
-# file is loaded on its own (rc.3 uses no owl:imports either).
-era:Vehicle a owl:Class .
-era:Body a owl:Class .
-era:Feature a owl:Class .
-era:OrganisationRole a owl:Class .
-era:ReferenceBorderPoint a owl:Class .
-era:RunningTrack a owl:Class .
-era:LocoIdent a owl:Class .
-era:TrainIdent a owl:Class .
-era:Train a owl:Class .
+# ---------------------------------------------------------------------
+# PART 3 – Reused classes and properties
+# ---------------------------------------------------------------------
+# Minimal declarations of the external classes this extension uses, so
+# that they are typed and labelled when this file is loaded on its own
+# (rc.3 uses no owl:imports either). Labels are copied from the source
+# vocabularies: ERA v4.0.0-rc.3 and W3C SOSA/SSN/SSN-Ext (vendored), PROV-O,
+# OWL-Time and QUDT. Their definitions stay with their publishers.
+
+## 3.1 ERA ontology v4.0.0-rc.3
+
+era:Body a owl:Class ; rdfs:label "Body"@en .
+era:Feature a owl:Class ; rdfs:label "ERA Feature"@en .
+era:LocoIdent a owl:Class ; rdfs:label "Loco ident"@en .
+era:OrganisationRole a owl:Class ; rdfs:label "Organisation Role"@en .
+era:ReferenceBorderPoint a owl:Class ; rdfs:label "Reference border point"@en .
+era:RunningTrack a owl:Class ; rdfs:label "Running track"@en .
+era:OperationalTrainNumberIdentifier a owl:Class ; rdfs:label "Operational train number identifier"@en .
+era:TrainCompositionJourneySection a owl:Class ; rdfs:label "Train composition journey section"@en .
+era:TrainCompositionMessage a owl:Class ; rdfs:label "Train composition message"@en .
+era:TrainIdent a owl:Class ; rdfs:label "Train ident"@en .
+era:TrainRunningInformationMessage a owl:Class ; rdfs:label "Train running information message"@en .
+era:Vehicle a owl:Class ; rdfs:label "Vehicle"@en .
+
+## 3.2 W3C SOSA, SSN and SSN-Ext
+
+sosa:FeatureOfInterest a owl:Class ; rdfs:label "Feature Of Interest"@en .
+sosa:ObservableProperty a owl:Class ; rdfs:label "Observable Property"@en .
+sosa:Observation a owl:Class ; rdfs:label "Observation"@en .
+sosa:ObservationCollection a owl:Class ; rdfs:label "Collection of observations"@en .
+sosa:Platform a owl:Class ; rdfs:label "Platform"@en .
+sosa:Sensor a owl:Class ; rdfs:label "Sensor"@en .
+ssn:System a owl:Class ; rdfs:label "System"@en .
+
+## 3.3 Other W3C, OGC and ETSI vocabularies
+
+prov:Activity a owl:Class ; rdfs:label "Activity"@en .
+prov:Entity a owl:Class ; rdfs:label "Entity"@en .
+time:Interval a owl:Class ; rdfs:label "Time interval"@en .
+geo:Feature a owl:Class ; rdfs:label "Feature"@en .
+qudt:QuantityValue a owl:Class ; rdfs:label "Quantity value"@en .
+saref:Meter a owl:Class ; rdfs:label "Meter"@en .
+skos:Concept a owl:Class ; rdfs:label "Concept"@en .
+
+## 3.4 Reused properties and annotation properties
+
 era:operationalTrainNumber a owl:DatatypeProperty .
 era:trainDepartureDate a owl:DatatypeProperty .
-era:trainOperatingRU a owl:DatatypeProperty .
 era:organisationCode a owl:DatatypeProperty .
 era:roleOf a owl:ObjectProperty .
 era:hasOrganisationRole a owl:ObjectProperty .
-skos:definition a owl:AnnotationProperty .
-vs:term_status a owl:AnnotationProperty .
-era:TrainCompositionMessage a owl:Class .
-era:TrainCompositionJourneySection a owl:Class .
-era:TrainRunningInformationMessage a owl:Class .
 era:unitOfMeasure a owl:AnnotationProperty .
 era:shaclShapeValidationRule a owl:AnnotationProperty .
+skos:definition a owl:AnnotationProperty .
+vs:term_status a owl:AnnotationProperty .

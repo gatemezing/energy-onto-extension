@@ -28,6 +28,7 @@ import rdflib
 from rdflib.namespace import SH
 
 import dl_check
+import era_shapes_check
 
 DRAFT = "era-energy-settlement-draft.ttl"
 SHAPES = "era-energy-settlement-shapes.ttl"
@@ -46,6 +47,7 @@ PREFIX time:    <http://www.w3.org/2006/time#>
 PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 PREFIX sosa:    <http://www.w3.org/ns/sosa/>
+PREFIX ssn:     <http://www.w3.org/ns/ssn/>
 PREFIX qudt:    <http://qudt.org/schema/qudt/>
 PREFIX owl:     <http://www.w3.org/2002/07/owl#>
 PREFIX saref:   <https://saref.etsi.org/core/>
@@ -229,6 +231,13 @@ SETS = [
   ?dcs ens:receivesFrom d:ems1 ; ens:operatedBy ?role .
   ?role a ens:DCSAdministratorRole ; era:roleOf ?org .
 }""", [("eress",)]),
+            ("CQ6.5", "Which classes does the extension declare as subclasses of ssn:System?",
+             "Taxonomy (TBox): Which [CE] are subclasses of [CE]?", "TBox",
+             """SELECT ?class WHERE {
+  ?class rdfs:subClassOf ssn:System ;
+         rdfs:isDefinedBy <http://data.europa.eu/dy6/def/energy/> .
+}""", [("DataCollectingSystem",), ("DataHandlingSystem",), ("EnergyMeasurementSystem",),
+       ("ExchangeFunction",), ("SettlementSystem",)]),
             ("CQ6.4", "Which auditable exchanges delivered composition data to the Norwegian and Swedish infrastructure managers?",
              "Selection over exchange activity", "ABox",
              """SELECT ?org ?outcome WHERE {
@@ -327,6 +336,15 @@ SETS = [
              "Selection through a role", "ABox",
              """SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }""",
              [("railLease",)]),
+            ("CQ10.5", "Which organisation roles carry no concept from the ERA organisation-roles scheme?",
+             "Negation: Which [CE] have no [P]?", "ABox",
+             """SELECT ?role ?kind WHERE {
+  ?role a ?kind .
+  ?kind rdfs:subClassOf* era:OrganisationRole .
+  FILTER NOT EXISTS { ?role era:hasOrganisationRole ?concept }
+}""", [("dcsAdminRole", "DCSAdministratorRole"), ("emsRespRole", "EMSResponsibleRole"),
+       ("ruRole", "EnergyConsumerRole"), ("settleOpNO", "SettlementOperatorRole"),
+       ("settleOpSE", "SettlementOperatorRole")]),
             ("CQ10.4", "Does any current ens: property point to an era:Body rather than to an era:OrganisationRole?",
              "Existence (TBox): Is there a [P] with range [CE]?", "TBox",
              """ASK {
@@ -348,7 +366,7 @@ SETS = [
        era:trainCompositionJourneySection ?js .
   ?js era:locoNumber ?loco ;
       era:trainRunningData/era:trainRunningTechData/era:trainWeight ?mass .
-}""", [("91 80 6189 001-3", "1450")]),
+}""", [("918061890013", "1450")]),
             ("CQ11.2", "Which registered vehicle is the traction unit of train 41234?",
              "Selection via normalized identifier rule", "ABox",
              """SELECT ?vehicle WHERE {
@@ -358,7 +376,8 @@ SETS = [
             ("CQ11.3", "Which composition messages were created after the train's evidenced actual departure?",
              "Temporal comparison", "ABox",
              """SELECT ?msg WHERE {
-  ?msg era:messageHeader/era:messageDateTimeCreated ?sent ;
+  ?msg a era:TrainCompositionMessage ;
+       era:messageHeader/era:messageDateTimeCreated ?sent ;
        ens:aboutRunningTrain/ens:actualDepartureTime ?departure .
   FILTER (?sent > ?departure)
 }""", [("tcm2",)]),
@@ -407,14 +426,28 @@ SETS = [
             ("CQ12.5", "Which railway undertaking operates running train 41234 departing on 15 October 2026, in which ERA role, and under which company code?",
              "Selection through the ERA organisation-role pattern", "ABox",
              """SELECT ?org ?role ?code WHERE {
-  ?run era:operationalTrainNumber "41234" ;
-       era:trainDepartureDate "2026-10-15"^^xsd:date ;
+  ?run ens:runningTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
+       ens:departureDate "2026-10-15"^^xsd:date ;
        ens:operatingRailwayUndertaking ?ruRole .
   ?ruRole era:roleOf ?org ;
           era:hasOrganisationRole ?role .
   ?org era:organisationCode ?code .
 }""",
              [("nordCargo", "RU-3", "3801")]),
+            ("CQ12.6", "Which running trains used operational train number 41234, and on which departure dates?",
+             "Selection with temporal attributes (reused identifier)", "ABox",
+             """SELECT ?run ?date WHERE {
+  ?run ens:runningTrainNumberIdentifier/era:operationalTrainNumber "41234" ;
+       ens:departureDate ?date .
+}""", [("run1", "2026-10-15"), ("run3", "2026-10-16")]),
+            ("CQ12.7", "Under which TAF/TAP path, from which location and at what scheduled time does running train run1 run?",
+             "Selection through era:TrainIdent", "ABox",
+             """SELECT ?path ?place ?scheduled WHERE {
+  d:run1 ens:runningTrainIdent ?ident .
+  ?ident era:pathIdent ?path ;
+         era:pathDepartureLocation/era:primaryLocationName ?place ;
+         era:scheduledDepartureDateTime ?scheduled .
+}""", [("PA-NO01-2026-41234", "Alnabru", "2026-10-15T06:00:00+00:00")]),
         ],
     },
     {
@@ -566,6 +599,56 @@ def run(rc3_path=DEFAULT_ERA_ONTOLOGY, skip_dl=False):
             validate_negative_cases(data, ont), dl)
 
 
+def validate_external_terms(rc3_path):
+    """Check that every reused sosa:, ssn: and era: term is declared at its source.
+
+    Terms are looked up in the vendored W3C SOSA/SSN/SSN-Ext files and in the
+    ERA ontology snapshot (ERA concept schemes and shapes are published
+    separately and are not checked). Returns the number of terms checked and
+    the undeclared ones.
+    """
+    sosa, ssn, era = ("http://www.w3.org/ns/sosa/", "http://www.w3.org/ns/ssn/",
+                      "http://data.europa.eu/949/")
+    w3c = rdflib.Graph()
+    for path in dl_check.W3C_VOCABULARIES:
+        w3c.parse(path)
+    era_graph = rdflib.Graph().parse(rc3_path)
+    used = set()
+    for path in (DRAFT, SHAPES, EXAMPLES):
+        for triple in rdflib.Graph().parse(path):
+            used.update(t for t in triple if isinstance(t, rdflib.URIRef))
+    checked, missing = 0, []
+    for term in sorted(used):
+        iri = str(term)
+        if iri.startswith((sosa, ssn)):
+            source = w3c
+        elif iri.startswith(era) and not iri.startswith((era + "concepts/", era + "shapes/")):
+            source = era_graph
+        else:
+            continue
+        checked += 1
+        if (term, None, None) not in source:
+            missing.append(iri)
+    return checked, missing
+
+
+def validate_era_shapes(rc3_path):
+    """Validate the examples against ERA's telematics shapes, and one fixture they must reject."""
+    shapes = era_shapes_check.load_shapes()
+    data = era_shapes_check.data_graph()
+    result = era_shapes_check.validate(data, rc3_path, shapes)
+    failures = []
+    era = rdflib.Namespace("http://data.europa.eu/949/")
+    d = rdflib.Namespace("http://example.org/data/")
+    no_status = rdflib.Graph()
+    for triple in data:
+        no_status.add(triple)
+    no_status.remove((d.tri1, era.messageStatus, None))
+    if era_shapes_check.validate(no_status, rc3_path, shapes).conforms:
+        failures.append("ERA shapes accepted a running information message without era:messageStatus")
+    return result, failures
+
+
 def validate_dl(rc3_path):
     """Run HermiT on the merged graph and on two fixtures it must reject."""
     era = rdflib.Namespace("http://data.europa.eu/949/")
@@ -713,12 +796,9 @@ def validate_negative_cases(data, ont):
         "an operating RU role typed as vehicle keeper": (
             [(d.nordCargoRU, era.hasOrganisationRole, None)],
             [(d.nordCargoRU, era.hasOrganisationRole, org_roles.Keeper)]),
-        "an operating RU code that differs from the body's organisation code": (
-            [(d.run1, era.trainOperatingRU, None)],
-            [(d.run1, era.trainOperatingRU, rdflib.Literal("9999"))]),
         "two running trains with the same train number and departure date": (
-            [(d.run2, era.operationalTrainNumber, None)],
-            [(d.run2, era.operationalTrainNumber, rdflib.Literal("41234"))]),
+            [(d.run3, ex.departureDate, None)],
+            [(d.run3, ex.departureDate, rdflib.Literal("2026-10-15", datatype=rdflib.XSD.date))]),
     }
     unit_ns = rdflib.Namespace("http://qudt.org/vocab/unit/")
     regenerated_result = data.value(d["r1-regenerated"], sosa.hasResult)
@@ -754,13 +834,13 @@ def validate_negative_cases(data, ont):
     return failures
 
 
-def render(conforms, shacl, results, accounting_issues, md_path, dl=None):
+def render(conforms, shacl, results, accounting_issues, md_path, dl=None, external=None, era=None):
     by_id = {cq_id: (ok, got) for _, cq_id, ok, got in results}
     passed = sum(1 for r in results if r[2])
     out = []
     w = out.append
     w("# Competency questions – ERA energy settlement extension\n")
-    w("Validation of the ontology draft **v0.8** (`era-energy-settlement-draft.ttl`) and its shapes "
+    w("Validation of the ontology draft **v0.9** (`era-energy-settlement-draft.ttl`) and its shapes "
       "against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.\n")
     w(f"**Result: {passed} of {len(results)} competency questions pass.** "
       f"SHACL conforms: **{conforms}**; allocation arithmetic issues: **{len(accounting_issues)}**; "
@@ -771,6 +851,13 @@ def render(conforms, shacl, results, accounting_issues, md_path, dl=None):
         dl_result, dl_failures = dl
         w(f"OWL 2 DL check (HermiT): consistent **{dl_result.consistent}**; unsatisfiable classes: "
           f"**{len(dl_result.unsatisfiable)}**; DL negative tests: **{'passed' if not dl_failures else 'failed'}**.\n")
+    if era is not None:
+        era_result, era_failures = era
+        w(f"ERA telematics shapes (v4.0.0-rc.3): conforms **{era_result.conforms}**; results: "
+          f"**{len(era_result.results)}**; negative test: **{'passed' if not era_failures else 'failed'}**.\n")
+    if external is not None:
+        checked, missing = external
+        w(f"Reused sosa:, ssn: and era: terms declared at their source: **{checked - len(missing)} of {checked}**.\n")
     w("Generated by `cq_suite.py`, which runs every CQ as a SPARQL query over the draft plus "
       "`era-energy-settlement-examples.ttl`. Re-run it after any change to the ontology.\n")
 
@@ -909,6 +996,21 @@ def main():
             print("FAIL negative constraint test:", failure)
     else:
         print("Negative constraint tests: passed")
+    era = validate_era_shapes(args.rc3)
+    era_result, era_failures = era
+    for adjustment in era_result.adjustments:
+        print("ERA shapes adjusted:", adjustment)
+    for focus, path_, message in era_result.results:
+        print(f"FAIL ERA shapes: {focus} {path_}: {message}")
+    for failure in era_failures:
+        print("FAIL ERA shapes negative test:", failure)
+    print(f"ERA telematics shapes: conforms={era_result.conforms}; results: {len(era_result.results)}")
+    era_ok = era_result.conforms and not era_failures
+    external = validate_external_terms(args.rc3)
+    checked, missing = external
+    for iri in missing:
+        print("FAIL undeclared reused term:", iri)
+    print(f"Reused sosa:, ssn: and era: terms declared at their source: {checked - len(missing)}/{checked}")
     dl_ok = True
     if dl is None:
         print("OWL 2 DL check (HermiT): skipped")
@@ -926,9 +1028,9 @@ def main():
             print("DL negative tests: passed")
         dl_ok = result.consistent and not result.unsatisfiable and not dl_failures
     if args.md:
-        render(conforms, shacl, results, accounting_issues, args.md, dl)
+        render(conforms, shacl, results, accounting_issues, args.md, dl, external, era)
         print("wrote", args.md)
-    sys.exit(0 if all(r[2] for r in results) and conforms and dl_ok
+    sys.exit(0 if all(r[2] for r in results) and conforms and dl_ok and era_ok and not missing
              and not accounting_issues and not negative_failures else 1)
 
 

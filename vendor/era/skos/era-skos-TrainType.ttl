@@ -1,0 +1,64 @@
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://data.europa.eu/949/concepts/train-type/0> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "0" ;
+    skos:prefLabel "Other train"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/1> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "1" ;
+    skos:prefLabel "Passenger train"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/2> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "2" ;
+    skos:prefLabel "Freight train"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/3> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "3" ;
+    skos:prefLabel "Light engine (locomotive train)"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/4> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "4" ;
+    skos:prefLabel "Engineering train"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/5> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "5" ;
+    skos:prefLabel "Emergency train"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/6> a skos:Concept ;
+    skos:inScheme <http://data.europa.eu/949/concepts/train-type/TrainType> ;
+    skos:notation "6" ;
+    skos:prefLabel "Mixed train (passenger and freight train in combination)"@en ;
+    skos:topConceptOf <http://data.europa.eu/949/concepts/train-type/TrainType> .
+
+<http://data.europa.eu/949/concepts/train-type/TrainType> a skos:ConceptScheme ;
+    rdfs:label "Concept Scheme for Type of train"@en ;
+    cc:license <http://data.europa.eu/eli/dec_impl/2017/863/oj> ;
+    dct:identifier "TrainType"^^xsd:string ;
+    dct:issued "2026-03-11"^^xsd:date ;
+    dct:modified "2026-03-11"^^xsd:date ;
+    skos:prefLabel "Concept Scheme for Type of train"@en ;
+    dct:title "Concept Scheme for Type of train"@en ;
+    skos:definition """Element TrainType defines the main purpose of the train in a fundamental way. These purposes are:
+Transport of passengers
+Transport of freight/goods
+Transport of passengers and freight/goods
+Train only for run of traction unit/locomotive
+Train of the IM in case of emergency
+The element is not repeatable, and it does not support any overlapping meaning."""@en .
+

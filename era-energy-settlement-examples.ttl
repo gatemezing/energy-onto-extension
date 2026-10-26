@@ -3,6 +3,10 @@
 @prefix ensc:   <http://data.europa.eu/dy6/def/energy/concepts/> .
 @prefix era:   <http://data.europa.eu/949/> .
 @prefix eraor: <http://data.europa.eu/949/concepts/organisation-roles/> .
+@prefix ms:    <http://data.europa.eu/949/concepts/message-status/> .
+@prefix rs:    <http://data.europa.eu/949/concepts/running-status/> .
+@prefix tt:    <http://data.europa.eu/949/concepts/train-type/> .
+@prefix trt:   <http://data.europa.eu/949/concepts/traction-type/> .
 @prefix d:     <http://example.org/data/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
@@ -77,11 +81,12 @@ d:retentionToApprove a prov:Entity ; rdfs:label "Approved retention schedule (co
 d:allocationRuleV1 a prov:Entity ; rdfs:label "Illustrative allocation rule, version 1"@en .
 d:departureEvent a prov:Entity ; rdfs:label "Illustrative authoritative departure event"@en .
 d:departureEvent2 a prov:Entity ; rdfs:label "Illustrative authoritative departure event for run 2"@en .
+d:departureEvent3 a prov:Entity ; rdfs:label "Illustrative authoritative departure event for run 3"@en .
 d:lateMessageEvidence a prov:Entity ; rdfs:label "Illustrative operational evidence for late composition message"@en .
 
 d:ruRole a ens:EnergyConsumerRole ; era:roleOf d:nordCargo .
 d:nordCargoRU a era:OrganisationRole ; era:roleOf d:nordCargo ; era:hasOrganisationRole eraor:RU-3 .
-d:keeperRole a era:OrganisationRole ; era:roleOf d:railLease .
+d:keeperRole a era:OrganisationRole ; era:roleOf d:railLease ; era:hasOrganisationRole eraor:Keeper .
 d:emsRespRole a ens:EMSResponsibleRole ; era:roleOf d:railLease .
 d:dcsAdminRole a ens:DCSAdministratorRole ; era:roleOf d:eress .
 d:settleOpNO a ens:SettlementOperatorRole ; era:roleOf d:baneNor .
@@ -240,10 +245,22 @@ d:opMagnor a era:OperationalPoint ;
     era:inCountry country:NOR ;
     era:primaryLocation d:plMagnor ;
     era:referenceBorderPoint d:rbpMagnor .
-d:plMagnor a era:PrimaryLocation ; era:primaryLocationName "Magnor"@no .
-d:plKongsvinger a era:PrimaryLocation ; era:primaryLocationName "Kongsvinger"@no .
-d:plCharlottenberg a era:PrimaryLocation ; era:primaryLocationName "Charlottenberg"@sv .
-d:plOslo a era:PrimaryLocation ; era:primaryLocationName "Alnabru"@no .
+# Primary locations in the TAF/TAP form that ERA's telematics shapes
+# require. Location primary codes are illustrative, not the real ones.
+d:isoNO a era:CountryCodeISO ; era:countryIdentISO "NO" .
+d:isoSE a era:CountryCodeISO ; era:countryIdentISO "SE" .
+d:plMagnor a era:PrimaryLocation ; era:primaryLocationName "Magnor" ;
+    era:countryCode "NO" ; era:countryCodeISO d:isoNO ;
+    era:stationLocationPrimaryCode 90001 ; era:freightLocationPrimaryCode "90001"^^xsd:positiveInteger .
+d:plKongsvinger a era:PrimaryLocation ; era:primaryLocationName "Kongsvinger" ;
+    era:countryCode "NO" ; era:countryCodeISO d:isoNO ;
+    era:stationLocationPrimaryCode 90002 ; era:freightLocationPrimaryCode "90002"^^xsd:positiveInteger .
+d:plCharlottenberg a era:PrimaryLocation ; era:primaryLocationName "Charlottenberg" ;
+    era:countryCode "SE" ; era:countryCodeISO d:isoSE ;
+    era:stationLocationPrimaryCode 90003 ; era:freightLocationPrimaryCode "90003"^^xsd:positiveInteger .
+d:plOslo a era:PrimaryLocation ; era:primaryLocationName "Alnabru" ;
+    era:countryCode "NO" ; era:countryCodeISO d:isoNO ;
+    era:stationLocationPrimaryCode 90004 ; era:freightLocationPrimaryCode "90004"^^xsd:positiveInteger .
 
 # --- Ground systems --------------------------------------------------
 
@@ -275,55 +292,166 @@ d:zoneNO a ens:SettlementZone ; ens:zoneCountry country:NOR ; ens:delimitedBy d:
 d:zoneSE a ens:SettlementZone ; ens:zoneCountry country:SWE ; ens:delimitedBy d:rbpMagnor .
 
 # --- TEL TSI messages (rc.3 telematics terms) ------------------------
+# The messages follow ERA's telematics SHACL shapes (v4.0.0-rc.3): named
+# nodes for headers, references, identifiers, reports and journey
+# sections, and ERA concepts for message status, running status, train
+# type and traction type. Company codes NO01 and SE01 are illustrative.
+
+# Operational train number identifiers, shared by the messages and the
+# running trains they describe. 41234 runs on two days (run1 and run3).
+d:otn41234 a era:OperationalTrainNumberIdentifier ; era:operationalTrainNumber "41234" .
+d:otn41888 a era:OperationalTrainNumberIdentifier ; era:operationalTrainNumber "41888" .
 
 d:tcm1 a era:TrainCompositionMessage ;
-    era:messageHeader [ era:messageDateTimeCreated "2026-10-15T05:50:00Z"^^xsd:dateTime ] ;
-    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
+    era:messageHeader d:tcm1-header ;
+    era:messageStatus ms:1 ;
+    era:operationalTrainNumberIdentifier d:otn41234 ;
     era:trainCompositionJourneySection d:js1 ;
     ens:aboutRunningTrain d:run1 .
+d:tcm1-header a era:MessageHeader ;
+    era:messageDateTimeCreated "2026-10-15T05:50:00Z"^^xsd:dateTime ;
+    era:messageReferenceReference d:tcm1-ref ;
+    era:senderCompany d:tcm1-sender ;
+    era:recipientReference d:tcm1-recipient .
+d:tcm1-ref a era:MessageReference ;
+    era:messageType "TrainCompositionMessage" ; era:messageTypeVersion "4.0.0" ;
+    era:messageIdentifier "TCM1-20261015" ; era:messageDateTime "2026-10-15T05:50:00Z"^^xsd:dateTime .
+d:tcm1-sender a era:Sender ; era:companyCode "3801" .
+d:tcm1-recipient a era:Recipient ; era:companyCode "NO01" .
 d:js1 a era:TrainCompositionJourneySection ;
-    era:locoNumber "91 80 6189 001-3" ;
-    era:regenerativeBrake [ era:regenerativeBrakeFitted true ] ;
-    era:journeySection [ era:journeySectionOrigin [ era:bookedLocationDateTime "2026-10-15T06:00:00Z"^^xsd:dateTime ] ] ;
-    era:trainRunningData [ era:trainRunningTechData [ era:trainWeight 1450 ] ] .
+    era:locoNumber "918061890013" ;
+    era:tractionType trt:11 ;
+    era:regenerativeBrake d:js1-regen ;
+    era:journeySection d:js1-section ;
+    era:trainRunningData d:js1-running .
+d:js1-regen a era:RegenerativeBrake ; era:regenerativeBrakeFitted true ;
+    era:possibilityToPreventUseOfRegenerativeBrake false ; era:regenerativeBrakePreventionInUse false .
+d:js1-section a era:JourneySection ;
+    era:journeySectionOrigin d:js1-origin ;
+    era:journeySectionDestination d:js1-destination ;
+    era:responsibilityActualSection d:js1-responsibility .
+d:js1-origin a era:JourneySectionOrigin ; era:countryCode "NO" ; era:countryCodeISO d:isoNO ;
+    era:stationLocationPrimaryCode 90004 ; era:freightLocationPrimaryCode "90004"^^xsd:positiveInteger ;
+    era:bookedLocationDateTime "2026-10-15T06:00:00Z"^^xsd:dateTime .
+d:js1-destination a era:JourneySectionDestination ; era:countryCode "SE" ; era:countryCodeISO d:isoSE ;
+    era:stationLocationPrimaryCode 90003 ; era:freightLocationPrimaryCode "90003"^^xsd:positiveInteger ;
+    era:bookedLocationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime .
+d:js1-responsibility a era:ResponsibilityActualSection ; era:responsibleIM "NO01" ; era:responsibleRU "3801" .
+d:js1-running a era:TrainRunningData ;
+    era:activityLocationIdent d:plOslo ; era:trainActivity d:js1-activity ;
+    era:trainRunningTechData d:js1-tech .
+d:js1-activity a era:TrainActivityType ; era:trainActivityType "0001" .
+d:js1-tech a era:TrainRunningTechData ;
+    era:trainType tt:2 ; era:trainLength 550 ; era:trainWeight "1450"^^xsd:int .
 
 d:tcm2 a era:TrainCompositionMessage ;            # timing evidence is illustrative, not legal validation
-    era:messageHeader [ era:messageDateTimeCreated "2026-10-15T17:00:00Z"^^xsd:dateTime ] ;
-    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41888" ] ;
+    era:messageHeader d:tcm2-header ;
+    era:messageStatus ms:1 ;
+    era:operationalTrainNumberIdentifier d:otn41888 ;
     era:trainCompositionJourneySection d:js2 ;
     ens:aboutRunningTrain d:run2 .
+d:tcm2-header a era:MessageHeader ;
+    era:messageDateTimeCreated "2026-10-15T17:00:00Z"^^xsd:dateTime ;
+    era:messageReferenceReference d:tcm2-ref ;
+    era:senderCompany d:tcm2-sender ;
+    era:recipientReference d:tcm2-recipient .
+d:tcm2-ref a era:MessageReference ;
+    era:messageType "TrainCompositionMessage" ; era:messageTypeVersion "4.0.0" ;
+    era:messageIdentifier "TCM2-20261015" ; era:messageDateTime "2026-10-15T17:00:00Z"^^xsd:dateTime .
+d:tcm2-sender a era:Sender ; era:companyCode "3801" .
+d:tcm2-recipient a era:Recipient ; era:companyCode "NO01" .
 d:js2 a era:TrainCompositionJourneySection ;
     era:locoNumber "917421940025" ;
-    era:journeySection [ era:journeySectionOrigin [ era:bookedLocationDateTime "2026-10-15T07:00:00Z"^^xsd:dateTime ] ] ;
-    era:trainRunningData [ era:trainRunningTechData [ era:trainWeight 980 ] ] .
+    era:tractionType trt:11 ;
+    era:journeySection d:js2-section ;
+    era:trainRunningData d:js2-running .
+d:js2-section a era:JourneySection ;
+    era:journeySectionOrigin d:js2-origin ;
+    era:journeySectionDestination d:js2-destination ;
+    era:responsibilityActualSection d:js2-responsibility .
+d:js2-origin a era:JourneySectionOrigin ; era:countryCode "NO" ; era:countryCodeISO d:isoNO ;
+    era:stationLocationPrimaryCode 90004 ; era:freightLocationPrimaryCode "90004"^^xsd:positiveInteger ;
+    era:bookedLocationDateTime "2026-10-15T07:00:00Z"^^xsd:dateTime .
+d:js2-destination a era:JourneySectionDestination ; era:countryCode "NO" ; era:countryCodeISO d:isoNO ;
+    era:stationLocationPrimaryCode 90002 ; era:freightLocationPrimaryCode "90002"^^xsd:positiveInteger ;
+    era:bookedLocationDateTime "2026-10-15T12:00:00Z"^^xsd:dateTime .
+d:js2-responsibility a era:ResponsibilityActualSection ; era:responsibleIM "NO01" ; era:responsibleRU "3801" .
+d:js2-running a era:TrainRunningData ;
+    era:activityLocationIdent d:plOslo ; era:trainActivity d:js2-activity ;
+    era:trainRunningTechData d:js2-tech .
+d:js2-activity a era:TrainActivityType ; era:trainActivityType "0001" .
+d:js2-tech a era:TrainRunningTechData ;
+    era:trainType tt:2 ; era:trainLength 420 ; era:trainWeight "980"^^xsd:int .
 
 # One location report per message: era:trainLocationReport and
 # era:locationDateTime are functional in ERA rc.3.
 d:tri1 a era:TrainRunningInformationMessage ;
-    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
+    era:messageHeader d:tri1-header ;
+    era:messageStatus ms:1 ;
+    era:operationalTrainNumberIdentifier d:otn41234 ;
     era:responsibleRU "3801" ;
     ens:responsibleRailwayUndertaking d:nordCargoRU ;
     ens:aboutRunningTrain d:run1 ;
-    era:trainLocationReport [ era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ] .
+    era:trainLocationReport d:tri1-report .
+d:tri1-report a era:TrainLocationReport ;
+    era:location d:plKongsvinger ; era:locationDateTime "2026-10-15T07:10:00Z"^^xsd:dateTime ; era:trainLocationStatus rs:05 .
+d:tri1-header a era:MessageHeader ;
+    era:messageDateTimeCreated "2026-10-15T07:10:30Z"^^xsd:dateTime ;
+    era:messageReferenceReference d:tri1-ref ;
+    era:senderCompany d:tri1-sender ;
+    era:recipientReference d:tri1-recipient .
+d:tri1-ref a era:MessageReference ;
+    era:messageType "TrainRunningInformationMessage" ; era:messageTypeVersion "4.0.0" ;
+    era:messageIdentifier "TRI1-20261015" ; era:messageDateTime "2026-10-15T07:10:30Z"^^xsd:dateTime .
+d:tri1-sender a era:Sender ; era:companyCode "NO01" .
+d:tri1-recipient a era:Recipient ; era:companyCode "3801" .
 
 d:tri2 a era:TrainRunningInformationMessage ;
-    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
+    era:messageHeader d:tri2-header ;
+    era:messageStatus ms:1 ;
+    era:operationalTrainNumberIdentifier d:otn41234 ;
     era:responsibleRU "3801" ;
     ens:responsibleRailwayUndertaking d:nordCargoRU ;
     ens:aboutRunningTrain d:run1 ;
-    era:trainLocationReport [ era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ] .
+    era:trainLocationReport d:tri2-report .
+d:tri2-report a era:TrainLocationReport ;
+    era:location d:plMagnor ; era:locationDateTime "2026-10-15T08:30:00Z"^^xsd:dateTime ; era:trainLocationStatus rs:05 .
+d:tri2-header a era:MessageHeader ;
+    era:messageDateTimeCreated "2026-10-15T08:30:30Z"^^xsd:dateTime ;
+    era:messageReferenceReference d:tri2-ref ;
+    era:senderCompany d:tri2-sender ;
+    era:recipientReference d:tri2-recipient .
+d:tri2-ref a era:MessageReference ;
+    era:messageType "TrainRunningInformationMessage" ; era:messageTypeVersion "4.0.0" ;
+    era:messageIdentifier "TRI2-20261015" ; era:messageDateTime "2026-10-15T08:30:30Z"^^xsd:dateTime .
+d:tri2-sender a era:Sender ; era:companyCode "NO01" .
+d:tri2-recipient a era:Recipient ; era:companyCode "3801" .
 
 d:tri3 a era:TrainRunningInformationMessage ;
-    era:operationalTrainNumberIdentifier [ era:operationalTrainNumber "41234" ] ;
+    era:messageHeader d:tri3-header ;
+    era:messageStatus ms:1 ;
+    era:operationalTrainNumberIdentifier d:otn41234 ;
     era:responsibleRU "3801" ;
     ens:responsibleRailwayUndertaking d:nordCargoRU ;
     ens:aboutRunningTrain d:run1 ;
-    era:trainLocationReport [ era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ] .
+    era:trainLocationReport d:tri3-report .
+d:tri3-report a era:TrainLocationReport ;
+    era:location d:plCharlottenberg ; era:locationDateTime "2026-10-15T08:38:00Z"^^xsd:dateTime ; era:trainLocationStatus rs:03 .
+d:tri3-header a era:MessageHeader ;
+    era:messageDateTimeCreated "2026-10-15T08:38:30Z"^^xsd:dateTime ;
+    era:messageReferenceReference d:tri3-ref ;
+    era:senderCompany d:tri3-sender ;
+    era:recipientReference d:tri3-recipient .
+d:tri3-ref a era:MessageReference ;
+    era:messageType "TrainRunningInformationMessage" ; era:messageTypeVersion "4.0.0" ;
+    era:messageIdentifier "TRI3-20261015" ; era:messageDateTime "2026-10-15T08:38:30Z"^^xsd:dateTime .
+d:tri3-sender a era:Sender ; era:companyCode "SE01" .
+d:tri3-recipient a era:Recipient ; era:companyCode "3801" .
 
 d:run1 a ens:RunningTrain ;
-    era:operationalTrainNumber "41234" ;
-    era:trainDepartureDate "2026-10-15"^^xsd:date ;
-    era:trainOperatingRU "3801" ;
+    ens:runningTrainNumberIdentifier d:otn41234 ;
+    ens:departureDate "2026-10-15"^^xsd:date ;
+    ens:runningTrainIdent d:trid1 ;
     ens:operatingRailwayUndertaking d:nordCargoRU ;
     ens:runStart "2026-10-15T06:00:00Z"^^xsd:dateTime ;
     ens:runEnd "2026-10-15T08:38:00Z"^^xsd:dateTime ;
@@ -331,16 +459,32 @@ d:run1 a ens:RunningTrain ;
     ens:actualDepartureTime "2026-10-15T06:02:00Z"^^xsd:dateTime ;
     ens:actualDepartureEvidence d:departureEvent .
 
+# TAF/TAP unique train identification of run1 (illustrative path ID).
+d:trid1 a era:TrainIdent ;
+    era:pathIdent "PA-NO01-2026-41234" ;
+    era:pathDepartureLocation d:plOslo ;
+    era:scheduledDepartureDateTime "2026-10-15T06:00:00Z"^^xsd:dateTime .
+
 d:run2 a ens:RunningTrain ;
-    era:operationalTrainNumber "41888" ;
-    era:trainDepartureDate "2026-10-15"^^xsd:date ;
-    era:trainOperatingRU "3801" ;
+    ens:runningTrainNumberIdentifier d:otn41888 ;
+    ens:departureDate "2026-10-15"^^xsd:date ;
     ens:operatingRailwayUndertaking d:nordCargoRU ;
     ens:runStart "2026-10-15T07:00:00Z"^^xsd:dateTime ;
     ens:runEnd "2026-10-15T12:00:00Z"^^xsd:dateTime ;
     ens:consumerRole d:ruRole ;
     ens:actualDepartureTime "2026-10-15T07:02:00Z"^^xsd:dateTime ;
     ens:actualDepartureEvidence d:departureEvent2 .
+
+# The same operational number 41234 on the next day: a different running train.
+d:run3 a ens:RunningTrain ;
+    ens:runningTrainNumberIdentifier d:otn41234 ;
+    ens:departureDate "2026-10-16"^^xsd:date ;
+    ens:operatingRailwayUndertaking d:nordCargoRU ;
+    ens:runStart "2026-10-16T06:00:00Z"^^xsd:dateTime ;
+    ens:runEnd "2026-10-16T08:40:00Z"^^xsd:dateTime ;
+    ens:consumerRole d:ruRole ;
+    ens:actualDepartureTime "2026-10-16T06:04:00Z"^^xsd:dateTime ;
+    ens:actualDepartureEvidence d:departureEvent3 .
 
 d:tcm2 ens:timelinessAssessment ensc:exceptionEvidenceRecorded ;
     ens:timelinessEvidence d:lateMessageEvidence ;
