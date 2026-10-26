@@ -336,6 +336,15 @@ SETS = [
              "Selection through a role", "ABox",
              """SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }""",
              [("railLease",)]),
+            ("CQ10.5", "Which organisation roles carry no concept from the ERA organisation-roles scheme?",
+             "Negation: Which [CE] have no [P]?", "ABox",
+             """SELECT ?role ?kind WHERE {
+  ?role a ?kind .
+  ?kind rdfs:subClassOf* era:OrganisationRole .
+  FILTER NOT EXISTS { ?role era:hasOrganisationRole ?concept }
+}""", [("dcsAdminRole", "DCSAdministratorRole"), ("emsRespRole", "EMSResponsibleRole"),
+       ("ruRole", "EnergyConsumerRole"), ("settleOpNO", "SettlementOperatorRole"),
+       ("settleOpSE", "SettlementOperatorRole")]),
             ("CQ10.4", "Does any current ens: property point to an era:Body rather than to an era:OrganisationRole?",
              "Existence (TBox): Is there a [P] with range [CE]?", "TBox",
              """ASK {

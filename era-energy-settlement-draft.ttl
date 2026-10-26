@@ -22,7 +22,7 @@
 # DRAFT v0.9 – ERA ontology extension for traction energy settlement
 #   (proposal for ERA governance; namespace http://data.europa.eu/dy6/def/energy/)
 # LOT activity: Ontology implementation (conceptualisation + reuse),
-#   validated against the 53 competency questions executed by cq_suite.py
+#   validated against the 56 competency questions executed by cq_suite.py
 #   (report: era-energy-settlement-cqs.md).
 #
 # Baseline: ERA ontology v4.0.0-rc.3 (vendored). No owl:imports, following

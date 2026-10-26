@@ -2,7 +2,7 @@
 
 Validation of the ontology draft **v0.9** (`era-energy-settlement-draft.ttl`) and its shapes against **ERA ontology v4.0.0-rc.3**, following the LOT methodology.
 
-**Result: 55 of 55 competency questions pass.** SHACL conforms: **True**; allocation arithmetic issues: **0**; SHACL results: **0**.
+**Result: 56 of 56 competency questions pass.** SHACL conforms: **True**; allocation arithmetic issues: **0**; SHACL results: **0**.
 
 OWL 2 DL check (HermiT): consistent **True**; unsatisfiable classes: **0**; DL negative tests: **passed**.
 
@@ -48,7 +48,7 @@ The CQs were produced and validated with current practice in ontology requiremen
 | S7 | Exchange function and cross-border exchange | CQ7.1, CQ7.2, CQ7.3 | 3/3 |
 | S8 | Settlement systems and zones | CQ8.1, CQ8.2, CQ8.3 | 3/3 |
 | S9 | Border points | CQ9.1, CQ9.2, CQ9.3 | 3/3 |
-| S10 | Roles (IRS 90930) | CQ10.1, CQ10.2, CQ10.3, CQ10.4 | 4/4 |
+| S10 | Roles (IRS 90930) | CQ10.1, CQ10.2, CQ10.3, CQ10.5, CQ10.4 | 5/5 |
 | S11 | Train composition (TEL TSI 2.5.1(16)) | CQ11.1, CQ11.2, CQ11.3 | 3/3 |
 | S12 | Train running information (TEL TSI 2.5.2(8)) | CQ12.1, CQ12.2, CQ12.3, CQ12.4, CQ12.5, CQ12.6, CQ12.7 | 7/7 |
 | S13 | Allocation and matching | CQ13.1, CQ13.2, CQ13.3, CQ13.4 | 4/4 |
@@ -587,6 +587,21 @@ SELECT ?role WHERE {
 
 ```sparql
 SELECT ?org WHERE { d:ems1 ens:emsResponsible/era:roleOf ?org . }
+```
+
+#### CQ10.5 – Which organisation roles carry no concept from the ERA organisation-roles scheme?
+
+- Archetype: Negation: Which [CE] have no [P]?
+- Type: ABox
+- Expected: dcsAdminRole, DCSAdministratorRole; emsRespRole, EMSResponsibleRole; ruRole, EnergyConsumerRole; settleOpNO, SettlementOperatorRole; settleOpSE, SettlementOperatorRole
+- Result: dcsAdminRole, DCSAdministratorRole; emsRespRole, EMSResponsibleRole; ruRole, EnergyConsumerRole; settleOpNO, SettlementOperatorRole; settleOpSE, SettlementOperatorRole → **PASS**
+
+```sparql
+SELECT ?role ?kind WHERE {
+  ?role a ?kind .
+  ?kind rdfs:subClassOf* era:OrganisationRole .
+  FILTER NOT EXISTS { ?role era:hasOrganisationRole ?concept }
+}
 ```
 
 #### CQ10.4 – Does any current ens: property point to an era:Body rather than to an era:OrganisationRole?

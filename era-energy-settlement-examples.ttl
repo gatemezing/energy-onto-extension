@@ -86,7 +86,7 @@ d:lateMessageEvidence a prov:Entity ; rdfs:label "Illustrative operational evide
 
 d:ruRole a ens:EnergyConsumerRole ; era:roleOf d:nordCargo .
 d:nordCargoRU a era:OrganisationRole ; era:roleOf d:nordCargo ; era:hasOrganisationRole eraor:RU-3 .
-d:keeperRole a era:OrganisationRole ; era:roleOf d:railLease .
+d:keeperRole a era:OrganisationRole ; era:roleOf d:railLease ; era:hasOrganisationRole eraor:Keeper .
 d:emsRespRole a ens:EMSResponsibleRole ; era:roleOf d:railLease .
 d:dcsAdminRole a ens:DCSAdministratorRole ; era:roleOf d:eress .
 d:settleOpNO a ens:SettlementOperatorRole ; era:roleOf d:baneNor .
