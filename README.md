@@ -71,7 +71,7 @@ The same suite runs in GitHub Actions on every push and pull request (`.github/w
 - `dl_check.py` — HermiT OWL 2 DL consistency check.
 - `era_shapes_check.py` — validation against ERA's telematics shapes.
 - `era-energy-settlement-cqs.md` — generated test report and open requirements.
-- `ONTOLOGY-REVIEW-AND-PLAN.md` — ontology engineering review, findings (R1–R25) and roadmap.
+- `ONTOLOGY-REVIEW-AND-PLAN.md` — ontology engineering review, findings (R1–R31) and roadmap.
 - `LEGAL-AND-TELEMATICS-REVIEW.md` — implementation decisions and remaining legal/operational checks.
 - `era-ontology-v4.0.0-rc.3.ttl` — upstream ERA ontology snapshot used for repeatable validation.
 - `vendor/w3c/` — W3C/OGC SOSA, SSN and SSN-Ext vocabularies used by the DL check.
@@ -83,7 +83,7 @@ A 15-slide overview (architecture figures of the main concepts and relations, in
 
 ## Roadmap
 
-See `ONTOLOGY-REVIEW-AND-PLAN.md`. Next: apply the role pattern to the responsible RU and the energy consumer, make the ground systems explicit PROV agents, separate the concept schemes into their own file, model allocation corrections, then network losses and the market/contract module. Upstream requests to ERA are listed there as well.
+See `ONTOLOGY-REVIEW-AND-PLAN.md`. Next (0.10): separate the concept schemes into their own file, split allocation status from method, model allocation corrections and harmonise time; then network losses and the market/contract module (0.11). Upstream requests to ERA (telematics shape bounds, shared functional super-properties, missing organisation-role concepts, …) are listed there as well.
 
 ## Licence
 

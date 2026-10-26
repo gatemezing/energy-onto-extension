@@ -12,18 +12,19 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 
 | | |
 |---|---|
-| Competency questions | 53 of 53 pass, in 15 sets |
-| Invalid fixtures rejected | 15 (13 by SHACL or the arithmetic check, 2 by HermiT) |
+| Competency questions | 56 of 56 pass, in 15 sets |
+| Invalid fixtures rejected | 15 (12 by SHACL or the arithmetic check, 1 by ERA's telematics shapes, 2 by HermiT) |
+| ERA telematics shapes | The examples conform to ERA's own shapes (vendored from rc.3) |
 | OWL 2 DL (HermiT) | Consistent; no unsatisfiable classes |
-| Terms | 94 `ens:` terms, each labelled, defined and given a term status; 9 deprecated with `dct:isReplacedBy` |
-| Reused terms | 71 of 71 `sosa:`, `ssn:` and `era:` terms declared at their source |
+| Terms | 96 `ens:` terms, each labelled, defined and given a term status; 9 deprecated with `dct:isReplacedBy` |
+| Reused terms | 113 of 113 `sosa:`, `ssn:` and `era:` terms declared at their source |
 | CI | `cq_suite.py` runs on every push and pull request (GitHub Actions) |
-| Findings | 26 recorded: 18 fixed, 1 partly fixed, 2 worked around upstream, 5 open |
+| Findings | 31 recorded: 21 fixed, 1 partly fixed, 5 worked around or reported upstream, 4 open |
 
 **Strengths**
 
 - A clear requirements basis: executable competency questions, SHACL shapes and rules, arithmetic checks, negative fixtures and an OWL 2 DL consistency check, run against a vendored ERA release (LOT-style ORSD → implementation → evaluation).
-- Strong reuse: SOSA/SSN and SSN-Ext for measurement, QUDT quantities, PROV-O for evidence and exchange, OWL-Time, GeoSPARQL, SAREF, and RINF/telematics anchors (`era:Vehicle`, `era:RunningTrack`, `era:ReferenceBorderPoint`, `era:Train`, the TEL TSI messages).
+- Strong reuse: SOSA/SSN and SSN-Ext for measurement, QUDT quantities, PROV-O for evidence and exchange, OWL-Time, GeoSPARQL, SAREF, and RINF/telematics anchors (`era:Vehicle`, `era:RunningTrack`, `era:ReferenceBorderPoint`, `era:OperationalTrainNumberIdentifier`, `era:TrainIdent`, the TEL TSI messages).
 - One party pattern: every party-valued property targets `era:OrganisationRole`, as ERA does.
 - Clean separation between the data model, its validation and legal evidence; the model never claims compliance.
 - No modification of `era:` terms, only extension; upstream issues are recorded as change requests.
@@ -36,8 +37,8 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R2 | `era:shaclShapeValidationRule` pointed to four `exsh:` shapes that did not exist; shapes were declared in the vocabulary namespace | High | **Fixed in 0.6**: shapes in `enssh:`, links resolve |
 | R3 | 70+ terms without `rdfs:label`, ~35 without any definition; no `rdfs:isDefinedBy` or term status | Medium | **Fixed in 0.6** |
 | R4 | No ontology metadata (title, description, versionIRI, preferred prefix, licence) | Medium | **Fixed in 0.6**, licence in 0.7 |
-| R5 | `ens:TrainRun` typed as `prov:Entity` and disconnected from the telematics train concepts | Medium | **Fixed in 0.6**: renamed `ens:RunningTrain` (cf. `era:RunningTrack`), `⊑ era:Train` |
-| R6 | Run identity not aligned with TAF/TAP: rc.3 has `era:TrainIdent` (unique contracted train ID) and `era:operationalTrainNumber` | Medium | **Partly fixed in 0.6**: `era:operationalTrainNumber` reused directly, `ens:runningTrainIdent → era:TrainIdent`; test data still missing (§3, 0.9) |
+| R5 | `ens:TrainRun` typed as `prov:Entity` and disconnected from the telematics train concepts | Medium | **Fixed in 0.6**: renamed `ens:RunningTrain` (cf. `era:RunningTrack`), `⊑ era:Train` (superclass dropped in 0.9, R19) |
+| R6 | Run identity not aligned with TAF/TAP: rc.3 has `era:TrainIdent` (unique contracted train ID) and `era:operationalTrainNumber` | Medium | **Fixed in 0.9**: a run is keyed by its `era:OperationalTrainNumberIdentifier` (`ens:runningTrainNumberIdentifier`, the node the messages carry) and `ens:departureDate`, unique together by SHACL; `ens:runningTrainIdent → era:TrainIdent` in the data; the number 41234 runs on two days (CQ12.6) |
 | R7 | `ens:allocatesReading` duplicates the component path without a stated relation | Medium | **Fixed in 0.6**: OWL 2 property chain |
 | R8 | `ens:forwardsTo` / `ens:exchangeProtocol` without domain/range; no check of admissible flow | Low | **Fixed in 0.6**, with `enssh:ForwardsToShape` |
 | R9 | Header comments contradicted the model (TrainRun "removed") and the CQ count | Low | **Fixed in 0.6** |
@@ -50,7 +51,7 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R16 | Time modelled two ways: `time:Interval` for readings, an `xsd:dateTime` pair for runs; timezone not enforced | Low | Open → 0.10 |
 | R17 | `ens:exchangeContains` (settlement system → activity) does not say "received"; since 0.8 it links the receiving system while `ens:exchangeRecipient` names the receiving role | Low | Open → 0.10 |
 | R18 | `skos:closeMatch` between OWL terms: with the SKOS schema, an RDFS or OWL RL reasoner types them as `skos:Concept`, and an annotation-property declaration clashes with SKOS in OWL 2 DL | Medium | **Fixed in 0.6**: `rdfs:seeAlso`; no SKOS mapping properties on ontology terms (verified with owlrl) |
-| R19 | `era:Train` is a TAF/TAP message element (its other subclasses are `era:TrainStopType` and `era:WagonStatusMessage`) with ERA shape links; if ERA shapes target `era:Train`, running trains are validated against them | Low | Open → 0.9: run the ERA shapes on the examples |
+| R19 | `era:Train` is a TAF/TAP message element (its other subclasses are `era:TrainStopType` and `era:WagonStatusMessage`) with ERA shape links; if ERA shapes target `era:Train`, running trains are validated against them | Low | **Fixed in 0.9**: ERA's TAP shape for `era:Train` requires `era:trainNb`, a train service number that running trains do not carry, so `ens:RunningTrain` is no longer `⊑ era:Train` (decision, §4) |
 | R20 | `era:trainOperatingRU` and `era:responsibleRU` are datatype properties (company code strings), but the RU is the organisation role of a body | Medium | **Fixed locally in 0.6 and 0.8**: `ens:operatingRailwayUndertaking` and `ens:responsibleRailwayUndertaking` → RU role; the source code must equal the body's `era:organisationCode`. Upstream request in §3 |
 | R21 | With the full SSN axioms (`sosa:Sensor ⊑ ∀ sosa:madeObservation.sosa:Observation`), stating the sensor on an observation collection makes the collection an observation | Medium | **Fixed in 0.7**: `sosa:madeBySensor` on each member observation, forbidden on readings by SHACL |
 | R22 | `ens:` aliases of SOSA properties only restated SOSA with a narrower domain/range | Low | **Fixed in 0.7**: SOSA properties used directly; aliases deprecated; domain/range checks in SHACL |
@@ -58,16 +59,25 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 | R24 | ERA rc.3 restricts `era:dNvroll` to `xsd:double` with `xsd:decimal` facet values, which is not valid OWL 2 DL | Low (upstream) | Worked around in `dl_check.py` (facets cast and reported); upstream request in §3 |
 | R25 | SSN (property chains defining `sosa:usedProcedure`) combined with SSN-Ext (`ObservationCollection ⊑ ≤1 sosa:usedProcedure`) is outside OWL 2 DL | Low (W3C) | Worked around in `dl_check.py`: that one SSN-Ext axiom (unused here) is dropped and reported |
 | R26 | `ens:DataHandlingSystem ⊑ sosa:System`, a term W3C SOSA/SSN does not define (the class is `ssn:System`); nothing checked that reused terms exist | Medium | **Fixed in 0.9**: `ssn:System`; `cq_suite.py` now checks that every reused `sosa:`, `ssn:` and `era:` term is declared at its source |
+| R27 | The example telematics messages did not conform to ERA's own telematics shapes (missing header, reference, sender and recipient nodes, message status, location codes); nothing ran those shapes | Medium | **Fixed in 0.9**: the examples are valid ERA telematics data; `era_shapes_check.py` gates them in `cq_suite.py` and CI, with a negative fixture |
+| R28 | ERA's telematics shapes give the numeric bounds of 182 properties (`era:trainLength`, `era:trainWeight`, location codes, …) as strings, which no number can satisfy | Medium (upstream) | Worked around in `era_shapes_check.py` (bounds cast to the property datatype and reported); upstream request in §3 |
+| R29 | ERA declares XSD-type super-properties functional (`era:freeText`, `era:companyCode`, `era:countryIdentISO`, `era:numberOfPassengerType`, `era:trackDataParameter`) although several sub-properties share them: a message reference with both `era:messageType` and `era:messageIdentifier`, which ERA's shapes require, is inconsistent in OWL | High (upstream) | Worked around in `dl_check.py` (functional axiom removed from super-properties with ≥ 2 sub-properties, reported); upstream request in §3; cf. ERA issue #482 |
+| R30 | `era:primaryLocationName` has range `rdf:langString` in the ontology, but ERA's telematics shapes require `xsd:string` | Low (upstream) | The examples follow the shapes (plain strings); upstream request in §3 |
+| R31 | The ERA organisation-roles scheme has no concept for the energy consumer, the EMS responsible, the DCS administrator or the settlement operator | Low | **Partly fixed in 0.9**: RU, IM and keeper roles carry `eraor:` concepts; CQ10.5 lists the five roles without one; request new concepts from ERA (§3) |
 
 ## 2. Version history
 
-### 0.9.0 – systems on SSN (in progress)
+### 0.9.0 – systems on SSN, run identity and ERA telematics conformance
 
 1. The EMS, the data handling system, the data collecting system, the exchange function and the settlement system are subclasses of `ssn:System` (R11). No `prov:Agent` superclass is stated: agency stays an inference from `ens:compiledBy` and `ens:producedBy` (decision, §4).
 2. `ens:DataHandlingSystem` used `sosa:System`, which W3C SOSA/SSN does not define; it is now `ssn:System` (R26).
 3. New gate in `cq_suite.py`: every reused `sosa:`, `ssn:` and `era:` term must be declared in the vendored W3C files or the ERA snapshot (71 terms; it flags `sosa:System` on 0.8).
 4. Every reused class (12 ERA, 7 SOSA/SSN, and PROV-O, OWL-Time, GeoSPARQL, QUDT, SAREF and SKOS classes: 26 in all) is declared as `owl:Class` with the `rdfs:label` of its source vocabulary, in Part 3 of the draft.
-5. New CQ6.5 (classes declared as `ssn:System`). Result: 53/53 CQs, SHACL conforms, HermiT consistent.
+5. `ens:RunningTrain` is no longer a subclass of `era:Train` (R19). A run is identified by `ens:runningTrainNumberIdentifier` (→ `era:OperationalTrainNumberIdentifier`, the same node the TCM and TRI messages carry) and `ens:departureDate` (`xsd:date`, `rdfs:seeAlso era:trainDepartureDate`); SHACL requires the pair to be unique and the message number to match the run (R6).
+6. The sample data is valid ERA telematics data (R27): message headers with named reference, sender and recipient nodes, `era:messageStatus`, journey sections with origin, destination, responsibility, running, activity and technical data, train running information with location reports and running status, ERA location codes and countries, and an `era:TrainIdent`. Operational train number 41234 runs on two days.
+7. New gate: `era_shapes_check.py` validates the draft, the examples and the ERA concept schemes they use against ERA's telematics SHACL shapes (vendored from rc.3 in `vendor/era/`), with a fixture without `era:messageStatus` that must be rejected. It reports the cast of string numeric bounds (R28); `dl_check.py` reports the removal of shared functional super-properties (R29).
+8. Role concepts: the keeper role carries `eraor:Keeper`; the energy consumer, EMS responsible, DCS administrator and settlement operator roles have no ERA concept yet (R31).
+9. New CQ6.5 (classes declared as `ssn:System`), CQ10.5 (roles without an ERA concept), CQ12.6 (runs sharing a train number) and CQ12.7 (TAF/TAP path, origin and scheduled time of a run). Result: 56/56 CQs, SHACL conforms, accounting and all negative tests pass, ERA telematics shapes conform, 113/113 reused terms declared, HermiT consistent.
 
 ### 0.8.0 – one party pattern
 
@@ -102,12 +112,12 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 
 ## 3. Roadmap
 
-### 0.9 – agents, role concepts and identity
+### 0.9 – agents, role concepts and identity (done)
 
-- Ground systems and the EMS as `ssn:System` (R11): done.
-- Type every `ens:` role instance (energy consumer, EMS responsible, operators) with an ERA organisation-roles concept where one fits, as the RU and IM roles already are.
-- Test data and CQs with `era:TrainIdent` and an operational train number reused on two days (R6).
-- Run the ERA shapes that target `era:Train` on the examples (R19).
+- Ground systems and the EMS as `ssn:System` (R11, R26).
+- ERA organisation-roles concepts on every role where one exists (R31; the missing ones are requested from ERA).
+- Run identity by operational train number identifier and departure date, with `era:TrainIdent` test data (R6).
+- ERA telematics shapes run on the examples and gated in CI (R19, R27).
 
 ### 0.10 – vocabularies, lifecycle and time
 
@@ -133,9 +143,13 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 - Change requests to the ERA ontology:
   - an object link from `era:LocoIdent`/`era:locoNumber` to `era:Vehicle`;
   - the unit of `era:trainWeight` (G5);
-  - whether the run key should be `era:TrainIdent` (R6);
+  - confirmation that the operational train number identifier plus departure date is the right run key when no `era:TrainIdent` is available (R6);
   - `xsd:double` facet values on `era:dNvroll` (R24);
   - confirmation against the TAF XSD that `era:trainLocationReport` is single-valued (R23);
+  - numeric bounds of the telematics shapes typed as numbers, not strings (R28);
+  - `owl:FunctionalProperty` removed from XSD-type super-properties shared by several sub-properties (R29; ERA issue #482);
+  - one datatype for `era:primaryLocationName` in the ontology and the shapes (R30);
+  - organisation-roles concepts for the energy consumer, EMS responsible, DCS administrator and settlement operator, or guidance on which existing concepts apply (R31);
   - `era:trainOperatingRU` and `era:responsibleRU` as object properties to `era:OrganisationRole`, or object counterparts, so that `ens:operatingRailwayUndertaking` and `ens:responsibleRailwayUndertaking` can be retired (R20).
 
 ## 4. Decisions
@@ -150,3 +164,5 @@ The legal and telematics review (`LEGAL-AND-TELEMATICS-REVIEW.md`) and open requ
 - Licence: EUPL v1.2 (0.7).
 - All party-valued properties target `era:OrganisationRole`; systems stay the range of `ens:producedBy` and `ens:compiledBy` (0.8).
 - Ground systems and the EMS are `ssn:System` only; `prov:Agent` is left to inference (0.9).
+- `ens:RunningTrain` is not a subclass of `era:Train`: a running train is not a TAP train service and carries no `era:trainNb` (0.9).
+- The sample data must conform to ERA's telematics shapes; the check gates CI (0.9).
